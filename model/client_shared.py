@@ -51,6 +51,7 @@ class ClientShared:
         """ Documentation for a function.
             @param self es la informacion del cliente para armar el json
         """
+
         return jsonify(
             _ref=self.ref,
             type_client=self.type_client,
