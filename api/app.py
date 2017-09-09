@@ -33,5 +33,9 @@ def get_task(task_id):
 def not_found(error):
     return make_response(jsonify({'error': 'Not Found'}), 404)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/')
+def index():
+    return jsonify(message='hello world')
+
+#if __name__ == '__main__':
+#    app.run(debug=True)
