@@ -11,5 +11,9 @@ def get_info_new_client():
     response.status_code = 200
     return response
 
+@app.route('/')
+def index():
+    return jsonify(message='hello world')
+
 if __name__ == '__main__':
     app.run(debug=True)
