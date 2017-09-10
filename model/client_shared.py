@@ -8,6 +8,7 @@ class ClientShared:
     """
     def __init__(self):
         """The constructor."""
+        self.client_id = ""
         self.ref = ""
         self.type_client = ""
         self.username = ""
@@ -59,7 +60,7 @@ class ClientShared:
         self.images.append(imagen)
 
     def get_json_new_client(self):
-        """ Json con la informacion del cliente que necesita el Shared para crear/modificar
+        """ Json con la informacion del cliente que necesita el Shared para crear
             el cliente
             @param self es la informacion del cliente para armar el json
         """

@@ -46,6 +46,13 @@ def client_default():
     response.status_code = 200
     return response
 
+@app.route('/api/v1/client/<int:client_id>', methods=['GET'])
+def get_info_client(client_id):
+    """Devuelve la informacion de un cliente"""
+    response = CLIENT_CONTROLLER.get_client(client_id)
+    response.status_code = 200
+    return response
+
 @app.route('/')
 def hello_word():
     """Devuelve el famoso Hello world"""
