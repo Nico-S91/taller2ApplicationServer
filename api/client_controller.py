@@ -1,4 +1,4 @@
-""" @package api
+""" @package client_controller
 """
 from model.client_shared import ClientShared
 
