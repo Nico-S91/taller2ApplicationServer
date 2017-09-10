@@ -1,5 +1,6 @@
+""" @package testRunner"""
 from test.app_test import TestEnpoints
-from test.client_shared_test import TestStringMethods
+from test.client_shared_test import TestClientController
 import unittest
 
 if __name__ == '__main__':
