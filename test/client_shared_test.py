@@ -22,7 +22,7 @@ class TestClientController(unittest.TestCase):
     def test(self):
         response = self.app.get('/api/v1/clientedefault')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "21/01/2000", \n  "country": "Argentina", \n  "email": "pepe@gmail.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "pepe", \n  "last_name": "lopez", \n  "password": "password", \n  "type_client": "cliente", \n  "username": "pepelopez"\n}\n')
+        self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "cliente", \n  "username": "Khaleesi"\n}\n')
 
 ## Solo lo dejo para que quede como ejemplo ##
 
