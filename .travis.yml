@@ -13,3 +13,6 @@ script:
  - nosetests --with-coverage # Add me to run nose with coverage support.
 after_success:
   - coveralls
+branches:
+  only:
+    - master

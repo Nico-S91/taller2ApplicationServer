@@ -1,4 +1,7 @@
 ### Application Server
+[![Build Status](https://travis-ci.org/zaragozamartin91/Nico-S91/taller2ApplicationServer.svg?branch=master)](https://travis-ci.org/Nico-S91/taller2ApplicationServer)
+<a href='https://coveralls.io/github/Nico-S91/taller2ApplicationServer?branch=master'><img src='https://coveralls.io/repos/github/Nico-S91/taller2ApplicationServer/badge.svg?branch=master' alt='Coverage Status' /></a>
+
 
 Se trata de una aplicación por consola destinada a mantenerse en ejecución por perí­odos prolongados de tiempo.
 
