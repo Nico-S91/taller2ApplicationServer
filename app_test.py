@@ -3,13 +3,13 @@ import unittest
 import os
 import json
 import sys
-from api import app
+from main_app import application
 
 class TestEnpoints(unittest.TestCase):
 
     def setUp(self):
         ''' fire up a test instance of the flask app '''
-        self.app = app.app.test_client()
+        self.app = application.test_client()
         self.app.testing = True
         # self.api = app.app.api
         self.test_brand_name = 'Llevame'
