@@ -6,6 +6,7 @@ from flask import jsonify
 
 SHARED_SERVER = SharedServer()
 CODIGO_OK = 0
+TIPO_CLIENTE = "cliente"
 
 class ClientController:
     """Esta clase tiene los metodos para manajar la informacion de los clientes"""
@@ -16,7 +17,7 @@ class ClientController:
 
     def get_info_new_client(self):
         """ Este metodo solo sirve para las pruebas"""
-        client = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3", "fb_user_id",
+        client = ClientShared.new_client(1, TIPO_CLIENTE, "Khaleesi", "Dragones3", "fb_user_id",
                                          "fb_auth_token", "Daenerys", "Targaryen", "Valyria",
                                          "madre_dragones@got.com", "01/01/1990")
         return client.get_json_new_client()
@@ -53,3 +54,10 @@ class ClientController:
         else:
             response = response_shared_server
         return response
+
+    def delete_client(self, client_id):
+        """ Este metodo permite eliminar un cliente
+            @param client_id identificador del cliente"""
+        response_shared_server = SHARED_SERVER.delete_client(client_id)
+        #Devolvemos la respuesta que nos da el shared
+        return response_shared_server
