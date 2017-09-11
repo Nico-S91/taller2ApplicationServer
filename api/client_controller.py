@@ -5,6 +5,7 @@ from model.client_shared import ClientShared
 from flask import jsonify
 
 SHARED_SERVER = SharedServer()
+CODIGO_OK = 0
 
 class ClientController:
     """Esta clase tiene los metodos para manajar la informacion de los clientes"""
@@ -36,3 +37,19 @@ class ClientController:
             email=informacion.email,
             birthdate=informacion.birthdate
         )
+
+    def post_new_client(self, client):
+        """ Este metodo permite crear un cliente
+            @param client informacion del cliente"""
+        response_shared_server = SHARED_SERVER.post_client(client)
+        if response_shared_server.status_code == 201:
+            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
+            # necesita el cliente
+            response = jsonify(
+                mensaje="El cliente fue creado correctamente",
+                codigo=CODIGO_OK,
+            )
+            response.status_code = response_shared_server.status_code
+        else:
+            response = response_shared_server
+        return response

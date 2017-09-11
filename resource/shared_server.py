@@ -27,15 +27,33 @@ class SharedServer:
 #        abrir_conexion.close()
 
     def put_client(self, client):
-        #Aca va a ir el codigo para hacer el pedido de modificacion del cliente
-        print (client)
+        """ Modifica la informacion de un cliente/chofer
+            @param client es la informacion modificada del cliente/chofer existente
+        """
+        #Aca va a ir el codigo para hacer el pedido de modificacion del cliente/chofer
+        print(client)
 
-    def get_client(self, id):
-        #Aca va a ir el codigo para hacer el pedido de get del cliente
+    def post_client(self, client):
+        """ Crea un nuevo cliente/chofer
+            @param client es la informacion del cliente/chofer
+        """
+        #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
+        response = DEFAULT_CLIENT.get_json_new_client()
+        response.status_code = 201
+        return response
+
+    def get_client(self, client_id):
+        """ Devuelve la informacion del cliente/chofer buscado
+            @param client_id es el id del cliente/chofer buscado
+        """
+        #Aca va a ir el codigo para hacer el pedido de get del cliente/chofer
         client = DEFAULT_CLIENT
-        client.client_id = id
+        client.client_id = client_id
         return client
 
-    def delete_client(self, id):
-        #Aca va a ir el codigo para hacer el pedido de delete del cliente
+    def delete_client(self, client_id):
+        """ Elimina un cliente/chofer
+            @param client_id es el id del cliente/chofer que se desea eliminar
+        """
+        #Aca va a ir el codigo para hacer el pedido de delete del cliente/chofer
         return jsonify(message="El usuario fue eliminado exitosamente", code="0")
