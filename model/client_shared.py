@@ -29,7 +29,7 @@ class ClientShared:
             @param ref es la referencia del cliente
             @param type_client es el tipo de cliente
             @param username es el nombre de usuario
-            @param password es la contraseña del usuario
+            @param password es la contrasenia del usuario
             @param fb_user_id es la cuenta de facebook
             @param fb_auth_token es el token del usuario del facebook
             @param first_name es el nombre del cliente
