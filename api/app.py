@@ -1,7 +1,7 @@
 #!flask/bin/python
 """ @package api.app
 """
-from flask import Flask, jsonify, abort, make_response
+from flask import Flask, jsonify, abort, make_response, request
 from api.client_controller import ClientController
 
 app = Flask(__name__)
@@ -51,6 +51,14 @@ def get_info_client(client_id):
     """Devuelve la informacion de un cliente"""
     response = CLIENT_CONTROLLER.get_client(client_id)
     response.status_code = 200
+    return response
+
+@app.route('/api/v1/client', methods=['POST'])
+def post_info_client():
+    """Crea un nuevo cliente"""
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.post_new_client(request.json)
     return response
 
 @app.route('/')

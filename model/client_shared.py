@@ -26,7 +26,6 @@ class ClientShared:
     def new_client(ref, type_client, username, password, fb_user_id, fb_auth_token,
                    first_name, last_name, country, email, birthdate):
         """ Constructor con la informacion necesaria para crear o modificar un cliente
-            @param self es la informacion del cliente para armar el json
             @param ref es la referencia del cliente
             @param type_client es el tipo de cliente
             @param username es el nombre de usuario
@@ -54,7 +53,6 @@ class ClientShared:
 
     def add_image(self, imagen):
         """ Agregar una imagen al usuario del cliente
-            @param self es la informacion del cliente para armar el json
             @param imagen es la imagen del cliente que se quiere agregar
         """
         self.images.append(imagen)
@@ -62,7 +60,6 @@ class ClientShared:
     def get_json_new_client(self):
         """ Json con la informacion del cliente que necesita el Shared para crear
             el cliente
-            @param self es la informacion del cliente para armar el json
         """
         return jsonify(
             _ref=self.ref,
