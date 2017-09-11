@@ -61,6 +61,12 @@ def post_info_client():
     response = CLIENT_CONTROLLER.post_new_client(request.json)
     return response
 
+@app.route('/api/v1/client/<int:client_id>', methods=['DELETE'])
+def delete_info_client(client_id):
+    """Devuelve la informacion de un cliente"""
+    response = CLIENT_CONTROLLER.delete_client(client_id)
+    return response
+
 @app.route('/')
 def hello_word():
     """Devuelve el famoso Hello world"""

@@ -59,6 +59,11 @@ class TestClientController(unittest.TestCase):
             '/api/v1/client', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
 
+    def test_eliminar_cliente(self):
+        """Prueba eliminar un cliente"""
+        response = self.app.delete('/api/v1/client/23')
+        self.assertEqual(response.status_code, 204)
+
 ## Solo lo dejo para que quede como ejemplo ##
 
 #    def test_upper(self):

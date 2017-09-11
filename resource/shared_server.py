@@ -56,4 +56,6 @@ class SharedServer:
             @param client_id es el id del cliente/chofer que se desea eliminar
         """
         #Aca va a ir el codigo para hacer el pedido de delete del cliente/chofer
-        return jsonify(message="El usuario fue eliminado exitosamente", code="0")
+        response = jsonify('')
+        response.status_code = 204
+        return response
