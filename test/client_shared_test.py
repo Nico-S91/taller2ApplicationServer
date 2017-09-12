@@ -35,7 +35,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los cliente que viene por defecto"""
         response = self.app.get('/api/v1/clients')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "description": "todo el dia perdido en intentar hacerlo andar", \n      "done": false, \n      "id": 1, \n      "title": "Aprender Docker"\n    }, \n    {\n      "description": "Por suerte no es tan complicado", \n      "done": false, \n      "id": 2, \n      "title": "Aprender Flask"\n    }\n  ]\n}\n')
+        self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "cliente", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "cliente", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
 
     def test_crear_cliente(self):
         """Prueba que al crear un cliente con la informacion valida entonces devuelva

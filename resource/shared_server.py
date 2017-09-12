@@ -72,16 +72,28 @@ class SharedServer:
 #        response = json.dumps(lista_clients)
         lista = [
             {
-                'id': 1,
-                'title': u'Aprender Docker',
-                'description': u'todo el dia perdido en intentar hacerlo andar',
-                'done': False
+                "birthdate": "08/04/2005",
+                "client_id": 15,
+                "country": "Winterfell",
+                "email": "chica_sin_cara@got.com",
+                "fb_auth_token": "fb_auth_token",
+                "fb_user_id": "fb_user_id",
+                "first_name": "Arya",
+                "last_name": "Stark",
+                "type_client": "cliente",
+                "username": "ChicaSinRostro"
             },
             {
-                'id': 2,
-                'title': u'Aprender Flask',
-                'description': u'Por suerte no es tan complicado',
-                'done': False
+                "birthdate": "01/01/1990",
+                "client_id": 15,
+                "country": "Valyria",
+                "email": "madre_dragones@got.com",
+                "fb_auth_token": "fb_auth_token",
+                "fb_user_id": "fb_user_id",
+                "first_name": "Daenerys",
+                "last_name": "Targaryen",
+                "type_client": "cliente",
+                "username": "Khaleesi"
             }
         ]
         response = jsonify({'tasks': lista})
