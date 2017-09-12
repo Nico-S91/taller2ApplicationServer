@@ -1,14 +1,14 @@
 """ @package test.client_shared_test
 """
 import unittest
-from api import app
+import main_app
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
     """
     def setUp(self):
         # creates a test client
-        self.app = app.app.test_client()
+        self.app = main_app.application.test_client()
         # propagate the exceptions to the test client
         self.app.testing = True
 
