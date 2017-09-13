@@ -1,11 +1,17 @@
 """ @package main
 """
 from flask import Flask, jsonify, abort, make_response, request
+from flasgger import Swagger
+from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.client_controller import TIPO_CLIENTE
 
+#Para levantar swagger hay que ir a http://localhost:5000/apidocs/
+
+
 application = Flask(__name__)
 CLIENT_CONTROLLER = ClientController()
+Swagger(application)
 
 tasks = [
     {
@@ -83,9 +89,12 @@ def delete_info_client(client_id):
     response = CLIENT_CONTROLLER.delete_client(client_id)
     return response
 
+@swag_from('swagger/helloWord.yml')
 @application.route('/')
 def hello_word():
-    """Devuelve el famoso Hello world"""
+    """
+    Devuelve el famoso Hello world
+    """
     return jsonify(message='hello world')
 
 if __name__ == '__main__':
