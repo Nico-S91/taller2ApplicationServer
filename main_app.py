@@ -1,5 +1,8 @@
+""" @package main
+"""
 from flask import Flask, jsonify, abort, make_response, request
 from api.client_controller import ClientController
+from api.client_controller import TIPO_CLIENTE
 
 application = Flask(__name__)
 CLIENT_CONTROLLER = ClientController()
@@ -39,15 +42,21 @@ def not_found(error):
 @application.route('/api/v1/clientedefault', methods=['GET'])
 def client_default():
     """Devuelve un ejemplo de la informacion que se debe enviar de un cliente"""
-    response = CLIENT_CONTROLLER.get_info_new_client()
+    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CLIENTE)
     response.status_code = 200
     return response
 
 @application.route('/api/v1/client/<int:client_id>', methods=['GET'])
 def get_info_client(client_id):
-    """Devuelve la informacion de un cliente"""
+    """Devuelve la informacion de un cliente
+    @param client_id es el identificador del cliente"""
     response = CLIENT_CONTROLLER.get_client(client_id)
-    response.status_code = 200
+    return response
+
+@application.route('/api/v1/clients', methods=['GET'])
+def get_info_clients():
+    """Devuelve la informacion de todos los clientes"""
+    response = CLIENT_CONTROLLER.get_clients(TIPO_CLIENTE)
     return response
 
 @application.route('/api/v1/client', methods=['POST'])
@@ -55,12 +64,22 @@ def post_info_client():
     """Crea un nuevo cliente"""
     if not request.json:
         abort(400)
-    response = CLIENT_CONTROLLER.post_new_client(request.json)
+    response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CLIENTE)
+    return response
+
+@application.route('/api/v1/client/<int:client_id>', methods=['PUT'])
+def put_info_client(client_id):
+    """Modificar un cliente
+    @param client_id es el identificador del cliente"""
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CLIENTE, client_id)
     return response
 
 @application.route('/api/v1/client/<int:client_id>', methods=['DELETE'])
 def delete_info_client(client_id):
-    """Devuelve la informacion de un cliente"""
+    """Devuelve la informacion de un cliente
+    @param client_id es el identificador del cliente"""
     response = CLIENT_CONTROLLER.delete_client(client_id)
     return response
 
