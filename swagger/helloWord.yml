@@ -1,0 +1,23 @@
+Devuelve el famoso Hello world
+Hello Word
+---
+tags:
+  - Pruebas
+responses:
+  500:
+    description: Error raro, jamas puede devolver esto!
+  200:
+    description: OK
+    schema:
+      id: awesome
+      properties:
+        language:
+          type: string
+          description: The language name
+          default: Lua
+        features:
+          type: array
+          description: The awesomeness list
+          items:
+            type: string
+          default: ["perfect", "simple", "lovely"]
