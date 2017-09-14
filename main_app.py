@@ -8,10 +8,27 @@ from api.client_controller import TIPO_CLIENTE
 
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
-
 application = Flask(__name__)
 CLIENT_CONTROLLER = ClientController()
-Swagger(application)
+
+TEMPLATE_SWAGGER = {
+    "swagger": "2.0",
+    "info": {
+        "title": "ApplicationServer",
+        "description": "API para Llevame",
+        "contact": {
+            "responsibleOrganization": "Grupo 6"
+        },
+        "version": "1.0.0"
+    },
+    "basePath": "/",  # base bash for blueprint registration
+    "schemes": [
+        "http",
+        "https"
+    ]
+}
+
+Swagger(application, template=TEMPLATE_SWAGGER)
 
 tasks = [
     {
