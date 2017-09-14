@@ -15,6 +15,14 @@ Para iniciar el server, se debe:
 * el puerto por defecto de la aplicacion va a ser 5000 (sin gunicorn)
 * correr el comando **python api/app.py** para levantar la app con el servidor de pruebas de Flask
 
+Para iniciar el servidor corriendo sobre Gunicorn:
+* Ejecutar el comando "gunicorn main_app" (sin las comillas)
+* La aplicacion sera levantada sobre localhost, puerto 8000 (http://localhost:8000 o 127.0.0.1:8000)
+
+La aplicacion esta hosteada en Heroku, para acceder a ella:
+* Ingesar a taller2-application-server.herokuapp.com
+* poner luego una url correspondiente al listado de los servicios de endpoints disponibles
+
 ## Reporte de cobertura
 El reporte de cobertura de código se generará en .coverage luego de correr el comando **nosetests --with-coverage**
 
