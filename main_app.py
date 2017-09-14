@@ -97,6 +97,15 @@ def get_info_drivers():
     response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
     return response
 
+@application.route('/api/v1/driver', methods=['POST'])
+def post_info_driver():
+    """Crea un nuevo chofer"""
+    application.logger.info('[POST] /api/v1/driver')
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
+    return response
+
 #Endpoints de clientes
 
 @application.route('/api/v1/clientedefault', methods=['GET'])
