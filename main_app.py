@@ -32,32 +32,6 @@ TEMPLATE_SWAGGER = {
 
 Swagger(application, template=TEMPLATE_SWAGGER)
 
-tasks = [
-    {
-        'id': 1,
-        'title': u'Aprender Docker',
-        'description': u'todo el dia perdido en intentar hacerlo andar',
-        'done': False
-    },
-    {
-        'id': 2,
-        'title': u'Aprender Flask',
-        'description': u'Por suerte no es tan complicado',
-        'done': False
-    }
-]
-
-@application.route('/todo/api/v1/tasks', methods=['GET'])
-def get_tasks():
-    return jsonify({'tasks': tasks})
-
-@application.route('/todo/api/v1/tasks/<int:task_id>', methods=['GET'])
-def get_task(task_id):
-    task = [task for task in tasks if task['id'] == task_id]
-    if len(task) == 0:
-        abort(404)
-    return jsonify({'task': task[0]})
-
 @application.errorhandler(404)
 def not_found(error):
     """Manejador de error para codigo 404"""
