@@ -67,6 +67,34 @@ class TestClientController(unittest.TestCase):
             '/api/v1/driver', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
 
+    def test_modificar_chofer(self):
+        """Prueba que al modificar un chofer con la informacion valida entonces devuelve
+           un mensaje que se creo correctamente"""
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/88', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue modificado correctamente"\n}\n')
+
+    def test_modificar_chofer_sin_informacion(self):
+        """Prueba que al modificar un chofer sin mandar la informacion devuelva el codigo de
+           error correspondiente"""
+        payload = ''
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/14', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 400)
+
     #Pruebas de cliente
 
     def test_obtener_cliente_default(self):

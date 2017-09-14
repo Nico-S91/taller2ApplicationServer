@@ -38,9 +38,15 @@ class SharedServer:
             @param client es la informacion modificada del cliente/chofer existente
         """
         #Aca va a ir el codigo para hacer el pedido de modificacion del cliente/chofer
-         #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
-        response = DEFAULT_CLIENT.get_json_new_client()
-        response.status_code = 201
+        #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
+
+        if client.type_client == "cliente":
+            response = DEFAULT_CLIENT.get_json_new_client()
+            response.status_code = 201
+        elif client.type_client == "chofer":
+            response = DEFAULT_DRIVER.get_json_new_client()
+            response.status_code = 201
+
         return response
 
     def post_client(self, client):

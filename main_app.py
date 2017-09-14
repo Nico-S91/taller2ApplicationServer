@@ -106,6 +106,16 @@ def post_info_driver():
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
     return response
 
+@application.route('/api/v1/driver/<int:driver_id>', methods=['PUT'])
+def put_info_driver(driver_id):
+    """Modifica un chofer
+    @param driver_id es el identificador del driver"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id))
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
+    return response
+
 #Endpoints de clientes
 
 @application.route('/api/v1/clientedefault', methods=['GET'])
