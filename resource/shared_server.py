@@ -8,6 +8,12 @@ DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
                                          "Targaryen", "Valyria", "madre_dragones@got.com",
                                          "01/01/1990")
+
+DEFAULT_DRIVER = ClientShared.new_client(1, "chofer", "Khaleesi", "Dragones3",
+                                         "fb_user_id", "fb_auth_token", "Daenerys",
+                                         "Targaryen", "Valyria", "madre_dragones@got.com",
+                                         "01/01/1990")
+
 class SharedServer:
 #    cabeceras = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
     """Conexion con el Shared server"""
@@ -47,12 +53,23 @@ class SharedServer:
         return response
 
     def get_client(self, client_id):
-        """ Devuelve la informacion del cliente/chofer buscado
-            @param client_id es el id del cliente/chofer buscado
+        """ Devuelve la informacion del cliente buscado
+            @param client_id es el id del cliente buscado
         """
         #Aca va a ir el codigo para hacer el pedido de get del cliente/chofer
         client = DEFAULT_CLIENT
         client.client_id = client_id
+
+        return client
+
+    def get_driver(self, driver_id):
+        """ Devuelve la informacion del chofer buscado
+            @param driver_id es el id del chofer buscado
+        """
+        #Aca va a ir el codigo para hacer el pedido de get del chofer
+        client = DEFAULT_DRIVER
+        client.client_id = driver_id
+
         return client
 
     def get_clients(self, type_client):
@@ -80,7 +97,7 @@ class SharedServer:
                 "fb_user_id": "fb_user_id",
                 "first_name": "Arya",
                 "last_name": "Stark",
-                "type_client": "cliente",
+                "type_client": type_client,
                 "username": "ChicaSinRostro"
             },
             {
@@ -92,7 +109,7 @@ class SharedServer:
                 "fb_user_id": "fb_user_id",
                 "first_name": "Daenerys",
                 "last_name": "Targaryen",
-                "type_client": "cliente",
+                "type_client": type_client,
                 "username": "Khaleesi"
             }
         ]

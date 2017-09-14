@@ -19,6 +19,28 @@ class TestClientController(unittest.TestCase):
         print(str(result.data))
         self.assertEqual(result.data, b'{\n  "message": "hello world"\n}\n')
 
+    #Pruebas de chofer
+
+    def test_obtener_chofer_default(self):
+        """Prueba de obtencion de chofer default"""
+        response = self.app.get('/api/v1/driverdefault')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
+
+    def test_obtener_chofer(self):
+        """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
+        response = self.app.get('/api/v1/driver/23')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, b'{\n  "birthdate": "01/01/1990", \n  "client_id": 23, \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
+
+    def test_obtener_choferes(self):
+        """Prueba que al obtener todos los choferes, viene el default"""
+        response = self.app.get('/api/v1/drivers')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "chofer", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "chofer", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
+    
+    #Pruebas de cliente
+
     def test_obtener_cliente_default(self):
         """Prueba que al obtener un cliente sea el que viene por defecto"""
         response = self.app.get('/api/v1/clientedefault')

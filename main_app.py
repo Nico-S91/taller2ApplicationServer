@@ -6,6 +6,7 @@ from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.client_controller import TIPO_CLIENTE
+from api.client_controller import TIPO_CHOFER
 
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
@@ -65,10 +66,36 @@ def not_found(error):
 
 @application.route('/logtest')
 def logTest():
+    """Url para testing de logueo a distintos niveles"""
     application.logger.warning('Testeando Warning!')
     application.logger.error('Testeando Error!')
     application.logger.info('Testeando Info!')
     return "Testeando el Logger..."
+
+#Endpoints de Choferes
+
+@application.route('/api/v1/driverdefault', methods=['GET'])
+def driver_default():
+    """Devuelve un ejemplo de la informacion que se debe enviar de un chofer"""
+    application.logger.info('[GET] /api/v1/driverdefault')
+    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CHOFER)
+    response.status_code = 200
+    return response
+
+@application.route('/api/v1/driver/<int:driver_id>', methods=['GET'])
+def get_info_driver(driver_id):
+    """Devuelve la informacion de un chofer
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id))
+    response = CLIENT_CONTROLLER.get_driver(driver_id)
+    return response
+
+@application.route('/api/v1/drivers', methods=['GET'])
+def get_info_drivers():
+    """Devuelve la informacion de todos los choferes"""
+    application.logger.info('[GET] /api/v1/drivers')
+    response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
+    return response
 
 #Endpoints de clientes
 
