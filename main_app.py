@@ -6,6 +6,7 @@ from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.client_controller import TIPO_CLIENTE
+from api.client_controller import TIPO_CHOFER
 
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
@@ -31,32 +32,6 @@ TEMPLATE_SWAGGER = {
 
 Swagger(application, template=TEMPLATE_SWAGGER)
 
-tasks = [
-    {
-        'id': 1,
-        'title': u'Aprender Docker',
-        'description': u'todo el dia perdido en intentar hacerlo andar',
-        'done': False
-    },
-    {
-        'id': 2,
-        'title': u'Aprender Flask',
-        'description': u'Por suerte no es tan complicado',
-        'done': False
-    }
-]
-
-@application.route('/todo/api/v1/tasks', methods=['GET'])
-def get_tasks():
-    return jsonify({'tasks': tasks})
-
-@application.route('/todo/api/v1/tasks/<int:task_id>', methods=['GET'])
-def get_task(task_id):
-    task = [task for task in tasks if task['id'] == task_id]
-    if len(task) == 0:
-        abort(404)
-    return jsonify({'task': task[0]})
-
 @application.errorhandler(404)
 def not_found(error):
     """Manejador de error para codigo 404"""
@@ -65,10 +40,63 @@ def not_found(error):
 
 @application.route('/logtest')
 def logTest():
+    """Url para testing de logueo a distintos niveles"""
     application.logger.warning('Testeando Warning!')
     application.logger.error('Testeando Error!')
     application.logger.info('Testeando Info!')
     return "Testeando el Logger..."
+
+#Endpoints de Choferes
+
+@application.route('/api/v1/driverdefault', methods=['GET'])
+def driver_default():
+    """Devuelve un ejemplo de la informacion que se debe enviar de un chofer"""
+    application.logger.info('[GET] /api/v1/driverdefault')
+    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CHOFER)
+    response.status_code = 200
+    return response
+
+@application.route('/api/v1/driver/<int:driver_id>', methods=['GET'])
+def get_info_driver(driver_id):
+    """Devuelve la informacion de un chofer
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id))
+    response = CLIENT_CONTROLLER.get_driver(driver_id)
+    return response
+
+@application.route('/api/v1/drivers', methods=['GET'])
+def get_info_drivers():
+    """Devuelve la informacion de todos los choferes"""
+    application.logger.info('[GET] /api/v1/drivers')
+    response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
+    return response
+
+@application.route('/api/v1/driver', methods=['POST'])
+def post_info_driver():
+    """Crea un nuevo chofer"""
+    application.logger.info('[POST] /api/v1/driver')
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
+    return response
+
+@application.route('/api/v1/driver/<int:driver_id>', methods=['PUT'])
+def put_info_driver(driver_id):
+    """Modifica un chofer
+    @param driver_id es el identificador del driver"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id))
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
+    return response
+
+@application.route('/api/v1/driver/<int:driver_id>', methods=['DELETE'])
+def delete_info_driver(driver_id):
+    """Devuelve la informacion de un chofer
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[DELETE] /api/v1/driver/' + str(driver_id))
+    response = CLIENT_CONTROLLER.delete_client(driver_id)
+    return response
 
 #Endpoints de clientes
 

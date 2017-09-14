@@ -42,6 +42,25 @@ class ClientController:
         response.status_code = 200
         return response
 
+    def get_driver(self, driver_id):
+        """ Este metodo devuelve la informacion del chofer buscado
+            @param driver_id es el id del chofer del que se esta buscando la informacion"""
+        informacion = SHARED_SERVER.get_driver(driver_id)
+        response = jsonify(
+            client_id=informacion.client_id,
+            type_client=informacion.type_client,
+            username=informacion.username,
+            fb_user_id=informacion.fb_user_id,
+            fb_auth_token=informacion.fb_auth_token,
+            first_name=informacion.first_name,
+            last_name=informacion.last_name,
+            country=informacion.country,
+            email=informacion.email,
+            birthdate=informacion.birthdate
+        )
+        response.status_code = 200
+        return response
+
     def get_clients(self, type_client):
         """ Este metodo devuelve la informacion de todos los cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
