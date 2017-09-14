@@ -1,5 +1,6 @@
 """ @package model.client_shared
 """
+import json
 from flask import jsonify
 
 class ClientShared:
@@ -49,6 +50,26 @@ class ClientShared:
         client.country = country
         client.email = email
         client.birthdate = birthdate
+        return client
+
+    @staticmethod
+    def new_client_json(json_client, type_client):
+        """ Constructor para agregar la informacion de un cliente que viene en el json
+            @param json_client es el json con la informacion del cliente
+            @param type_client es el tipo de cliente"""
+        client = ClientShared()
+        client.ref = 1
+        client.type_client = type_client
+        client.username = json_client["username"]
+        client.password = json_client["password"]
+        client.fb_user_id = json_client["fb"]["userId"]
+        client.fb_auth_token = json_client["fb"]["authToken"]
+        client.first_name = json_client["firstName"]
+        client.last_name = json_client["lastName"]
+        client.country = json_client["country"]
+        client.email = json_client["email"]
+        client.birthdate = json_client["birthdate"]
+        #Falta agregar las imagenes
         return client
 
     def add_image(self, imagen):
