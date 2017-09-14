@@ -95,6 +95,11 @@ class TestClientController(unittest.TestCase):
             '/api/v1/driver/14', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
 
+    def test_eliminar_chofer(self):
+        """Prueba eliminar un chofer"""
+        response = self.app.delete('/api/v1/driver/45')
+        self.assertEqual(response.status_code, 204)
+
     #Pruebas de cliente
 
     def test_obtener_cliente_default(self):

@@ -116,6 +116,14 @@ def put_info_driver(driver_id):
     response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
     return response
 
+@application.route('/api/v1/driver/<int:driver_id>', methods=['DELETE'])
+def delete_info_driver(driver_id):
+    """Devuelve la informacion de un chofer
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[DELETE] /api/v1/driver/' + str(driver_id))
+    response = CLIENT_CONTROLLER.delete_client(driver_id)
+    return response
+
 #Endpoints de clientes
 
 @application.route('/api/v1/clientedefault', methods=['GET'])
