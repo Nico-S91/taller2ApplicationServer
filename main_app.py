@@ -2,6 +2,7 @@
 """
 import os
 from flask import Flask, jsonify, abort, make_response, request
+from flask_httpauth import HTTPBasicAuth
 from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
@@ -29,6 +30,21 @@ TEMPLATE_SWAGGER = {
         "https"
     ]
 }
+
+# security
+auth = HTTPBasicAuth()
+
+#users
+USER_DATA = {
+    "admin": "password",
+    "ricveal": "1234"
+}
+
+@auth.verify_password
+def verify(username, password):
+    if not (username and password):
+        return False
+    return USER_DATA.get(username) == password
 
 Swagger(application, template=TEMPLATE_SWAGGER)
 
@@ -148,10 +164,12 @@ def delete_info_client(client_id):
     @param client_id es el identificador del cliente"""
     application.logger.info('[DELETE] /api/v1/client/' + str(client_id))
     response = CLIENT_CONTROLLER.delete_client(client_id)
+    print(str(response.data))
     return response
 
 @swag_from('swagger/helloWord.yml')
 @application.route('/')
+@auth.login_required
 def hello_word():
     """Devuelve el famoso Hello world"""
     application.logger.info('[TEST] Hello world module - Hello World!')
