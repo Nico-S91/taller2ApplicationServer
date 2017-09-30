@@ -2,6 +2,8 @@
 """
 import unittest
 import main_app
+import requests
+import json
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
@@ -29,15 +31,45 @@ class TestClientController(unittest.TestCase):
 
     def test_obtener_chofer(self):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
-        response = self.app.get('/api/v1/driver/23')
+        # response = self.app.get('/api/v1/driver/23')
+        response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "birthdate": "01/01/1990", \n  "client_id": 23, \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
+        self.assertEqual(str(response.json()), b'{u\'username\': u\'Khaleesi\', u\'first_name\': u\'Daenerys\', u\'last_name\': u\'Targaryen\', u\'country\': u\'Valyria\', u\'fb_user_id\': u\'fb_user_id\', u\'birthdate\': u\'01/01/1990\', u\'type_client\': u\'chofer\', u\'fb_auth_token\': u\'fb_auth_token\', u\'client_id\': 23, u\'email\': u\'madre_dragones@got.com\'}')
 
     def test_obtener_choferes(self):
         """Prueba que al obtener todos los choferes, viene el default"""
-        response = self.app.get('/api/v1/drivers')
+        response = requests.get('https://demo4909478.mockable.io/api/v1/drivers')
+        assertRes = json.loads("""
+                {
+            "list": [
+                {
+                    "birthdate": "08/04/2005",
+                    "client_id": 15,
+                    "country": "Winterfell",
+                    "email": "chica_sin_cara@got.com",
+                    "fb_auth_token": "fb_auth_token",
+                    "fb_user_id": "fb_user_id",
+                    "first_name": "Arya",
+                    "last_name": "Stark",
+                    "type_client": "chofer",
+                    "username": "ChicaSinRostro"
+                },
+                {
+                    "birthdate": "01/01/1990",
+                    "client_id": 15,
+                    "country": "Valyria",
+                    "email": "madre_dragones@got.com",
+                    "fb_auth_token": "fb_auth_token",
+                    "fb_user_id": "fb_user_id",
+                    "first_name": "Daenerys",
+                    "last_name": "Targaryen",
+                    "type_client": "chofer",
+                    "username": "Khaleesi"
+                }
+            ]
+        }""")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "chofer", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "chofer", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
+        self.assertTrue(response.json() == assertRes)
     
     def test_crear_chofer(self):
         """Prueba que al crear un chofer con la informacion valida entonces devuelva
@@ -118,7 +150,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los cliente que viene por defecto"""
         response = self.app.get('/api/v1/clients')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "cliente", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "cliente", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
+        self.assertEqual(response.data, b'{\n  "list": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "cliente", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "cliente", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
 
     def test_crear_cliente(self):
         """Prueba que al crear un cliente con la informacion valida entonces devuelva

@@ -124,7 +124,7 @@ class SharedServer:
                 "username": "Khaleesi"
             }
         ]
-        response = jsonify({'tasks': lista})
+        response = jsonify({'list': lista})
         response.status_code = 200
         return response
 
