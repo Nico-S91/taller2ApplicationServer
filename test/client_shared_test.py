@@ -13,10 +13,14 @@ class TestClientController(unittest.TestCase):
         self.app = main_app.application.test_client()
         # propagate the exceptions to the test client
         self.app.testing = True
+
+    def mockeamos_login_correcto(self):
+        """Mockeamos para que el login de correcto"""
         LoginService.is_logged = mock.MagicMock(return_value=True)
 
     def test_home_status_code(self):
         """Prueba el endpoint HelloWordl"""
+        self.mockeamos_login_correcto()
         result = self.app.get('/')
         self.assertEqual(result.status_code, 200)
         print(str(result.data))
@@ -26,18 +30,21 @@ class TestClientController(unittest.TestCase):
 
     def test_obtener_chofer_default(self):
         """Prueba de obtencion de chofer default"""
+        self.mockeamos_login_correcto()
         response = self.app.get('/api/v1/driverdefault')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
 
     def test_obtener_chofer(self):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
+        self.mockeamos_login_correcto()
         response = self.app.get('/api/v1/driver/23')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "birthdate": "01/01/1990", \n  "client_id": 23, \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
 
     def test_obtener_choferes(self):
         """Prueba que al obtener todos los choferes, viene el default"""
+        self.mockeamos_login_correcto()
         response = self.app.get('/api/v1/drivers')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "chofer", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "chofer", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
@@ -45,6 +52,7 @@ class TestClientController(unittest.TestCase):
     def test_crear_chofer(self):
         """Prueba que al crear un chofer con la informacion valida entonces devuelva
            un mensaje que se creo correctamente"""
+        self.mockeamos_login_correcto()
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -60,6 +68,7 @@ class TestClientController(unittest.TestCase):
     def test_crear_chofer_sin_informacion(self):
         """Prueba que al crear un chofer sin mandar la informacion devuelva el codigo de
            error correspondiente"""
+        self.mockeamos_login_correcto()
         payload = ''
         headers = {
             'content-type': "application/json",
@@ -73,6 +82,7 @@ class TestClientController(unittest.TestCase):
     def test_modificar_chofer(self):
         """Prueba que al modificar un chofer con la informacion valida entonces devuelve
            un mensaje que se creo correctamente"""
+        self.mockeamos_login_correcto()
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -88,6 +98,7 @@ class TestClientController(unittest.TestCase):
     def test_modificar_chofer_sin_informacion(self):
         """Prueba que al modificar un chofer sin mandar la informacion devuelva el codigo de
            error correspondiente"""
+        self.mockeamos_login_correcto()
         payload = ''
         headers = {
             'content-type': "application/json",
@@ -100,6 +111,7 @@ class TestClientController(unittest.TestCase):
 
     def test_eliminar_chofer(self):
         """Prueba eliminar un chofer"""
+        self.mockeamos_login_correcto()
         response = self.app.delete('/api/v1/driver/45')
         self.assertEqual(response.status_code, 204)
 
@@ -107,18 +119,21 @@ class TestClientController(unittest.TestCase):
 
     def test_obtener_cliente_default(self):
         """Prueba que al obtener un cliente sea el que viene por defecto"""
+        self.mockeamos_login_correcto()
         response = self.app.get('/api/v1/clientedefault')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "cliente", \n  "username": "Khaleesi"\n}\n')
 
     def test_obtener_cliente(self):
         """Prueba que al obtener un cliente sea el que viene por defecto"""
+        self.mockeamos_login_correcto()
         response = self.app.get('/api/v1/client/23')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "birthdate": "01/01/1990", \n  "client_id": 23, \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "type_client": "cliente", \n  "username": "Khaleesi"\n}\n')
 
     def test_obtener_clientes(self):
         """Prueba que al obtener todos los cliente que viene por defecto"""
+        self.mockeamos_login_correcto()
         response = self.app.get('/api/v1/clients')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "tasks": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "cliente", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "cliente", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
@@ -126,6 +141,7 @@ class TestClientController(unittest.TestCase):
     def test_crear_cliente(self):
         """Prueba que al crear un cliente con la informacion valida entonces devuelva
            un mensaje que se creo correctamente"""
+        self.mockeamos_login_correcto()
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -141,6 +157,7 @@ class TestClientController(unittest.TestCase):
     def test_crear_cliente_sin_informacion(self):
         """Prueba que al crear un cliente sin mandar la informacion tire el codigo de
            error correspondiente"""
+        self.mockeamos_login_correcto()
         payload = ''
         headers = {
             'content-type': "application/json",
@@ -154,6 +171,7 @@ class TestClientController(unittest.TestCase):
     def test_modificar_cliente(self):
         """Prueba que al modificar un cliente con la informacion valida entonces devuelva
            un mensaje que se creo correctamente"""
+        self.mockeamos_login_correcto()
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -169,6 +187,7 @@ class TestClientController(unittest.TestCase):
     def test_modificar_cliente_sin_informacion(self):
         """Prueba que al modificar un cliente sin mandar la informacion tire el codigo de
            error correspondiente"""
+        self.mockeamos_login_correcto()
         payload = ''
         headers = {
             'content-type': "application/json",
@@ -181,6 +200,7 @@ class TestClientController(unittest.TestCase):
 
     def test_eliminar_cliente(self):
         """Prueba eliminar un cliente"""
+        self.mockeamos_login_correcto()
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
