@@ -1,6 +1,8 @@
 """ @package test.client_shared_test
 """
 import unittest
+import mock
+from service.login_service import LoginService
 import main_app
 
 class TestClientController(unittest.TestCase):
@@ -11,6 +13,7 @@ class TestClientController(unittest.TestCase):
         self.app = main_app.application.test_client()
         # propagate the exceptions to the test client
         self.app.testing = True
+        LoginService.is_logged = mock.MagicMock(return_value=True)
 
     def test_home_status_code(self):
         """Prueba el endpoint HelloWordl"""
