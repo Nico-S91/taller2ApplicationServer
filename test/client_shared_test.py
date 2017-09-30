@@ -217,7 +217,7 @@ class TestClientController(unittest.TestCase):
 
 ## Test con Mocks
     def test_obtener_lista_choferes(self):
-        cmpTest = json.loads("""{
+        cmp_test = json.loads("""{
         "list": [
             {
             "birthdate": "08/04/2005",
@@ -248,24 +248,27 @@ class TestClientController(unittest.TestCase):
 
         SharedServer.URL_SHARED_SERVER = MagicMock(return_value='https://demo4909478.mockable.io')
         response = self.app.get('/api/v1/drivers')
-        print('*********************************')
-        cmpResponse = json.loads(response.data)
+        cmp_response = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(cmpResponse == cmpTest)
+        self.assertTrue(cmp_response == cmp_test)
 
 
-## Solo lo dejo para que quede como ejemplo ##
+    def test_mock_obtener_chofer(self):
+        cmp_test = json.loads("""{
+            "birthdate": "01/01/1990",
+            "client_id": 23,
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "fb_auth_token": "fb_auth_token",
+            "fb_user_id": "fb_user_id",
+            "first_name": "Daenerys",
+            "last_name": "Targaryen",
+            "type_client": "chofer",
+            "username": "Khaleesi"
+        }""")
 
-#    def test_upper(self):
-#        self.assertEqual('foo'.upper(), 'FOO')
-
-#   def test_isupper(self):
-#       self.assertTrue('FOO'.isupper())
-#       self.assertFalse('Foo'.isupper())
-
-#    def test_split(self):
-#        s = 'hello world'
-#        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-#        with self.assertRaises(TypeError):
-#            s.split(2)
+        SharedServer.URL_SHARED_SERVER = MagicMock(return_value='https://demo4909478.mockable.io')
+        response = self.app.get('/api/v1/driver/23')
+        cmp_response = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(cmp_response == cmp_test)
