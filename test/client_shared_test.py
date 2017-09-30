@@ -1,9 +1,11 @@
 """ @package test.client_shared_test
 """
 import unittest
+import json
 import main_app
 import requests
-import json
+from mock import MagicMock
+from resource.shared_server import SharedServer
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
@@ -212,6 +214,45 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un cliente"""
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
+
+## Test con Mocks
+    def test_obtener_lista_choferes(self):
+        cmpTest = json.loads("""{
+        "list": [
+            {
+            "birthdate": "08/04/2005",
+            "client_id": 15,
+            "country": "Winterfell",
+            "email": "chica_sin_cara@got.com",
+            "fb_auth_token": "fb_auth_token",
+            "fb_user_id": "fb_user_id",
+            "first_name": "Arya",
+            "last_name": "Stark",
+            "type_client": "chofer",
+            "username": "ChicaSinRostro"
+            },
+            {
+            "birthdate": "01/01/1990",
+            "client_id": 15,
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "fb_auth_token": "fb_auth_token",
+            "fb_user_id": "fb_user_id",
+            "first_name": "Daenerys",
+            "last_name": "Targaryen",
+            "type_client": "chofer",
+            "username": "Khaleesi"
+            }
+        ]
+        }""")
+
+        SharedServer.URL_SHARED_SERVER = MagicMock(return_value='https://demo4909478.mockable.io')
+        response = self.app.get('/api/v1/drivers')
+        print('*********************************')
+        cmpResponse = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(cmpResponse == cmpTest)
+
 
 ## Solo lo dejo para que quede como ejemplo ##
 
