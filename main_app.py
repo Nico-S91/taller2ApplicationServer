@@ -7,11 +7,13 @@ from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.client_controller import TIPO_CLIENTE
 from api.client_controller import TIPO_CHOFER
+from service.login_service import LoginService
 
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
 application = Flask(__name__)
 CLIENT_CONTROLLER = ClientController()
+LOGIN_SERVICE = LoginService()
 FALTA_LOGUEARSE = 'Falta loguearse'
 
 TEMPLATE_SWAGGER = {
@@ -31,11 +33,9 @@ TEMPLATE_SWAGGER = {
     ]
 }
 
-def esta_logueado():
+def is_logged():
     """Verifica si esta logueado el usuario o no lo esta"""
-    if 'idusuario' in session:
-        return True
-    return False
+    return LOGIN_SERVICE.is_logged(session)
 
 @application.route('/login/facebookAuthToken/<string:facebook_auth_token>', methods=['GET', 'POST'])
 def login_facebook(facebook_auth_token):
@@ -44,15 +44,12 @@ def login_facebook(facebook_auth_token):
     if request.method == 'POST':
         if not facebook_auth_token:
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
-        if not USER_DATA.get(facebook_auth_token):
-            username = facebook_auth_token
-            session['username'] = username
+        if LOGIN_SERVICE.login_facebook(facebook_auth_token, session):
             return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
         return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
     return '''
         <form method="post">
-            <p><input type=text name=username>
-            <p><input type=text name=password>
+            <p><input type=text name=estaSeguro>
             <p><input type=submit value=Login>
         </form>
     '''
@@ -66,7 +63,7 @@ def login(username, password):
     if request.method == 'POST':
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
-        if (USER_DATA.get(username) == password):
+        if LOGIN_SERVICE.login(username, password, session):
             session['username'] = username
             return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
         return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
@@ -81,38 +78,33 @@ def login(username, password):
 def logout():
     """Deslogueamos al usuario"""
     session.pop('username', None)
-    response = jsonify(mensaje = 'Se deslogueo correctamente')
+    response = jsonify(mensaje='Se deslogueo correctamente')
     response.status_code = 200
     return response
 
 # set the secret key.  keep this really secret:
 application.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
-#users por el momento solo aceptamos esto, despues vamos a usar la info de la base
-USER_DATA = {
-    "admin": "password",
-    "ricveal": "1234"
-}
-
 Swagger(application, template=TEMPLATE_SWAGGER)
 
 @application.errorhandler(404)
-def not_found(error):
+def not_found():
     """Manejador de error para codigo 404"""
     application.logger.error('Error 404 - Recurso no encontrado')
     return make_response(jsonify({'error': 'Not Found'}), 404)
 
 @application.route('/logtest')
-def logTest():
+def log_test():
     """Url para testing de logueo a distintos niveles"""
     application.logger.warning('Testeando Warning!')
     application.logger.error('Testeando Error!')
     application.logger.info('Testeando Info!')
     return "Testeando el Logger..."
 
-def responseInvalidLogin() :
+def response_invalid_login():
+    """Devuelve el json con la respuesta que indica que el usuario no esta logueado o es invalido"""
     application.logger.info('No estaba logueado o estaba mal logueado')
-    response = jsonify(mensaje = FALTA_LOGUEARSE)
+    response = jsonify(mensaje=FALTA_LOGUEARSE)
     response.status_code = 400
     return response
 
@@ -123,8 +115,8 @@ def driver_default():
     """Devuelve un ejemplo de la informacion que se debe enviar de un chofer"""
     application.logger.info('[GET] /api/v1/driverdefault')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CHOFER)
     response.status_code = 200
     return response
@@ -135,8 +127,8 @@ def get_info_driver(driver_id):
     @param driver_id es el identificador del chofer"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id))
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_driver(driver_id)
     return response
 
@@ -145,8 +137,8 @@ def get_info_drivers():
     """Devuelve la informacion de todos los choferes"""
     application.logger.info('[GET] /api/v1/drivers')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
     return response
 
@@ -155,8 +147,8 @@ def post_info_driver():
     """Crea un nuevo chofer"""
     application.logger.info('[POST] /api/v1/driver')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     if not request.json:
         abort(400)
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
@@ -168,8 +160,8 @@ def put_info_driver(driver_id):
     @param driver_id es el identificador del driver"""
     application.logger.info('[PUT] /api/v1/driver/' + str(driver_id))
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     if not request.json:
         abort(400)
     response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
@@ -181,8 +173,8 @@ def delete_info_driver(driver_id):
     @param driver_id es el identificador del chofer"""
     application.logger.info('[DELETE] /api/v1/driver/' + str(driver_id))
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.delete_client(driver_id)
     return response
 
@@ -193,8 +185,8 @@ def client_default():
     """Devuelve un ejemplo de la informacion que se debe enviar de un cliente"""
     application.logger.info('[GET] /api/v1/clientedefault')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CLIENTE)
     response.status_code = 200
     return response
@@ -205,8 +197,8 @@ def get_info_client(client_id):
     @param client_id es el identificador del cliente"""
     application.logger.info('[GET] /api/v1/client/' + str(client_id))
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_client(client_id)
     return response
 
@@ -215,8 +207,8 @@ def get_info_clients():
     """Devuelve la informacion de todos los clientes"""
     application.logger.info('[GET] /api/v1/clients')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_clients(TIPO_CLIENTE)
     return response
 
@@ -225,8 +217,8 @@ def post_info_client():
     """Crea un nuevo cliente"""
     application.logger.info('[POST] /api/v1/client')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     if not request.json:
         abort(400)
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CLIENTE)
@@ -238,8 +230,8 @@ def put_info_client(client_id):
     @param client_id es el identificador del cliente"""
     application.logger.info('[PUT] /api/v1/client/' + str(client_id))
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     if not request.json:
         abort(400)
     response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CLIENTE, client_id)
@@ -251,8 +243,8 @@ def delete_info_client(client_id):
     @param client_id es el identificador del cliente"""
     application.logger.info('[DELETE] /api/v1/client/' + str(client_id))
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.delete_client(client_id)
     print(str(response.data))
     return response
@@ -263,8 +255,8 @@ def hello_word():
     """Devuelve el famoso Hello world"""
     application.logger.info('[TEST] Hello world module - Hello World!')
     #Veo si esta logueado
-    if not esta_logueado():
-        return responseInvalidLogin()
+    if not is_logged():
+        return response_invalid_login()
     return jsonify(message='hello world')
 
 if __name__ == '__main__':
