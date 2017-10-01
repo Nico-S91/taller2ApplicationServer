@@ -16,6 +16,9 @@ CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
 FALTA_LOGUEARSE = 'Falta loguearse'
 
+#Secret key para las session
+application.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+
 TEMPLATE_SWAGGER = {
     "swagger": "2.0",
     "info": {
@@ -32,6 +35,24 @@ TEMPLATE_SWAGGER = {
         "https"
     ]
 }
+
+Swagger(application, template=TEMPLATE_SWAGGER)
+
+@application.errorhandler(404)
+def not_found():
+    """Manejador de error para codigo 404"""
+    application.logger.error('Error 404 - Recurso no encontrado')
+    return make_response(jsonify({'error': 'Not Found'}), 404)
+
+@application.route('/logtest')
+def log_test():
+    """Url para testing de logueo a distintos niveles"""
+    application.logger.warning('Testeando Warning!')
+    application.logger.error('Testeando Error!')
+    application.logger.info('Testeando Info!')
+    return "Testeando el Logger..."
+
+#Login y logout
 
 def is_logged():
     """Verifica si esta logueado el usuario o no lo esta"""
@@ -80,25 +101,6 @@ def logout():
     response = jsonify(mensaje='Se deslogueo correctamente')
     response.status_code = 200
     return response
-
-# set the secret key.  keep this really secret:
-application.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
-
-Swagger(application, template=TEMPLATE_SWAGGER)
-
-@application.errorhandler(404)
-def not_found():
-    """Manejador de error para codigo 404"""
-    application.logger.error('Error 404 - Recurso no encontrado')
-    return make_response(jsonify({'error': 'Not Found'}), 404)
-
-@application.route('/logtest')
-def log_test():
-    """Url para testing de logueo a distintos niveles"""
-    application.logger.warning('Testeando Warning!')
-    application.logger.error('Testeando Error!')
-    application.logger.info('Testeando Info!')
-    return "Testeando el Logger..."
 
 def response_invalid_login():
     """Devuelve el json con la respuesta que indica que el usuario no esta logueado o es invalido"""
