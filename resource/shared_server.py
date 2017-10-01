@@ -3,7 +3,9 @@
 import json
 from model.client_shared import ClientShared
 from flask import jsonify
-import httplib
+import http
+
+# http.client.HTTPConnection()
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -35,10 +37,7 @@ class SharedServer:
 
     def __init__(self):
         self.cabeceras = {"Content-type": "application/json"}
-        self.abrir_conexion = httplib.HTTPConnection(URL_SHARED_SERVER)
-
-
-    def __init__(self):
+        self.abrir_conexion = http.client.HTTPConnection(URL_SHARED_SERVER)
         #Por el momento tenemos aca los usuarios
         self.user_data = {
             "admin": "password",
