@@ -33,6 +33,24 @@ class SharedServer:
         #Cerramos la coneccion
 #        abrir_conexion.close()
 
+    def __init__(self):
+        #Por el momento tenemos aca los usuarios
+        self.user_data = {
+            "admin": "password",
+            "ricveal": "1234"
+        }
+
+    def get_validate_client(self, username, password):
+        """Validamos que el usuario exista en el sistema
+        @param username es el nombre del usuario que guardo en el sistema
+        @param password es la contraseña del usuario"""
+        return self.user_data.get(username) == password
+
+    def get_validate_client_facebook(self, facebook_auth_token):
+        """Validamos que el usuario exista en el sistema
+        @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
+        return self.user_data.get(facebook_auth_token)
+
     def put_client(self, client_id, client):
         """ Modifica la informacion de un cliente/chofer
             @param client es la informacion modificada del cliente/chofer existente

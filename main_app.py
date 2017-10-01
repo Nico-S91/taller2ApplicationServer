@@ -79,8 +79,7 @@ def login_facebook(facebook_auth_token):
 def login(username, password):
     """Logueamos al usuario
     @param username es el nombre del usuario que guardo en el sistema
-    @param password es la contraseña del usuario
-    @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
+    @param password es la contraseña del usuario"""
     if request.method == 'POST':
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
