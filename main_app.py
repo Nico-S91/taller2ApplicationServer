@@ -1,7 +1,7 @@
 """ @package main
 """
 import os
-from flask import Flask, jsonify, abort, make_response, request, session, redirect, url_for, escape
+from flask import Flask, jsonify, abort, make_response, request, session
 from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
@@ -43,10 +43,10 @@ def login_facebook(facebook_auth_token):
     @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
     if request.method == 'POST':
         if not facebook_auth_token:
-            return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
+            return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         if LOGIN_SERVICE.login_facebook(facebook_auth_token, session):
             return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
-        return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
+        return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
     return '''
         <form method="post">
             <p><input type=text name=estaSeguro>
@@ -62,11 +62,11 @@ def login(username, password):
     @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
     if request.method == 'POST':
         if not (username and password):
-            return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
+            return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         if LOGIN_SERVICE.login(username, password, session):
             session['username'] = username
             return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
-        return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 400)
+        return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
     return '''
         <form method="post">
             <p><input type=text name=estaSeguro>
