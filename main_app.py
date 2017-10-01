@@ -64,7 +64,6 @@ def login(username, password):
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         if LOGIN_SERVICE.login(username, password, session):
-            session['username'] = username
             return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
         return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
     return '''
@@ -74,10 +73,10 @@ def login(username, password):
         </form>
     '''
 
-@application.route('/logout')
+@application.route('/logout', methods=['POST', 'GET'])
 def logout():
     """Deslogueamos al usuario"""
-    session.pop('username', None)
+    LOGIN_SERVICE.logout(session)
     response = jsonify(mensaje='Se deslogueo correctamente')
     response.status_code = 200
     return response

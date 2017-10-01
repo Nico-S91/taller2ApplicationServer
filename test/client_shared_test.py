@@ -35,7 +35,7 @@ class TestClientController(unittest.TestCase):
         self.assertTrue(LoginService.login.called)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "respuesta": "Se logueo correctamente"\n}\n')
-    
+
     def test_login_con_usuario_o_contrasenia_incorrecta(self):
         """Pruebo que se loguee correctamente el usuario"""
         LoginService.login = mock.MagicMock(return_value=False)
@@ -44,7 +44,7 @@ class TestClientController(unittest.TestCase):
         print(str(response.data))
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, b'{\n  "respuesta": "Credenciales invalidas"\n}\n')
-    
+
     def test_login_facebook_correcto(self):
         """Pruebo que se loguee correctamente el usuario"""
         LoginService.login_facebook = mock.MagicMock(return_value=True)
@@ -53,15 +53,22 @@ class TestClientController(unittest.TestCase):
         self.assertTrue(LoginService.login.called)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "respuesta": "Se logueo correctamente"\n}\n')
-    
+
     def test_login_facebook_incorrecta(self):
         """Pruebo que se loguee correctamente el usuario"""
         LoginService.login_facebook = mock.MagicMock(return_value=False)
         response = self.app.post('/login/facebookAuthToken/245')
-        print('*********************************************')
-        print(str(response.data))
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, b'{\n  "respuesta": "Credenciales invalidas"\n}\n')
+
+    def test_logout_correcto(self):
+        """Pruebo que se desloguee correctamente el usuario"""
+        LoginService.logout = mock.MagicMock(return_value=True)
+        response = self.app.post('/logout')
+        print(str(response.data))
+        self.assertTrue(LoginService.login.called)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, b'{\n  "mensaje": "Se deslogueo correctamente"\n}\n')
 
     #Pruebas de chofer
 

@@ -31,3 +31,7 @@ class LoginService:
             session['username'] = username
             return True
         return False
+
+    def logout(self, session):
+        """Logout del cliente"""
+        session.pop('username', None)
