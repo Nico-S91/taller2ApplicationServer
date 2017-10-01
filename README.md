@@ -24,7 +24,7 @@ La aplicacion esta hosteada en Heroku, para acceder a ella:
 * poner luego una url correspondiente al listado de los servicios de endpoints disponibles
 
 ## Reporte de cobertura
-El reporte de cobertura de código se generará en .coverage luego de correr el comando **nosetests --with-coverage**
+El reporte de cobertura de código se generará en coverageReport luego de correr el comando **coverage report > coverageReport**
 
 ## Linter
 Para correr el linter de la aplicacion, correr el comando **pylint --rcfile=.pylintrc api test model > linterReport** y el reporte se generara en linterReport
