@@ -3,6 +3,9 @@
 import json
 from model.client_shared import ClientShared
 from flask import jsonify
+import http
+
+# http.client.HTTPConnection()
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -14,10 +17,12 @@ DEFAULT_DRIVER = ClientShared.new_client(1, "chofer", "Khaleesi", "Dragones3",
                                          "Targaryen", "Valyria", "madre_dragones@got.com",
                                          "01/01/1990")
 
+URL_SHARED_SERVER = "localhost:80"
+
 class SharedServer:
 #    cabeceras = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
     """Conexion con el Shared server"""
-#    abrir_conexion = httplib.HTTPConnection("localhost:80")
+#    abrir_conexion = httplib.HTTPConnection(URL_SHARED_SERVER)
 
 #   def peticion(self):
         #Parametros que hay que enviar
@@ -25,15 +30,14 @@ class SharedServer:
         #Hacemos la llamada
 #        abrir_conexion.request("POST", "/archivo_cualquiera.php", parametros, cabeceras)
 #        respuesta = abrir_conexion.getresponse()
-        #Imprime codigo de respuesta
-#        print (respuesta.status)
-        #Imprime el nombre del codigo de la respuesta
-#        print (respuesta.reason)
-#        ver_source = respuesta.read()
+        
         #Cerramos la coneccion
 #        abrir_conexion.close()
+#       return respuesta
 
     def __init__(self):
+        self.cabeceras = {"Content-type": "application/json"}
+        self.abrir_conexion = http.client.HTTPConnection(URL_SHARED_SERVER)
         #Por el momento tenemos aca los usuarios
         self.user_data = {
             "admin": "password",
@@ -142,7 +146,7 @@ class SharedServer:
                 "username": "Khaleesi"
             }
         ]
-        response = jsonify({'tasks': lista})
+        response = jsonify({'list': lista})
         response.status_code = 200
         return response
 
