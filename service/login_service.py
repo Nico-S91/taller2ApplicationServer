@@ -12,6 +12,7 @@ class LoginService:
         @param session es la sesion del usuario"""
         if 'username' in session:
             return True
+        print('False')
         return False
 
     def login(self, username, password, session):
@@ -37,3 +38,4 @@ class LoginService:
         """Logout del cliente
         @param session es la sesion del usuario"""
         session.pop('username', None)
+        return session
