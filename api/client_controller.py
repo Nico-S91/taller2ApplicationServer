@@ -48,16 +48,16 @@ class ClientController:
             @param driver_id es el id del chofer del que se esta buscando la informacion"""
         informacion = SHARED_SERVER.get_driver(driver_id)
         response = jsonify(
-            client_id=informacion.client_id,
-            type_client=informacion.type_client,
-            username=informacion.username,
-            fb_user_id=informacion.fb_user_id,
-            fb_auth_token=informacion.fb_auth_token,
-            first_name=informacion.first_name,
-            last_name=informacion.last_name,
-            country=informacion.country,
-            email=informacion.email,
-            birthdate=informacion.birthdate
+            client_id=informacion.get("client_id"),
+            type_client=informacion.get("type_client"),
+            username=informacion.get("username"),
+            fb_user_id=informacion.get("fb_user_id"),
+            fb_auth_token=informacion.get("fb_auth_token"),
+            first_name=informacion.get("first_name"),
+            last_name=informacion.get("last_name"),
+            country=informacion.get("country"),
+            email=informacion.get("email"),
+            birthdate=informacion.get("birthdate")
         )
         response.status_code = 200
         return response
