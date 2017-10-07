@@ -1,9 +1,11 @@
 """ @package shared_server
 """
-import json
+import http
+from model import client_shared
 from model.client_shared import ClientShared
 from flask import jsonify
 import http, urllib
+import json
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -41,21 +43,40 @@ class SharedServer:
         """ Modifica  el parametro url de la clase
         """
         SharedServer.url_shared_server = url_value
+        #Por el momento tenemos aca los usuarios
+        self.user_data = {
+            "admin": "password",
+            "ricveal": "1234"
+        }
+
+    def get_validate_client(self, username, password):
+        """Validamos que el usuario exista en el sistema
+        @param username es el nombre del usuario que guardo en el sistema
+        @param password es la contraseña del usuario"""
+        credential = client_shared.get_json_client_credentials(username, password)
+        #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
+        print(credential)
+        return self.user_data.get(username) == password
+
+    def get_validate_client_facebook(self, facebook_auth_token):
+        """Validamos que el usuario exista en el sistema
+        @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
+        credential = client_shared.get_json_client_credentials_facebook(facebook_auth_token)
+        #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
+        print(credential)
+        return self.user_data.get(facebook_auth_token)
 
     def put_client(self, client_id, client):
         """ Modifica la informacion de un cliente/chofer
             @param client es la informacion modificada del cliente/chofer existente
         """
         #Aca va a ir el codigo para hacer el pedido de modificacion del cliente/chofer
-        #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
-
         if client.type_client == "cliente":
             response = DEFAULT_CLIENT.get_json_new_client()
             response.status_code = 201
         elif client.type_client == "chofer":
             response = DEFAULT_DRIVER.get_json_new_client()
             response.status_code = 201
-
         return response
 
     def post_client(self, client):
@@ -69,7 +90,6 @@ class SharedServer:
         elif client.type_client == "chofer":
             response = DEFAULT_DRIVER.get_json_new_client()
             response.status_code = 201
-
         return response
 
     def get_client(self, client_id):
@@ -79,15 +99,12 @@ class SharedServer:
         #Aca va a ir el codigo para hacer el pedido de get del cliente/chofer
         client = DEFAULT_CLIENT
         client.client_id = client_id
-
         return client
 
     def get_driver(self, driver_id):
         """ Devuelve la informacion del chofer buscado
             @param driver_id es el id del chofer buscado
         """
-        #Codigo para hacer el pedido de get del chofer
-
         #Abrimos conexion
         abrir_conexion = http.client.HTTPConnection(SharedServer.url_shared_server)
 
