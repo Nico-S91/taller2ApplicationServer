@@ -1,5 +1,4 @@
 """ Facilita la operacion con la base de datos de mongo """
-
 import os
 from pymongo import MongoClient
 
@@ -46,7 +45,7 @@ def main():
 
     # Inserto un post y obtengo su id
     post_id = posts.insert_one(post).inserted_id
-    print(post_id)
+    print(post_id.__str__())
 
 if __name__ == '__main__':
     main()
