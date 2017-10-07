@@ -34,9 +34,8 @@ class SharedServer:
 #       return respuesta
 
     def __init__(self):
-        self.url_shared_server = "demo4909478.mockable.io"
+        SharedServer.url_shared_server = ""
         self.cabeceras = {"Content-type": "application/json"}
-        self.abrir_conexion = http.client.HTTPConnection(self.url_shared_server)
 
     def change_url(self, url_value):
         """ Modifica  el parametro url de la clase
@@ -89,12 +88,18 @@ class SharedServer:
         """
         #Codigo para hacer el pedido de get del chofer
 
+        #Abrimos conexion
+        abrir_conexion = http.client.HTTPConnection(SharedServer.url_shared_server)
+
         #Hacemos la llamada
-        self.abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
-        response = self.abrir_conexion.getresponse()
+        abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
+        response = abrir_conexion.getresponse()
 
         decode_msg = response.read().decode('utf-8')
         json_obj = json.loads(decode_msg)
+
+        #Cerramos Conexion
+        abrir_conexion.close()
 
         return json_obj
 
