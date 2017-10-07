@@ -192,3 +192,12 @@ class SharedServer:
         response = jsonify({'metadata': metadata, 'car': car})
         response.status_code = 200
         return response
+
+    def post_car(self, properties, client_id):
+        """ Crea un nuevo auto para el chofer
+            @param client_id es el identificador del chofer
+        """
+        #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
+        response = self.get_car(45, client_id)
+        response.status_code = 201
+        return response

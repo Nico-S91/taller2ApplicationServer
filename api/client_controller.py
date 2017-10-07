@@ -3,6 +3,7 @@
 import json
 from resource.shared_server import SharedServer
 from model.client_shared import ClientShared
+from model.car_shared import CarShared
 from flask import jsonify
 
 SHARED_SERVER = SharedServer()
@@ -141,6 +142,28 @@ class ClientController:
         else:
             # Si vino un error por el momento lo devuelvo, quizas hay que ver si conviene crear nuestros errores
             response = informacion
+        return response
+
+    def post_new_car(self, car_json, client_id):
+        """ Este metodo permite crear un auto
+            @param car_json informacion del auto
+            @param client_id identificador del cliente"""
+        # Convertimos la info en el cliente y le ponemos el tipo
+        propertiesjson = jsonify(
+            properties=car_json.get('properties')
+        )
+        # Mandamos la info al shared server
+        response_shared_server = SHARED_SERVER.post_car(propertiesjson, client_id)
+        if response_shared_server.status_code == 201:
+            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
+            # necesita el cliente
+            response = jsonify(
+                mensaje="El cliente fue creado correctamente",
+                codigo=CODIGO_OK,
+            )
+            response.status_code = response_shared_server.status_code
+        else:
+            response = response_shared_server
         return response
 
     ### Metodos privados ###
