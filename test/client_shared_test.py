@@ -296,6 +296,53 @@ class TestClientController(unittest.TestCase):
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
+    # Test de autos
+
+    def test_obtener_auto_cliente(self):
+        """Prueba obtener un auto correctamente"""
+        self.mockeamos_login_correcto()
+        response = self.app.get('api/v1/driver/23/cars/1')
+        self.assertEqual(response.status_code, 200)
+        cmp_test = json.loads("""{
+                "car_id": "1",
+                "owner": "23",
+                "properties": [
+                {
+                    "name": "color",
+                    "value": "negro"
+                },
+                {
+                    "name": "modelo",
+                    "value": "punto"
+                },
+                {
+                    "name": "marca",
+                    "value": "fiat"
+                }]}""")
+        cmp_response = json.loads(response.data)
+        self.assertEqual(cmp_test, cmp_response)
+
+#    def test_obtener_auto_cliente_inexistente(self):
+ #       """Prueba obtener un auto de un cliente inexistente"""
+  #      self.mockeamos_login_correcto()
+   #     response = self.app.get('/api/v1/driver/0/cars/1')
+    #    self.assertEqual(response.status_code, 404)
+     #   cmp_test = json.loads("""
+      #  """)
+       # cmp_response = json.loads(response.data)
+        #self.assertEqual(cmp_test, cmp_response)
+
+#    def test_obtener_auto_inexistente(self):
+ #       """Prueba obtener un auto que no tiene el cliente"""
+  #      self.mockeamos_login_correcto()
+   #     response = self.app.get('/api/v1/driver/23/cars/99')
+    #    self.assertEqual(response.status_code, 404)
+     #   cmp_test = json.loads("""
+      #  """)
+       # cmp_response = json.loads(response.data)
+        #self.assertEqual(cmp_test, cmp_response)
+
+
 ## Test con Mocks
     def test_obtener_lista_choferes(self):
         cmp_test = json.loads("""{
