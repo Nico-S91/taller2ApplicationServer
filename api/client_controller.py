@@ -189,6 +189,14 @@ class ClientController:
             response = response_shared_server
         return response
 
+    def delete_car(self, driver_id, car_id):
+        """ Este metodo permite eliminar un auto de un chofer
+            @param car_id identificadore del auto
+            @param driver_id identificador del conductor"""
+        response_shared_server = SHARED_SERVER.delete_car(driver_id, car_id)
+        #Devolvemos la respuesta que nos da el shared
+        return response_shared_server
+
     ### Metodos privados ###
 
     def _convert_clients_json(self, json_clients):

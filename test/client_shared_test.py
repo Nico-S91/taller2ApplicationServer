@@ -360,7 +360,7 @@ class TestClientController(unittest.TestCase):
             "mensaje": "El cliente fue creado correctamente"
         }""")
         self.assertEqual(cmp_test, cmp_response)
-    
+
     def test_crear_auto_cliente_sin_propiedades(self):
         """Prueba crear un auto sin propiedades"""
         self.mockeamos_login_correcto()
@@ -393,7 +393,7 @@ class TestClientController(unittest.TestCase):
             "mensaje": "El cliente fue modificado correctamente"
         }""")
         self.assertEqual(cmp_test, cmp_response)
-    
+
     def test_modificar_auto_cliente_sin_propiedades(self):
         """Prueba para modificar un auto sin propiedades"""
         self.mockeamos_login_correcto()
@@ -406,6 +406,12 @@ class TestClientController(unittest.TestCase):
         response = self.app.put(
             '/api/v1/driver/23/cars/45', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
+
+    def test_eliminar_auto(self):
+        """Prueba eliminar un auto de un chofer"""
+        self.mockeamos_login_correcto()
+        response = self.app.delete('/api/v1/driver/23/cars/45')
+        self.assertEqual(response.status_code, 204)
 
 ## Test con Mocks
     def test_obtener_lista_choferes(self):

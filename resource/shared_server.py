@@ -228,3 +228,12 @@ class SharedServer:
         response = self.get_car(45, client_id)
         response.status_code = 201
         return response
+
+    def delete_car(self, driver_id, car_id):
+        """ Este metodo permite eliminar un auto de un chofer
+            @param car_id identificadore del auto
+            @param driver_id identificador del conductor"""
+            #Aca va a ir el codigo para hacer el pedido de delete del auto de un chofer
+        response = jsonify('')
+        response.status_code = 204
+        return response
