@@ -254,7 +254,7 @@ def delete_info_client(client_id):
 @application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>',methods=['GET'])
 def get_info_car(driver_id, car_id):
     """Devuelve la informacion del auto de un conductor"""
-    application.logger.info('[GET] /api/v1/driver/<int:driver_id>/cars/<int:car_id>')
+    application.logger.info('[GET] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
@@ -264,7 +264,7 @@ def get_info_car(driver_id, car_id):
 @application.route('/api/v1/driver/<int:driver_id>/cars', methods=['POST'])
 def post_info_car(driver_id):
     """Crea un nuevo auto para un cliente"""
-    application.logger.info('[POST] /api/v1/driver/<int:driver_id>/cars')
+    application.logger.info('[POST] /api/v1/driver/'+str(driver_id)+'/cars')
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
@@ -272,6 +272,19 @@ def post_info_car(driver_id):
         abort(400)
     print(request.json)
     response = CLIENT_CONTROLLER.post_new_car(request.json, driver_id)
+    return response
+
+@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>', methods=['PUT'])
+def put_info_car(driver_id, car_id):
+    """Modificar un cliente
+    @param client_id es el identificador del cliente"""
+    application.logger.info('[PUT] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.put_new_car(request.json, car_id, driver_id)
     return response
 
 #Para pruebas

@@ -195,6 +195,18 @@ class SharedServer:
 
     def post_car(self, properties, client_id):
         """ Crea un nuevo auto para el chofer
+            @param properties son las propiedades del auto del chofer
+            @param client_id es el identificador del chofer
+        """
+        #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
+        response = self.get_car(45, client_id)
+        response.status_code = 201
+        return response
+
+    def put_car(self, propertiesjson, car_id, client_id):
+        """ Modifica el auto de un chofer
+            @param properties son las propiedades del auto del chofer
+            @param car_id es el identificador del auto
             @param client_id es el identificador del chofer
         """
         #Aca va a ir el codigo para hacer el pedido de crear un cliente/chofer
