@@ -343,7 +343,7 @@ class TestClientController(unittest.TestCase):
         #self.assertEqual(cmp_test, cmp_response)
 
     def test_crear_auto_cliente(self):
-        """Prueba obtener un auto correctamente"""
+        """Prueba crear un auto correctamente"""
         self.mockeamos_login_correcto()
         payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
         headers = {
@@ -362,7 +362,7 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(cmp_test, cmp_response)
     
     def test_crear_auto_cliente_sin_propiedades(self):
-        """Prueba obtener un auto correctamente"""
+        """Prueba crear un auto sin propiedades"""
         self.mockeamos_login_correcto()
         payload = ""
         headers = {
@@ -372,6 +372,39 @@ class TestClientController(unittest.TestCase):
         }
         response = self.app.post(
             '/api/v1/driver/23/cars', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_modificar_auto_cliente(self):
+        """Prueba modificar un auto correctamente"""
+        self.mockeamos_login_correcto()
+        payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/23/cars/45', data=payload, headers=headers)
+        print(str(response.data))
+        self.assertEqual(response.status_code, 201)
+        cmp_response = json.loads(response.data)
+        cmp_test = json.loads("""{
+            "codigo": 0, 
+            "mensaje": "El cliente fue modificado correctamente"
+        }""")
+        self.assertEqual(cmp_test, cmp_response)
+    
+    def test_modificar_auto_cliente_sin_propiedades(self):
+        """Prueba para modificar un auto sin propiedades"""
+        self.mockeamos_login_correcto()
+        payload = ""
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/23/cars/45', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
 
 ## Test con Mocks
