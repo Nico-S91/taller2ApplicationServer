@@ -3,7 +3,7 @@
 import json
 from model.client_shared import ClientShared
 from flask import jsonify
-import httplib
+import http, urllib
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -15,7 +15,7 @@ DEFAULT_DRIVER = ClientShared.new_client(1, "chofer", "Khaleesi", "Dragones3",
                                          "Targaryen", "Valyria", "madre_dragones@got.com",
                                          "01/01/1990")
 
-URL_SHARED_SERVER = "localhost:80"
+
 
 class SharedServer:
 #    cabeceras = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
@@ -34,9 +34,14 @@ class SharedServer:
 #       return respuesta
 
     def __init__(self):
+        self.url_shared_server = "demo4909478.mockable.io"
         self.cabeceras = {"Content-type": "application/json"}
-        self.abrir_conexion = httplib.HTTPConnection(URL_SHARED_SERVER)
+        self.abrir_conexion = http.client.HTTPConnection(self.url_shared_server)
 
+    def change_url(self, url_value):
+        """ Modifica  el parametro url de la clase
+        """
+        SharedServer.url_shared_server = url_value
 
     def put_client(self, client_id, client):
         """ Modifica la informacion de un cliente/chofer
@@ -82,11 +87,16 @@ class SharedServer:
         """ Devuelve la informacion del chofer buscado
             @param driver_id es el id del chofer buscado
         """
-        #Aca va a ir el codigo para hacer el pedido de get del chofer
-        client = DEFAULT_DRIVER
-        client.client_id = driver_id
+        #Codigo para hacer el pedido de get del chofer
 
-        return client
+        #Hacemos la llamada
+        self.abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
+        response = self.abrir_conexion.getresponse()
+
+        decode_msg = response.read().decode('utf-8')
+        json_obj = json.loads(decode_msg)
+
+        return json_obj
 
     def get_clients(self, type_client):
         """ Devuelve la informacion del cliente/chofer buscado

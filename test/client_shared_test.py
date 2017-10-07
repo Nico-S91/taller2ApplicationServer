@@ -31,17 +31,17 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
 
-    def test_obtener_chofer(self):
-        """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
-        # response = self.app.get('/api/v1/driver/23')
-        response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(str(response.json()), b'{u\'username\': u\'Khaleesi\', u\'first_name\': u\'Daenerys\', u\'last_name\': u\'Targaryen\', u\'country\': u\'Valyria\', u\'fb_user_id\': u\'fb_user_id\', u\'birthdate\': u\'01/01/1990\', u\'type_client\': u\'chofer\', u\'fb_auth_token\': u\'fb_auth_token\', u\'client_id\': 23, u\'email\': u\'madre_dragones@got.com\'}')
+    # def test_obtener_chofer(self):
+    #     """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
+    #     # response = self.app.get('/api/v1/driver/23')
+    #     response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(str(response.json()), b'{u\'username\': u\'Khaleesi\', u\'first_name\': u\'Daenerys\', u\'last_name\': u\'Targaryen\', u\'country\': u\'Valyria\', u\'fb_user_id\': u\'fb_user_id\', u\'birthdate\': u\'01/01/1990\', u\'type_client\': u\'chofer\', u\'fb_auth_token\': u\'fb_auth_token\', u\'client_id\': 23, u\'email\': u\'madre_dragones@got.com\'}')
 
     def test_obtener_choferes(self):
         """Prueba que al obtener todos los choferes, viene el default"""
         response = requests.get('https://demo4909478.mockable.io/api/v1/drivers')
-        assertRes = json.loads("""
+        assert_res = json.loads("""
                 {
             "list": [
                 {
@@ -71,8 +71,8 @@ class TestClientController(unittest.TestCase):
             ]
         }""")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json() == assertRes)
-    
+        self.assertTrue(response.json() == assert_res)
+
     def test_crear_chofer(self):
         """Prueba que al crear un chofer con la informacion valida entonces devuelva
            un mensaje que se creo correctamente"""
@@ -248,7 +248,7 @@ class TestClientController(unittest.TestCase):
 
         SharedServer.URL_SHARED_SERVER = MagicMock(return_value='https://demo4909478.mockable.io')
         response = self.app.get('/api/v1/drivers')
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(cmp_response == cmp_test)
 
@@ -267,8 +267,9 @@ class TestClientController(unittest.TestCase):
             "username": "Khaleesi"
         }""")
 
-        SharedServer.URL_SHARED_SERVER = MagicMock(return_value='https://demo4909478.mockable.io')
+        # mock_url = MagicMock(return_value='https://demo4909478.mockable.io')
+        SharedServer.change_url(SharedServer, 'https://demo4909478.mockable.io')
         response = self.app.get('/api/v1/driver/23')
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(cmp_response == cmp_test)
