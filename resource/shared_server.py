@@ -38,16 +38,16 @@ class SharedServer:
     def __init__(self):
         SharedServer.url_shared_server = ""
         self.cabeceras = {"Content-type": "application/json"}
-
-    def change_url(self, url_value):
-        """ Modifica  el parametro url de la clase
-        """
-        SharedServer.url_shared_server = url_value
         #Por el momento tenemos aca los usuarios
         self.user_data = {
             "admin": "password",
             "ricveal": "1234"
         }
+
+    def change_url(self, url_value):
+        """ Modifica  el parametro url de la clase
+        """
+        SharedServer.url_shared_server = url_value
 
     def get_validate_client(self, username, password):
         """Validamos que el usuario exista en el sistema
