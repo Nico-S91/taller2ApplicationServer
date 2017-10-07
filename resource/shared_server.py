@@ -56,7 +56,11 @@ class SharedServer:
         credential = client_shared.get_json_client_credentials(username, password)
         #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
         print(credential)
-        return self.user_data.get(username) == password
+        if self.user_data.get(username) == password:
+            return DEFAULT_CLIENT.get_json_new_client()
+        else:
+            response = jsonify(code=1, message='Ese cliente no existe')
+            response.status_code = 401
 
     def get_validate_client_facebook(self, facebook_auth_token):
         """Validamos que el usuario exista en el sistema
@@ -64,7 +68,11 @@ class SharedServer:
         credential = client_shared.get_json_client_credentials_facebook(facebook_auth_token)
         #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
         print(credential)
-        return self.user_data.get(facebook_auth_token)
+        if self.user_data.get(facebook_auth_token):
+            return DEFAULT_CLIENT.get_json_new_client()
+        else:
+            response = jsonify(code=1, message='Ese cliente no existe')
+            response.status_code = 401
 
     def put_client(self, client_id, client):
         """ Modifica la informacion de un cliente/chofer

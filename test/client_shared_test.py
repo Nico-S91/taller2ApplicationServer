@@ -8,6 +8,7 @@ import main_app
 import requests
 from mock import MagicMock
 from resource.shared_server import SharedServer
+from model.client_shared import ClientShared
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
@@ -20,7 +21,7 @@ class TestClientController(unittest.TestCase):
 
     def mockeamos_login_correcto(self):
         """Mockeamos para que el login de correcto"""
-        LoginService.is_logged = mock.MagicMock(return_value=True)
+        LoginService.is_logged = mock.MagicMock(return_value=SharedServer)
 
     def test_home_status_code(self):
         """Prueba el endpoint HelloWordl"""
@@ -33,7 +34,12 @@ class TestClientController(unittest.TestCase):
     #Pruebas del login
     def test_login_correcto(self):
         """Pruebo que se loguee correctamente el usuario"""
-        LoginService.login = mock.MagicMock(return_value=True)
+        client = ClientShared.new_client(1, "chofer", "Khaleesi", "Dragones3",
+                                         "fb_user_id", "fb_auth_token", "Daenerys",
+                                         "Targaryen", "Valyria", "madre_dragones@got.com",
+                                         "01/01/1990")
+        return_value = client.get_json_new_client()
+        LoginService.login = mock.MagicMock(return_value=return_value)
         response = self.app.post('/login/username/user/password/pass')
         print(str(response.data))
         self.assertTrue(LoginService.login.called)
