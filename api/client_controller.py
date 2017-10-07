@@ -1,5 +1,6 @@
 """ @package client_controller
 """
+import json
 from resource.shared_server import SharedServer
 from model.client_shared import ClientShared
 from flask import jsonify
@@ -120,6 +121,27 @@ class ClientController:
         response_shared_server = SHARED_SERVER.delete_client(client_id)
         #Devolvemos la respuesta que nos da el shared
         return response_shared_server
+
+    # Metodos para manipular la informacion de los autos
+
+    def get_car(self, id_car, client_id):
+        """ Este metodo devuelve la informacion del auto de un cliente
+            @param id_car es el id del auto del cliente
+            @param client_id es el id del cliente que se esta buscando la informacion"""
+        informacion = SHARED_SERVER.get_car(id_car, client_id)
+        if informacion.status_code == 200:
+            #Filtro los datos que no le interesa al cliente
+            car = json.loads(informacion.data)['car']
+            response = jsonify(
+                car_id=car.get('id'),
+                owner=car.get('owner'),
+                properties=car.get('properties')
+            )
+            response.status_code = 200
+        else:
+            # Si vino un error por el momento lo devuelvo, quizas hay que ver si conviene crear nuestros errores
+            response = informacion
+        return response
 
     ### Metodos privados ###
 

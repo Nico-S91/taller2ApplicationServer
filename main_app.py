@@ -249,6 +249,18 @@ def delete_info_client(client_id):
     print(str(response.data))
     return response
 
+# Endpoints de autos
+
+@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>',methods=['GET'])
+def get_info_car(driver_id, car_id):
+    """Devuelve la informacion del auto de un conductor"""
+    application.logger.info('[GET] /api/v1/driver/<int:driver_id>/cars/<int:car_id>')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = CLIENT_CONTROLLER.get_car(car_id, driver_id)
+    return response
+
 @swag_from('swagger/helloWord.yml')
 @application.route('/')
 def hello_word():

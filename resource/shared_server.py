@@ -1,8 +1,10 @@
 """ @package shared_server
 """
 import http
+import json
 from model import client_shared
 from model.client_shared import ClientShared
+from model.car_shared import CarShared
 from flask import jsonify
 
 # http.client.HTTPConnection()
@@ -157,4 +159,36 @@ class SharedServer:
         #Aca va a ir el codigo para hacer el pedido de delete del cliente/chofer
         response = jsonify('')
         response.status_code = 204
+        return response
+
+    def get_car(self, id_car, owner):
+        """ Devuelve la informacion del auto de un cliente
+            @param id_car es el id del auto del cliente
+            @param owner es el id del cliente buscado
+        """
+        #Aca va a ir el codigo para hacer el pedido de get del auto del cliente
+        metadata = {
+                "version": "1"
+            }
+        car = {
+            "id": "1",
+            "_ref": "dfsd",
+            "owner": "23",
+            "properties": [
+            {
+                "name": "color",
+                "value": "negro"
+            },
+            {
+                "name": "modelo",
+                "value": "punto"
+            },
+            {
+                "name": "marca",
+                "value": "fiat"
+            }
+            ]
+        }
+        response = jsonify({'metadata': metadata, 'car': car})
+        response.status_code = 200
         return response
