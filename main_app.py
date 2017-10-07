@@ -261,6 +261,21 @@ def get_info_car(driver_id, car_id):
     response = CLIENT_CONTROLLER.get_car(car_id, driver_id)
     return response
 
+@application.route('/api/v1/driver/<int:driver_id>/cars', methods=['POST'])
+def post_info_car(driver_id):
+    """Crea un nuevo auto para un cliente"""
+    application.logger.info('[POST] /api/v1/driver/<int:driver_id>/cars')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    print(request.json)
+    response = CLIENT_CONTROLLER.post_new_car(request.json, driver_id)
+    return response
+
+#Para pruebas
+
 @swag_from('swagger/helloWord.yml')
 @application.route('/')
 def hello_word():
