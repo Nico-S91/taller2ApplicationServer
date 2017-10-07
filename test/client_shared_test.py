@@ -31,12 +31,27 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
 
-    # def test_obtener_chofer(self):
-    #     """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
-    #     # response = self.app.get('/api/v1/driver/23')
-    #     response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(str(response.json()), b'{u\'username\': u\'Khaleesi\', u\'first_name\': u\'Daenerys\', u\'last_name\': u\'Targaryen\', u\'country\': u\'Valyria\', u\'fb_user_id\': u\'fb_user_id\', u\'birthdate\': u\'01/01/1990\', u\'type_client\': u\'chofer\', u\'fb_auth_token\': u\'fb_auth_token\', u\'client_id\': 23, u\'email\': u\'madre_dragones@got.com\'}')
+    def test_obtener_chofer(self):
+        """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
+        # response = self.app.get('/api/v1/driver/23')
+        response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
+
+        assert_res = json.loads("""
+            {
+                "username": "Khaleesi",
+                "first_name": "Daenerys",
+                "last_name": "Targaryen",
+                "country": "Valyria",
+                "fb_user_id": "fb_user_id",
+                "birthdate": "01/01/1990",
+                "type_client": "chofer",
+                "fb_auth_token": "fb_auth_token",
+                "client_id": 23,
+                "email": "madre_dragones@got.com"
+            }
+        """)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json() == assert_res)
 
     def test_obtener_choferes(self):
         """Prueba que al obtener todos los choferes, viene el default"""
