@@ -261,7 +261,7 @@ class TestClientController(unittest.TestCase):
         ]
         }""")
 
-        SharedServer.URL_SHARED_SERVER = MagicMock(return_value='demo4909478.mockable.io')
+        SharedServer.change_url(SharedServer, 'demo4909478.mockable.io')
         response = self.app.get('/api/v1/drivers')
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
