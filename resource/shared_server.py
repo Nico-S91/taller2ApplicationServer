@@ -6,8 +6,8 @@ from model import client_shared
 from model.client_shared import ClientShared
 from model.car_shared import CarShared
 from flask import jsonify
-
-# http.client.HTTPConnection()
+import http, urllib
+import json
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -19,7 +19,7 @@ DEFAULT_DRIVER = ClientShared.new_client(1, "chofer", "Khaleesi", "Dragones3",
                                          "Targaryen", "Valyria", "madre_dragones@got.com",
                                          "01/01/1990")
 
-URL_SHARED_SERVER = "localhost:80"
+
 
 class SharedServer:
 #    cabeceras = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
@@ -38,13 +38,18 @@ class SharedServer:
 #       return respuesta
 
     def __init__(self):
+        SharedServer.url_shared_server = ""
         self.cabeceras = {"Content-type": "application/json"}
-        self.abrir_conexion = http.client.HTTPConnection(URL_SHARED_SERVER)
         #Por el momento tenemos aca los usuarios
         self.user_data = {
             "admin": "password",
             "ricveal": "1234"
         }
+
+    def change_url(self, url_value):
+        """ Modifica  el parametro url de la clase
+        """
+        SharedServer.url_shared_server = url_value
 
     def get_validate_client(self, username, password):
         """Validamos que el usuario exista en el sistema
@@ -102,10 +107,20 @@ class SharedServer:
         """ Devuelve la informacion del chofer buscado
             @param driver_id es el id del chofer buscado
         """
-        #Aca va a ir el codigo para hacer el pedido de get del chofer
-        client = DEFAULT_DRIVER
-        client.client_id = driver_id
-        return client
+        #Abrimos conexion
+        abrir_conexion = http.client.HTTPConnection(SharedServer.url_shared_server)
+
+        #Hacemos la llamada
+        abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
+        response = abrir_conexion.getresponse()
+
+        decode_msg = response.read().decode('utf-8')
+        json_obj = json.loads(decode_msg)
+
+        #Cerramos Conexion
+        abrir_conexion.close()
+
+        return json_obj
 
     def get_clients(self, type_client):
         """ Devuelve la informacion del cliente/chofer buscado

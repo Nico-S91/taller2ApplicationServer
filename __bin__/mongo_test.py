@@ -10,15 +10,15 @@ from pymongo import MongoClient
 # import os
 # dbUrl= os.environ.get('DATABASE_URL')
 
-DB_URL = 'mongodb://localhost:27017/'
+DB_URL = 'mongodb://localhost:27017/test'
 
 CLIENT = MongoClient(DB_URL)
 
 # Obtengo una referencia a la BBDD 'test'
-DB = CLIENT.test
+DB = CLIENT['test']
 
 # Obtengo una referencia a la collection/tabla 'posts'
-POSTS = DB.posts
+POSTS = DB["posts"]
 
 POST = {"author": "Mike", "text": "My first blog post!",
         "tags": ["mongodb", "python", "pymongo"],
