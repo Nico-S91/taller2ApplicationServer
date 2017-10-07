@@ -13,7 +13,7 @@ Previo a iniciar el server, es necesario correr los siguientes comandos:
 ## Inicio
 Para iniciar el server, se debe:
 * el puerto por defecto de la aplicacion va a ser 5000 (sin gunicorn)
-* correr el comando **python api/app.py** para levantar la app con el servidor de pruebas de Flask
+* correr el comando **python main_app.py** para levantar la app con el servidor de pruebas de Flask
 
 Para iniciar el servidor corriendo sobre Gunicorn:
 * Ejecutar el comando "gunicorn main_app" (sin las comillas)
