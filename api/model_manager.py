@@ -40,3 +40,35 @@ class ModelManager:
         }
 
         return jsonify(response)
+
+    def add_auth_token(self, user_id, token, expiration):
+        """ Este metodo graba en la base de datos OauthToken un nuevo token de autorizacion.
+            @param user_id identificador de usuario
+            @param token un token de autorizacion
+            @param expiration fecha de expiracion del token
+        """
+        auth_tokens = self.db_manager.get_table('OauthToken')
+
+        nuevo_token = {
+            "idusuario": user_id,
+            "token": token,
+            "expiration": expiration
+        }
+
+        id_nuevo_token = auth_tokens.insert_one(nuevo_token).inserted_id
+
+        return id_nuevo_token
+
+    def delete_token(self, token):
+        """ Este metodo elimina un token, al proveer el nombre del mismo
+            @param token nombre del token a eliminar
+        """
+        auth_tokens = self.db_manager.get_table('OauthToken')
+
+        delete_info = auth_tokens.delete_one({'token': token})
+        response = {
+            "operation_result": delete_info.acknowledged,
+            "delete_count": delete_info.deleted_count
+        }
+
+        return jsonify(response)
