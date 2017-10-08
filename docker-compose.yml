@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 
 # docker-compose maneja una red interna donde mapea cada modulo a una url
 services:

@@ -8,6 +8,8 @@ from api.client_controller import ClientController
 from api.client_controller import TIPO_CLIENTE
 from api.client_controller import TIPO_CHOFER
 from service.login_service import LoginService
+from bson import ObjectId
+import model.db_manager
 
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
@@ -303,6 +305,42 @@ def delete_info_car(driver_id, car_id):
     return response
 
 #Para pruebas
+
+@application.route('/api/v1/test_mongo', methods=['GET'])
+def test_mongo():
+    """Prueba si MongoDB esta activo"""
+    db_manager = model.db_manager
+    posts = db_manager.get_table('post')
+    post = {"author": "Mike", "text": "Testeanding!", "tags": ["mongoDB", "Python", "pyMongo"]}
+    #Inserto un post y obtengo su id
+    post_id = posts.insert_one(post).inserted_id
+    response = {"post_id":post_id.__str__()}
+    return jsonify(response)
+
+@application.route('/api/v1/get_mongo_test_table', methods=['GET'])
+def get_test_db():
+    """Obtiene los elementos de la tabla post"""
+    db_manager = model.db_manager
+    posts = db_manager.get_table('post')
+    cursor = posts.find({})
+    response = []
+    for document in cursor:
+        newobj = {
+            "post_id": str(document.get('_id')),
+            "author": document.get('author'),
+            "text": document.get('text'),
+            "tags": document.get('tags'),
+        }
+        response.append(newobj)
+    return jsonify(response)
+
+@application.route('/api/v1/test_mongo/<string:post_id>', methods=['DELETE'])
+def delete_test_mongo(post_id):
+    """Elimina los datos de un documento de la coleccion de prueba de Mongo"""
+    db_manager = model.db_manager
+    posts = db_manager.get_table('post')
+    response = posts.delete_one({'_id': ObjectId(post_id)})
+    return str(response)
 
 @swag_from('swagger/helloWord.yml')
 @application.route('/')
