@@ -339,8 +339,24 @@ def delete_test_mongo(post_id):
     """Elimina los datos de un documento de la coleccion de prueba de Mongo"""
     db_manager = model.db_manager
     posts = db_manager.get_table('post')
-    response = posts.delete_one({'_id': ObjectId(post_id)})
-    return str(response)
+    delete_info = posts.delete_one({'_id': ObjectId(post_id)})
+    response = {
+        "operation_result": delete_info.acknowledged,
+        "delete_count": delete_info.deleted_count
+    }
+    return jsonify(response)
+
+@application.route('/api/v1/erase_tests', methods=['DELETE'])
+def delete_test_table():
+    """Elimina la tabla post con todo su contenido"""
+    db_manager = model.db_manager
+    posts = db_manager.get_table('post')
+    count = posts.delete_many({})
+    response = {
+        "operation_result": count.acknowledged,
+        "delete_count": count.deleted_count
+    }
+    return jsonify(response)
 
 @swag_from('swagger/helloWord.yml')
 @application.route('/')
