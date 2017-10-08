@@ -75,6 +75,23 @@ class ModelManager:
 
         return id_nuevo_token
 
+    def get_auth_token(self, token):
+        """ Este metodo obtiene a un token de la coleccion OauthToken
+            @param token el nombre del token
+        """
+        auth_tokens = self.db_manager.get_table('OauthToken')
+
+        token = auth_tokens.find_one({'token': token})
+
+        response = {
+            "_id": str(token.get('_id')),
+            "idusuario": token.get('idusuario'),
+            "token": token.get('token'),
+            "expiration": token.get('expiration'),
+        }
+
+        return jsonify(response)
+
     def delete_token(self, token):
         """ Este metodo elimina un token, al proveer el nombre del mismo
             @param token nombre del token a eliminar
@@ -104,3 +121,21 @@ class ModelManager:
         id_nueva_credencial = credenciales.insert_one(nueva_credencial).inserted_id
 
         return id_nueva_credencial
+
+    def get_credenciales_ubicacion(self, user_id):
+        """ Este metodo obtiene TODAS las credenciales de ubicacion dado un user_id
+            @param user_id un id de usuario
+        """
+        credenciales = self.db_manager.get_table('CredencialesUbicacion')
+
+        cred_asociadas = credenciales.find({'idusuario': user_id})
+
+        response = []
+        for credencial in cred_asociadas:
+            newobj = {
+                "key": credencial.get('keyGeolocation')
+            }
+            response.append(newobj)
+
+        return jsonify(response)
+    
