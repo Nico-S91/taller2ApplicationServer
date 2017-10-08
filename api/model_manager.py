@@ -9,7 +9,7 @@ class ModelManager:
     def __init__(self):
         """Constructor"""
         self.db_manager = model.db_manager
-    
+ 
     def add_user(self, username, user_id):
         """Este metodo graba en la base de datos USUARIOS un nuevo usuario.
             @param username nombre de usuario
@@ -26,6 +26,22 @@ class ModelManager:
         id_nuevo_usuario = usuarios.insert_one(nuevo_usuario).inserted_id
 
         return id_nuevo_usuario
+
+    def get_user(self, user_id):
+        """ Este metodo obtiene a un usuario de la coleccion Usuarios
+            @param user_id el id de usuario a buscar
+        """
+        usuarios = self.db_manager.get_table('usuarios')
+
+        user = usuarios.find_one({'idUsuario': user_id})
+
+        response = {
+            "_id": str(user.get('_id')),
+            "idUsuario": user.get('idUsuario'),
+            "username": user.get('username')
+        }
+
+        return jsonify(response)
 
     def remove_user(self, user_id):
         """ Este metodo elimina a un usuario de la coleccion USUARIOS.

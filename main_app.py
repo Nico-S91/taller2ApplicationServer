@@ -253,7 +253,7 @@ def delete_info_client(client_id):
 
 # Endpoints de autos
 
-@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>',methods=['GET'])
+@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>', methods=['GET'])
 def get_info_car(driver_id, car_id):
     """Devuelve la informacion del auto de un conductor"""
     application.logger.info('[GET] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
@@ -329,9 +329,25 @@ def get_test_db():
             "post_id": str(document.get('_id')),
             "author": document.get('author'),
             "text": document.get('text'),
-            "tags": document.get('tags'),
+            "tags": document.get('tags')
         }
         response.append(newobj)
+    return jsonify(response)
+
+@application.route('/api/v1/test_mongo/<string:author>', methods=['GET'])
+def get_post(author):
+    """Obtiene UN post on un autor dado"""
+    db_manager = model.db_manager
+    posts = db_manager.get_table('post')
+    query = posts.find_one({'author': author})
+
+    response = {
+        "post_id": str(query.get('_id')),
+        "author": query.get('author'),
+        "text": query.get('text'),
+        "tags": query.get('tags'),
+    }
+
     return jsonify(response)
 
 @application.route('/api/v1/test_mongo/<string:post_id>', methods=['DELETE'])
