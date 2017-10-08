@@ -132,19 +132,22 @@ class SharedServer:
             @param driver_id es el id del chofer buscado
         """
         #Abrimos conexion
-        abrir_conexion = http.client.HTTPConnection(SharedServer.url_shared_server)
+        # abrir_conexion = http.client.HTTPConnection(SharedServer.url_shared_server)
 
-        #Hacemos la llamada
-        abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
-        response = abrir_conexion.getresponse()
+        # #Hacemos la llamada
+        # abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
+        # response = abrir_conexion.getresponse()
 
-        decode_msg = response.read().decode('utf-8')
-        json_obj = json.loads(decode_msg)
+        # decode_msg = response.read().decode('utf-8')
+        # json_obj = json.loads(decode_msg)
 
-        #Cerramos Conexion
-        abrir_conexion.close()
+        # #Cerramos Conexion
+        # abrir_conexion.close()
+        url = self.get_url('/api/v1/driver/'+str(driver_id))
+        response_server = requests.get(url)
+        json_data = json.loads(response_server.text)
 
-        return json_obj
+        return json_data
 
     def get_clients(self, type_client):
         """ Devuelve la informacion del cliente/chofer buscado
