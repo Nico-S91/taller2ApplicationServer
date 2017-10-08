@@ -8,6 +8,7 @@ from model.car_shared import CarShared
 from flask import jsonify
 import http, urllib
 import json
+import requests
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -38,7 +39,7 @@ class SharedServer:
 #       return respuesta
 
     def __init__(self):
-        SharedServer.url_shared_server = ""
+        SharedServer.url_shared_server = 'https://stormy-lowlands-30400.herokuapp.com'
         self.cabeceras = {"Content-type": "application/json"}
         #Por el momento tenemos aca los usuarios
         self.user_data = {
@@ -51,22 +52,45 @@ class SharedServer:
         """
         SharedServer.url_shared_server = url_value
 
+    def get_url(self, endpoint):
+        """Devuelve la url formada para pegarle al shared server
+        @param endpoint es el endpoint del shared server al que se le va a pegar"""
+        return SharedServer.url_shared_server + endpoint + '?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImxsZXZhbWUiLCJpYXQiOjE1MDczODkxODQsImV4cCI6MTUwOTk4MTE4NH0.KGdbsCbiYQMXXhtuogpKX6FslNTRIg9wVadI_F-w5Ko'
+
     def get_validate_client(self, username, password):
         """Validamos que el usuario exista en el sistema
         @param username es el nombre del usuario que guardo en el sistema
         @param password es la contraseña del usuario"""
         credential = client_shared.get_json_client_credentials(username, password)
-        #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
-        print(credential)
-        return self.user_data.get(username) == password
+
+        url = self.get_url('/api/v1/users/validate')
+        response_server = requests.post(url, json=credential)
+        json_data = json.loads(response_server.text)
+
+        if response_server.status_code == 200:
+            response = jsonify(json_data)
+            response.status_code = 200
+        else:
+            response = jsonify(code=1, message='Ese cliente no existe')
+            response.status_code = 401
+        return response
 
     def get_validate_client_facebook(self, facebook_auth_token):
         """Validamos que el usuario exista en el sistema
         @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
         credential = client_shared.get_json_client_credentials_facebook(facebook_auth_token)
-        #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
-        print(credential)
-        return self.user_data.get(facebook_auth_token)
+
+        url = self.get_url('/api/v1/users/validate')
+        response_server = requests.post(url, json=credential)
+        json_data = json.loads(response_server.text)
+
+        if response_server.status_code == 200:
+            response = jsonify(json_data)
+            response.status_code = 200
+        else:
+            response = jsonify(code=1, message='Ese cliente no existe')
+            response.status_code = 401
+        return response
 
     def put_client(self, client_id, client):
         """ Modifica la informacion de un cliente/chofer
