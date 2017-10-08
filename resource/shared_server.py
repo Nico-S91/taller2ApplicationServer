@@ -6,6 +6,7 @@ from model.client_shared import ClientShared
 from flask import jsonify
 import http, urllib
 import json
+import requests
 
 DEFAULT_CLIENT = ClientShared.new_client(1, "cliente", "Khaleesi", "Dragones3",
                                          "fb_user_id", "fb_auth_token", "Daenerys",
@@ -56,11 +57,18 @@ class SharedServer:
         credential = client_shared.get_json_client_credentials(username, password)
         #Aca va ir el codigo para validar las credenciales del usuario con el SharedServer
         print(credential)
-        if self.user_data.get(username) == password:
-            return DEFAULT_CLIENT.get_json_new_client()
+        self.change_url('https://stormy-lowlands-30400.herokuapp.com')
+        url = 'https://stormy-lowlands-30400.herokuapp.com/api/v1/users/validate?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImxsZXZhbWUiLCJpYXQiOjE1MDczODkxODQsImV4cCI6MTUwOTk4MTE4NH0.KGdbsCbiYQMXXhtuogpKX6FslNTRIg9wVadI_F-w5Ko'
+        response_server = requests.post(url, json=credential)
+        json_data = json.loads(response_server.text)
+        if response_server.status_code == 200:
+            #return DEFAULT_CLIENT.get_json_new_client()
+            response = jsonify(json_data)
+            response.status_code = 200
         else:
             response = jsonify(code=1, message='Ese cliente no existe')
             response.status_code = 401
+        return response
 
     def get_validate_client_facebook(self, facebook_auth_token):
         """Validamos que el usuario exista en el sistema
