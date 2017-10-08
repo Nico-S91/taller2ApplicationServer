@@ -13,8 +13,8 @@ class ModelManager:
     def add_user(self, username, user_id):
         """Este metodo graba en la base de datos USUARIOS un nuevo usuario.
             @param username nombre de usuario
-            @param user_id identificador de usuario"""
-        
+            @param user_id identificador de usuario
+        """
         #obtengo la tabla usuarios
         usuarios = self.db_manager.get_table('usuarios')
         nuevo_usuario = {
@@ -72,3 +72,19 @@ class ModelManager:
         }
 
         return jsonify(response)
+
+    def add_credenciales_ubicacion(self, user_id, key_geolocation):
+        """Este metodo graba en la base de datos de credenciales de ubicacion una nueva key.
+            @param user_id identificador de usuario
+            @param key_geolocation la llave asociada
+        """
+        credenciales = self.db_manager.get_table('CredencialesUbicacion')
+
+        nueva_credencial = {
+            "idusuario": user_id,
+            "keyGeolocation": key_geolocation
+        }
+
+        id_nueva_credencial = credenciales.insert_one(nueva_credencial).inserted_id
+
+        return id_nueva_credencial
