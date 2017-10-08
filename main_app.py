@@ -65,9 +65,7 @@ def login_facebook(facebook_auth_token):
     if request.method == 'POST':
         if not facebook_auth_token:
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
-        if LOGIN_SERVICE.login_facebook(facebook_auth_token, session):
-            return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
-        return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
+        return LOGIN_SERVICE.login_facebook(facebook_auth_token, session)
     return '''
         <form method="post">
             <p><input type=text name=estaSeguro>
@@ -83,9 +81,7 @@ def login(username, password):
     if request.method == 'POST':
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
-        if LOGIN_SERVICE.login(username, password, session):
-            return make_response(jsonify({'respuesta': 'Se logueo correctamente'}), 200)
-        return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
+        return LOGIN_SERVICE.login(username, password, session)
     return '''
         <form method="post">
             <p><input type=text name=estaSeguro>
