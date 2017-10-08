@@ -91,61 +91,67 @@ class TestClientController(unittest.TestCase):
 
     def test_obtener_chofer(self):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
-        # response = self.app.get('/api/v1/driver/23')
-        response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
-
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/api/v1/driver/23')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
             {
-                "username": "Khaleesi",
+                "birthdate": "01/01/1990",
+                "client_id": 23,
+                "country": "Valyria",
+                "email": "madre_dragones@got.com",
+                "fb_auth_token": "fb_auth_token",
+                "fb_user_id": "fb_user_id",
                 "first_name": "Daenerys",
                 "last_name": "Targaryen",
-                "country": "Valyria",
-                "fb_user_id": "fb_user_id",
-                "birthdate": "01/01/1990",
                 "type_client": "chofer",
-                "fb_auth_token": "fb_auth_token",
-                "client_id": 23,
-                "email": "madre_dragones@got.com"
+                "username": "Khaleesi"
             }
         """)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json() == assert_res)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_choferes(self):
         """Prueba que al obtener todos los choferes, viene el default"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        response = requests.get('https://demo4909478.mockable.io/api/v1/drivers')
-        assert_res = json.loads("""
-                {
-            "list": [
-                {
-                    "birthdate": "08/04/2005",
-                    "client_id": 15,
-                    "country": "Winterfell",
-                    "email": "chica_sin_cara@got.com",
-                    "fb_auth_token": "fb_auth_token",
-                    "fb_user_id": "fb_user_id",
-                    "first_name": "Arya",
-                    "last_name": "Stark",
-                    "type_client": "chofer",
-                    "username": "ChicaSinRostro"
-                },
-                {
-                    "birthdate": "01/01/1990",
-                    "client_id": 15,
-                    "country": "Valyria",
-                    "email": "madre_dragones@got.com",
-                    "fb_auth_token": "fb_auth_token",
-                    "fb_user_id": "fb_user_id",
-                    "first_name": "Daenerys",
-                    "last_name": "Targaryen",
-                    "type_client": "chofer",
-                    "username": "Khaleesi"
-                }
-            ]
+        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/api/v1/drivers')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/drivers')
+        assert_res = json.loads("""{
+        "list": [
+            {
+            "birthdate": "08/04/2005",
+            "client_id": 15,
+            "country": "Winterfell",
+            "email": "chica_sin_cara@got.com",
+            "fb_auth_token": "fb_auth_token",
+            "fb_user_id": "fb_user_id",
+            "first_name": "Arya",
+            "last_name": "Stark",
+            "type_client": "chofer",
+            "username": "ChicaSinRostro"
+            },
+            {
+            "birthdate": "01/01/1990",
+            "client_id": 15,
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "fb_auth_token": "fb_auth_token",
+            "fb_user_id": "fb_user_id",
+            "first_name": "Daenerys",
+            "last_name": "Targaryen",
+            "type_client": "chofer",
+            "username": "Khaleesi"
+            }
+        ]
         }""")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json() == assert_res)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
 
     def test_crear_chofer(self):
         """Prueba que al crear un chofer con la informacion valida entonces devuelva
@@ -418,62 +424,3 @@ class TestClientController(unittest.TestCase):
         self.mockeamos_login_correcto()
         response = self.app.delete('/api/v1/driver/23/cars/45')
         self.assertEqual(response.status_code, 204)
-
-## Test con Mocks
-    def test_obtener_lista_choferes(self):
-        cmp_test = json.loads("""{
-        "list": [
-            {
-            "birthdate": "08/04/2005",
-            "client_id": 15,
-            "country": "Winterfell",
-            "email": "chica_sin_cara@got.com",
-            "fb_auth_token": "fb_auth_token",
-            "fb_user_id": "fb_user_id",
-            "first_name": "Arya",
-            "last_name": "Stark",
-            "type_client": "chofer",
-            "username": "ChicaSinRostro"
-            },
-            {
-            "birthdate": "01/01/1990",
-            "client_id": 15,
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "fb_auth_token": "fb_auth_token",
-            "fb_user_id": "fb_user_id",
-            "first_name": "Daenerys",
-            "last_name": "Targaryen",
-            "type_client": "chofer",
-            "username": "Khaleesi"
-            }
-        ]
-        }""")
-
-        SharedServer.change_url(SharedServer, 'demo4909478.mockable.io')
-        response = self.app.get('/api/v1/drivers')
-        cmp_response = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(cmp_response == cmp_test)
-
-
-    def test_mock_obtener_chofer(self):
-        cmp_test = json.loads("""{
-            "birthdate": "01/01/1990",
-            "client_id": 23,
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "fb_auth_token": "fb_auth_token",
-            "fb_user_id": "fb_user_id",
-            "first_name": "Daenerys",
-            "last_name": "Targaryen",
-            "type_client": "chofer",
-            "username": "Khaleesi"
-        }""")
-
-        # mock_url = MagicMock(return_value='demo4909478.mockable.io')
-        SharedServer.change_url(SharedServer, 'demo4909478.mockable.io')
-        response = self.app.get('/api/v1/driver/23')
-        cmp_response = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(cmp_response == cmp_test)
