@@ -123,30 +123,9 @@ class SharedServer:
             @param client_id es el id del cliente buscado
         """
         #Aca va a ir el codigo para hacer el pedido de get del cliente/chofer
-        client = DEFAULT_CLIENT
-        client.client_id = client_id
-        return client
-
-    def get_driver(self, driver_id):
-        """ Devuelve la informacion del chofer buscado
-            @param driver_id es el id del chofer buscado
-        """
-        #Abrimos conexion
-        # abrir_conexion = http.client.HTTPConnection(SharedServer.url_shared_server)
-
-        # #Hacemos la llamada
-        # abrir_conexion.request("GET", "/api/v1/driver/" + str(driver_id))
-        # response = abrir_conexion.getresponse()
-
-        # decode_msg = response.read().decode('utf-8')
-        # json_obj = json.loads(decode_msg)
-
-        # #Cerramos Conexion
-        # abrir_conexion.close()
-        url = self.get_url('/api/v1/driver/'+str(driver_id))
+        url = self.get_url('/api/v1/users/'+str(client_id))
         response_server = requests.get(url)
         json_data = json.loads(response_server.text)
-
         return json_data
 
     def get_clients(self, type_client):
@@ -199,9 +178,9 @@ class SharedServer:
             @param client_id es el id del cliente/chofer que se desea eliminar
         """
         #Aca va a ir el codigo para hacer el pedido de delete del cliente/chofer
-        response = jsonify('')
-        response.status_code = 204
-        return response
+        url = self.get_url('/api/v1/users/'+str(client_id))
+        response_server = requests.delete(url)
+        return response_server
 
     def get_car(self, id_car, owner):
         """ Devuelve la informacion del auto de un cliente
