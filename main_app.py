@@ -131,9 +131,6 @@ def get_info_drivers():
 def post_info_driver():
     """Crea un nuevo chofer"""
     application.logger.info('[POST] /api/v1/driver')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
     if not request.json:
         abort(400)
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
@@ -190,9 +187,6 @@ def get_info_clients():
 def post_info_client():
     """Crea un nuevo cliente"""
     application.logger.info('[POST] /api/v1/client')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
     if not request.json:
         abort(400)
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CLIENTE)
