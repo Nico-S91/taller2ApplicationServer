@@ -150,14 +150,17 @@ class ClientController:
         informacion = SHARED_SERVER.get_cars(client_id)
         if informacion.status_code == 200:
             #obtencion de la informacion relevante
-            cars = json.loads(informacion.data)['cars']
+            cars = json.loads(informacion.data.decode('utf-8'))['cars']
             car_list = []
             for car in cars:
-                car_info = jsonify(
-                    car_id = car.get('id'),
-                    owner = car.get('owner'),
-                    properties = car.get('properties')
-                )
+                car_id = car.get('id')
+                owner = car.get('owner')
+                properties = car.get('properties')
+                car_info = {
+                    "car_id": car_id,
+                    "owner": owner,
+                    "properties": properties
+                }
                 car_list.append(car_info)
             response = jsonify(car_list)
             response.status_code = 200

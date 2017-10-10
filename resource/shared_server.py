@@ -60,7 +60,7 @@ class SharedServer:
     def get_validate_client(self, username, password):
         """Validamos que el usuario exista en el sistema
         @param username es el nombre del usuario que guardo en el sistema
-        @param password es la contraseña del usuario"""
+        @param password es la contrasenia del usuario"""
         credential = client_shared.get_json_client_credentials(username, password)
 
         url = self.get_url('/api/v1/users/validate')

@@ -424,3 +424,9 @@ class TestClientController(unittest.TestCase):
         self.mockeamos_login_correcto()
         response = self.app.delete('/api/v1/driver/23/cars/45')
         self.assertEqual(response.status_code, 204)
+
+    def test_get_all_cars(self):
+        """Prueba obtener todos los autos"""
+        self.mockeamos_login_correcto()
+        response = self.app.get('/api/v1/driver/23/cars')
+        self.assertEqual(response.status_code, 200)
