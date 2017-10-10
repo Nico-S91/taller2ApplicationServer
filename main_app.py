@@ -106,17 +106,6 @@ def response_invalid_login():
 
 #Endpoints de Choferes
 
-@application.route('/api/v1/driverdefault', methods=['GET'])
-def driver_default():
-    """Devuelve un ejemplo de la informacion que se debe enviar de un chofer"""
-    application.logger.info('[GET] /api/v1/driverdefault')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CHOFER)
-    response.status_code = 200
-    return response
-
 @application.route('/api/v1/driver/<string:driver_id>', methods=['GET'])
 def get_info_driver(driver_id):
     """Devuelve la informacion de un chofer
@@ -175,17 +164,6 @@ def delete_info_driver(driver_id):
     return response
 
 #Endpoints de clientes
-
-@application.route('/api/v1/clientedefault', methods=['GET'])
-def client_default():
-    """Devuelve un ejemplo de la informacion que se debe enviar de un cliente"""
-    application.logger.info('[GET] /api/v1/clientedefault')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CLIENTE)
-    response.status_code = 200
-    return response
 
 @application.route('/api/v1/client/<string:client_id>', methods=['GET'])
 def get_info_client(client_id):

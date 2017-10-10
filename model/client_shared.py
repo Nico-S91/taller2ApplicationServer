@@ -102,13 +102,15 @@ class ClientShared:
         """ Json con la informacion del cliente que necesita el Shared para crear
             el cliente
         """
+        facebook = {}
+        facebook['userId'] = self.fb_user_id
+        facebook['authToken'] = self.fb_auth_token
         return jsonify(
             _ref=self.ref,
-            type_client=self.type_client,
+            type=self.type_client,
             username=self.username,
             password=self.password,
-            fb_user_id=self.fb_user_id,
-            fb_auth_token=self.fb_auth_token,
+            fb=facebook,
             first_name=self.first_name,
             last_name=self.last_name,
             country=self.country,
