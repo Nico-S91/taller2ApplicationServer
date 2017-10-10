@@ -16,20 +16,12 @@ class ClientController:
 
     def __init__(self):
         """The constructor."""
-        self.ref = ""
-
-    def get_info_new_client(self, tipo):
-        """ Este metodo solo sirve para las pruebas"""
-        client = ClientShared.new_client(1, tipo, "Khaleesi", "Dragones3", "fb_user_id",
-                                         "fb_auth_token", "Daenerys", "Targaryen", "Valyria",
-                                         "madre_dragones@got.com", "01/01/1990")
-        return client.get_json_new_client()
+        self.refs = {}
 
     def get_client(self, client_id):
         """ Este metodo devuelve la informacion del cliente buscado
             @param client_id es el id del cliente que se esta buscando la informacion"""
         response_shared_server = SHARED_SERVER.get_client(client_id)
-        json_data = json.loads(response_shared_server.text)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
             response = jsonify(json_data['user'])
@@ -74,6 +66,7 @@ class ClientController:
             @param type_client tipo de cliente"""
         # Le agregamos el tipo al cliente
         client_json['type'] = type_client
+        client_json['_ref'] = self._get_ref_client(client_id)
 
         # Mandamos la info al shared server
         response_shared_server = SHARED_SERVER.put_client(client_id, client_json)
@@ -175,3 +168,18 @@ class ClientController:
     def _convert_clients_json(self, json_clients):
         # Convertiremos el json que viene a nuestro propio json de clientes
         return json_clients
+
+    def _get_ref_client(self, client_id):
+        ref = self.refs.get(client_id)
+        if ref:
+            return ref
+        #Si no tenemos el ref lo buscamos
+        response_shared_server = SHARED_SERVER.get_client(client_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            data_client = json_data['user']
+            self.refs[client_id] = data_client.get('_ref')
+            return data_client.get('_ref')
+        else:
+            #Hubo un problema al buscar el get asi que no conseguimos el ref
+            return ''
