@@ -220,7 +220,6 @@ def delete_info_client(client_id):
     if not is_logged():
         return response_invalid_login()
     response = CLIENT_CONTROLLER.delete_client(client_id)
-    print(str(response.data))
     return response
 
 # Endpoints de autos

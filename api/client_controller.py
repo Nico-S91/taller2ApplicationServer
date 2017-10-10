@@ -30,7 +30,11 @@ class ClientController:
             @param client_id es el id del cliente que se esta buscando la informacion"""
         response_shared_server = SHARED_SERVER.get_client(client_id)
         json_data = json.loads(response_shared_server.text)
-        response = jsonify(json_data)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            response = jsonify(json_data['user'])
+        else:
+            response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         return response
 
@@ -40,7 +44,10 @@ class ClientController:
         response_shared_server = SHARED_SERVER.get_clients(type_client)
         #Hay que filtrar los usuarios por tipos
         json_data = json.loads(response_shared_server.text)
-        response = jsonify(json_data)
+        if response_shared_server.status_code == 200:
+            response = jsonify(json_data['users'])
+        else:
+            response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         return response
 
@@ -54,7 +61,10 @@ class ClientController:
         # Mandamos la info al shared server
         response_shared_server = SHARED_SERVER.post_client(client_json)
         json_data = json.loads(response_shared_server.text)
-        response = jsonify(json_data)
+        if response_shared_server.status_code == 201:
+            response = jsonify(json_data['user'])
+        else:
+            response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         return response
 
@@ -68,7 +78,10 @@ class ClientController:
         # Mandamos la info al shared server
         response_shared_server = SHARED_SERVER.put_client(client_id, client_json)
         json_data = json.loads(response_shared_server.text)
-        response = jsonify(json_data)
+        if response_shared_server.status_code == 201:
+            response = jsonify(json_data['user'])
+        else:
+            response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         return response
 
