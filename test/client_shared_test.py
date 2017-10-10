@@ -32,20 +32,20 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(result.data, b'{\n  "message": "hello world"\n}\n')
 
     #Pruebas del login
-    def test_login_correcto(self):
-        """Pruebo que se loguee correctamente el usuario"""
-        response_api = json.loads("""
-        {
-            "respuesta": "Se logueo correctamente",
-        }
-        """)
-        LoginService.login = mock.MagicMock(return_value=response_api)
-        response = self.app.post('/login/username/user/password/pass')
-        print(str(response.data))
-        self.assertTrue(LoginService.login.called)
-        self.assertEqual(response.status_code, 200)
-        cmp_response = json.loads(response.data)
-        self.assertEqual(response_api, cmp_response)
+    # def test_login_correcto(self):
+    #     """Pruebo que se loguee correctamente el usuario"""
+    #     response_api = json.loads("""
+    #     {
+    #         "respuesta": "Se logueo correctamente",
+    #     }
+    #     """)
+    #     LoginService.login = mock.MagicMock(return_value=response_api)
+    #     response = self.app.post('/login/username/user/password/pass')
+    #     print(str(response.data))
+    #     self.assertTrue(LoginService.login.called)
+    #     self.assertEqual(response.status_code, 200)
+    #     cmp_response = json.loads(response.data)
+    #     self.assertEqual(response_api, cmp_response)
 
     # def test_login_con_usuario_o_contrasenia_incorrecta(self):
     #     """Pruebo que se loguee correctamente el usuario"""
@@ -356,19 +356,97 @@ class TestClientController(unittest.TestCase):
 
     #Pruebas de cliente
 
+    #Get cliente
+
     def test_obtener_cliente(self):
-        """Prueba que al obtener un cliente sea el que viene por defecto"""
+        """Prueba que al obtener un cliente este sea igual al que viene por defecto"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/23?token=tokenApi')
+        #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
+        assert_res = json.loads("""
+            {
+                "birthdate": "01/01/1990",
+                "client_id": 23,
+                "country": "Valyria",
+                "email": "madre_dragones@got.com",
+                "fb_auth_token": "fb_auth_token",
+                "fb_user_id": "fb_user_id",
+                "first_name": "Daenerys",
+                "last_name": "Targaryen",
+                "type_client": "passenger",
+                "username": "Khaleesi"
+            }
+        """)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "birthdate": "01/01/1990", \n  "client_id": 23, \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "type_client": "cliente", \n  "username": "Khaleesi"\n}\n')
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_cliente_no_autorizado(self):
+        """Prueba que al obtener un cliente cuando no esta autorizado"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/9?token=tokenApi')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23')
+        assert_res = json.loads("""
+             "code": 1,
+            "message": "No esta autorizado a obtener la info del usuario"
+        """)
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_cliente_no_existe(self):
+        """Prueba que al obtener un cliente cuando no existe"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/99?token=tokenApi')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23')
+        assert_res = json.loads("""
+            "code": 2,
+            "message": "No existe el usuario"
+        """)
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    #Get clientes
 
     def test_obtener_clientes(self):
-        """Prueba que al obtener todos los cliente que viene por defecto"""
+        """Prueba que al obtener todos los clientes, viene el default"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            .............................
+        }""")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "list": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "cliente", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "cliente", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_clientes_desautorizado(self):
+        """Prueba que al obtener todos los clientes sin autorizacion"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/clients')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 3,
+            "message": "No estas autorizado"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    #Post cliente
 
     def test_crear_cliente(self):
         """Prueba que al crear un cliente con la informacion valida entonces devuelva
@@ -380,29 +458,20 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
-        response = self.app.post(
-            '/api/v1/client', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue creado correctamente"\n}\n')
-
-    def test_crear_cliente_sin_informacion(self):
-        """Prueba que al crear un cliente sin mandar la informacion tire el codigo de
-           error correspondiente"""
+         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        payload = ''
-        headers = {
-            'content-type': "application/json",
-            'cache-control': "no-cache",
-            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
-        }
-        response = self.app.post(
-            '/api/v1/client', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 400)
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        response = self.app.post('/api/v1/client', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            .........................
+        }""")
+        self.assertEqual(response.status_code, 201)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
 
-    def test_modificar_cliente(self):
-        """Prueba que al modificar un cliente con la informacion valida entonces devuelva
-           un mensaje que se creo correctamente"""
+    def test_crear_cliente_insuficientes_parametros(self):
+        """Prueba que al crear un cliente con falta de informacion"""
         self.mockeamos_login_correcto()
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
@@ -410,14 +479,59 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
+        response = self.app.post('/api/v1/client', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No se cumplio con las precondiciones"
+        }""")
+        self.assertEqual(response.status_code, 400)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_crear_cliente_sin_informacion(self):
+        """Prueba que al crear un cliente sin mandar la informacion devuelva el codigo de
+           error correspondiente"""
+        self.mockeamos_login_correcto()
+        payload = ''
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.post(
+            '/api/v1/client', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 400)
+
+    #Put cliente
+
+    def test_modificar_cliente(self):
+        """Prueba que al modificar un cliente con la informacion valida entonces devuelve
+           un mensaje que se creo correctamente"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
         response = self.app.put(
-            '/api/v1/client/22', data=payload, headers=headers)
+            '/api/v1/client/88', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            ................................
+        }""")
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue modificado correctamente"\n}\n')
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
 
     def test_modificar_cliente_sin_informacion(self):
-        """Prueba que al modificar un cliente sin mandar la informacion tire el codigo de
+        """Prueba que al modificar un cliente sin mandar la informacion devuelva el codigo de
            error correspondiente"""
         self.mockeamos_login_correcto()
         payload = ''
@@ -427,14 +541,93 @@ class TestClientController(unittest.TestCase):
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
         response = self.app.put(
-            '/api/v1/client/22', data=payload, headers=headers)
+            '/api/v1/client/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            ................................
+        }""")
         self.assertEqual(response.status_code, 400)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_cliente_no_existe(self):
+        """Prueba que al modificar un cliente que no existe"""
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        payload = ''
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/client/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_cliente_conflicto(self):
+        """Prueba que al modificar un cliente entre en conflicto"""
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        payload = ''
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/client/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 3,
+            "message": "conflictos de colision"
+        }""")
+        self.assertEqual(response.status_code, 409)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    #Delete cliente
 
     def test_eliminar_cliente(self):
         """Prueba eliminar un cliente"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
+
+    def test_eliminar_cliente_no_autorizado(self):
+        """Prueba eliminar un cliente cuando no esta autorizado"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        response = self.app.delete('/api/v1/client/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No esta autorizado a eliminar el usuario"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_eliminar_cliente_no_existente(self):
+        """Prueba eliminar un cliente que no existe"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        response = self.app.delete('/api/v1/client/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(assert_res, cmp_response)
 
     # Test de autos
 
