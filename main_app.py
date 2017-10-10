@@ -106,18 +106,7 @@ def response_invalid_login():
 
 #Endpoints de Choferes
 
-@application.route('/api/v1/driverdefault', methods=['GET'])
-def driver_default():
-    """Devuelve un ejemplo de la informacion que se debe enviar de un chofer"""
-    application.logger.info('[GET] /api/v1/driverdefault')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CHOFER)
-    response.status_code = 200
-    return response
-
-@application.route('/api/v1/driver/<int:driver_id>', methods=['GET'])
+@application.route('/api/v1/driver/<string:driver_id>', methods=['GET'])
 def get_info_driver(driver_id):
     """Devuelve la informacion de un chofer
     @param driver_id es el identificador del chofer"""
@@ -125,7 +114,7 @@ def get_info_driver(driver_id):
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
-    response = CLIENT_CONTROLLER.get_driver(driver_id)
+    response = CLIENT_CONTROLLER.get_client(driver_id)
     return response
 
 @application.route('/api/v1/drivers', methods=['GET'])
@@ -150,7 +139,7 @@ def post_info_driver():
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>', methods=['PUT'])
+@application.route('/api/v1/driver/<string:driver_id>', methods=['PUT'])
 def put_info_driver(driver_id):
     """Modifica un chofer
     @param driver_id es el identificador del driver"""
@@ -163,7 +152,7 @@ def put_info_driver(driver_id):
     response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>', methods=['DELETE'])
+@application.route('/api/v1/driver/<string:driver_id>', methods=['DELETE'])
 def delete_info_driver(driver_id):
     """Devuelve la informacion de un chofer
     @param driver_id es el identificador del chofer"""
@@ -176,18 +165,7 @@ def delete_info_driver(driver_id):
 
 #Endpoints de clientes
 
-@application.route('/api/v1/clientedefault', methods=['GET'])
-def client_default():
-    """Devuelve un ejemplo de la informacion que se debe enviar de un cliente"""
-    application.logger.info('[GET] /api/v1/clientedefault')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    response = CLIENT_CONTROLLER.get_info_new_client(TIPO_CLIENTE)
-    response.status_code = 200
-    return response
-
-@application.route('/api/v1/client/<int:client_id>', methods=['GET'])
+@application.route('/api/v1/client/<string:client_id>', methods=['GET'])
 def get_info_client(client_id):
     """Devuelve la informacion de un cliente
     @param client_id es el identificador del cliente"""
@@ -220,7 +198,7 @@ def post_info_client():
     response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CLIENTE)
     return response
 
-@application.route('/api/v1/client/<int:client_id>', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>', methods=['PUT'])
 def put_info_client(client_id):
     """Modificar un cliente
     @param client_id es el identificador del cliente"""
@@ -233,7 +211,7 @@ def put_info_client(client_id):
     response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CLIENTE, client_id)
     return response
 
-@application.route('/api/v1/client/<int:client_id>', methods=['DELETE'])
+@application.route('/api/v1/client/<string:client_id>', methods=['DELETE'])
 def delete_info_client(client_id):
     """Devuelve la informacion de un cliente
     @param client_id es el identificador del cliente"""
@@ -242,12 +220,11 @@ def delete_info_client(client_id):
     if not is_logged():
         return response_invalid_login()
     response = CLIENT_CONTROLLER.delete_client(client_id)
-    print(str(response.data))
     return response
 
 # Endpoints de autos
 
-@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>',methods=['GET'])
+@application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>',methods=['GET'])
 def get_info_car(driver_id, car_id):
     """Devuelve la informacion del auto de un conductor"""
     application.logger.info('[GET] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
@@ -257,7 +234,7 @@ def get_info_car(driver_id, car_id):
     response = CLIENT_CONTROLLER.get_car(car_id, driver_id)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>/cars', methods=['POST'])
+@application.route('/api/v1/driver/<string:driver_id>/cars', methods=['POST'])
 def post_info_car(driver_id):
     """Crea un nuevo auto para un chofer
     @param car_id es el identificador del auto de un chofer
@@ -272,7 +249,7 @@ def post_info_car(driver_id):
     response = CLIENT_CONTROLLER.post_new_car(request.json, driver_id)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>', methods=['PUT'])
+@application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>', methods=['PUT'])
 def put_info_car(driver_id, car_id):
     """Modificar el auto de un chofer
     @param car_id es el identificador del auto de un chofer
@@ -286,7 +263,7 @@ def put_info_car(driver_id, car_id):
     response = CLIENT_CONTROLLER.put_new_car(request.json, car_id, driver_id)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>/cars/<int:car_id>', methods=['DELETE'])
+@application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>', methods=['DELETE'])
 def delete_info_car(driver_id, car_id):
     """Elimina el auto de un chofer
     @param car_id es el identificador del auto de un chofer

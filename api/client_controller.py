@@ -8,8 +8,8 @@ from flask import jsonify
 
 SHARED_SERVER = SharedServer()
 CODIGO_OK = 0
-TIPO_CLIENTE = "cliente"
-TIPO_CHOFER = "chofer"
+TIPO_CLIENTE = "passenger"
+TIPO_CHOFER = "driver"
 
 class ClientController:
     """Esta clase tiene los metodos para manajar la informacion de los clientes"""
@@ -28,100 +28,73 @@ class ClientController:
     def get_client(self, client_id):
         """ Este metodo devuelve la informacion del cliente buscado
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        informacion = SHARED_SERVER.get_client(client_id)
-        response = jsonify(
-            client_id=informacion.client_id,
-            type_client=informacion.type_client,
-            username=informacion.username,
-            fb_user_id=informacion.fb_user_id,
-            fb_auth_token=informacion.fb_auth_token,
-            first_name=informacion.first_name,
-            last_name=informacion.last_name,
-            country=informacion.country,
-            email=informacion.email,
-            birthdate=informacion.birthdate
-        )
-        response.status_code = 200
-        return response
-
-    def get_driver(self, driver_id):
-        """ Este metodo devuelve la informacion del chofer buscado
-            @param driver_id es el id del chofer del que se esta buscando la informacion"""
-        informacion = SHARED_SERVER.get_driver(driver_id)
-        response = jsonify(
-            client_id=informacion.get("client_id"),
-            type_client=informacion.get("type_client"),
-            username=informacion.get("username"),
-            fb_user_id=informacion.get("fb_user_id"),
-            fb_auth_token=informacion.get("fb_auth_token"),
-            first_name=informacion.get("first_name"),
-            last_name=informacion.get("last_name"),
-            country=informacion.get("country"),
-            email=informacion.get("email"),
-            birthdate=informacion.get("birthdate")
-        )
-        response.status_code = 200
+        response_shared_server = SHARED_SERVER.get_client(client_id)
+        json_data = json.loads(response_shared_server.text)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            response = jsonify(json_data['user'])
+        else:
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def get_clients(self, type_client):
         """ Este metodo devuelve la informacion de todos los cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
         response_shared_server = SHARED_SERVER.get_clients(type_client)
+        #Hay que filtrar los usuarios por tipos
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
-            # Vamos a convertir nuestro json de clientes a uno con la info que corresponde
-            # Hay que enviar response_shared_server.data y no el response
-            response = self._convert_clients_json(response_shared_server)
-            response.status_code = response_shared_server.status_code
+            response = jsonify(json_data['users'])
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def post_new_client(self, client_json, type_client):
         """ Este metodo permite crear un cliente
             @param client informacion del cliente
             @param type_client tipo de cliente"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        client = ClientShared.new_client_json(client_json, type_client)
+        # Le agregamos el tipo al cliente
+        client_json['type'] = type_client
+
         # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.post_client(client)
+        response_shared_server = SHARED_SERVER.post_client(client_json)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue creado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            response = jsonify(json_data['user'])
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def put_new_client(self, client_json, type_client, client_id):
         """ Este metodo permite modificar un cliente
             @param client informacion del cliente
             @param type_client tipo de cliente"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        client = ClientShared.new_client_json(client_json, type_client)
+        # Le agregamos el tipo al cliente
+        client_json['type'] = type_client
+
         # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.put_client(client_id, client)
+        response_shared_server = SHARED_SERVER.put_client(client_id, client_json)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue modificado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            response = jsonify(json_data['user'])
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def delete_client(self, client_id):
         """ Este metodo permite eliminar un cliente
             @param client_id identificador del cliente"""
         response_shared_server = SHARED_SERVER.delete_client(client_id)
-        #Devolvemos la respuesta que nos da el shared
-        return response_shared_server
+        json_data = ''
+        if response_shared_server.text:
+            json_data = json.loads(response_shared_server.text)
+        response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
+        return response
 
     # Metodos para manipular la informacion de los autos
 
