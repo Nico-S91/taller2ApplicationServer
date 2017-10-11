@@ -76,13 +76,15 @@ class SharedServer:
             @param car_id es el identificador del auto
             @param driver_id es el identificador del chofer
         """
-        return self._put_shared_server('/api/v1/users/' + str(driver_id) + '/cars/' + str(car_id), car)
+        return self._put_shared_server('/api/v1/users/' + str(driver_id) + '/cars/'
+                                       + str(car_id), car)
 
     def delete_car(self, driver_id, car_id):
         """ Este metodo permite eliminar un auto de un chofer
             @param car_id identificadore del auto
             @param driver_id identificador del conductor"""
-        return self._delete_shared_server('/api/v1/users/' + str(driver_id) + '/cars/' + str(car_id))
+        return self._delete_shared_server('/api/v1/users/' + str(driver_id) + '/cars/'
+                                          + str(car_id))
 
     # Metodos privados
 
