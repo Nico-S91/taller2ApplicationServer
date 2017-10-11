@@ -35,7 +35,7 @@ class ClientController:
     def get_clients(self, type_client):
         """ Este metodo devuelve la informacion de todos los cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        response_shared_server = SHARED_SERVER.get_clients(type_client)
+        response_shared_server = SHARED_SERVER.get_clients()
         #Hay que filtrar los usuarios por tipos
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
