@@ -104,19 +104,16 @@ class ClientController:
         """ Este metodo devuelve la informacion del auto de un cliente
             @param id_car es el id del auto del cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        informacion = SHARED_SERVER.get_car(id_car, client_id)
-        if informacion.status_code == 200:
-            #Filtro los datos que no le interesa al cliente
-            car = json.loads(informacion.data)['car']
-            response = jsonify(
-                car_id=car.get('id'),
-                owner=car.get('owner'),
-                properties=car.get('properties')
-            )
-            response.status_code = 200
+        response_shared_server = SHARED_SERVER.get_car(id_car, client_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            print(str(json_data))
+            car = json_data['car']
+            self._save_ref(self._key_car(client_id, id_car), car.get('_ref'))
+            response = jsonify(car)
         else:
-            # Si vino un error por el momento lo devuelvo, quizas hay que ver si conviene crear nuestros errores
-            response = informacion
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def post_new_car(self, car_json, client_id):
@@ -202,6 +199,11 @@ class ClientController:
             @param ref_id identificador del objeto que maneja el sharedServer"""
         if self.refs.get(ref_id):
             self.refs.pop(ref_id)
+
+    def _key_car(self, client_id, id_car):
+        """ Devuelve la key de un auto para manejar los colisiones
+        """
+        return str(client_id) + '&' + str(id_car)
 
     def _filter_user(self, users, type_client):
         """ Este metodo filtra los usuarios segun su tipo
