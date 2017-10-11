@@ -12,18 +12,13 @@ class SharedServer:
     """Conexion con el Shared server"""
 
     def __init__(self):
-        SharedServer.url_shared_server = 'https://stormy-lowlands-30400.herokuapp.com'
+        self.url_shared_server = 'https://stormy-lowlands-30400.herokuapp.com'
         self.cabeceras = {"Content-type": "application/json"}
         #Por el momento tenemos aca los usuarios
         self.user_data = {
             "admin": "password",
             "ricveal": "1234"
         }
-
-    def change_url(self, url_value):
-        """ Modifica  el parametro url de la clase
-        """
-        SharedServer.url_shared_server = url_value
 
     def get_token(self):
         """ Devuelve el token para usar el shared server
@@ -33,7 +28,7 @@ class SharedServer:
     def get_url(self, endpoint):
         """Devuelve la url formada para pegarle al shared server
         @param endpoint es el endpoint del shared server al que se le va a pegar"""
-        return SharedServer.url_shared_server + endpoint + '?token=' + self.get_token()
+        return self.url_shared_server + endpoint + '?token=' + self.get_token()
 
     def get_validate_client(self, username, password):
         """Validamos que el usuario exista en el sistema
@@ -90,10 +85,8 @@ class SharedServer:
         """ Devuelve la informacion del cliente buscado
             @param client_id es el id del cliente buscado
         """
-        #Aca va a ir el codigo para hacer el pedido de get del cliente/chofer
         url = self.get_url('/api/v1/users/'+str(client_id))
         response_server = requests.get(url)
-        # json_data = json.loads(response_server.text)
         return response_server
 
     def get_clients(self, type_client):
