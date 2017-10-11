@@ -24,7 +24,9 @@ class ClientController:
         response_shared_server = SHARED_SERVER.get_client(client_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
-            response = jsonify(json_data['user'])
+            client = json_data['user']
+            self._save_ref(client_id, client.get('_ref'))
+            response = jsonify(client)
         else:
             response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
@@ -54,7 +56,9 @@ class ClientController:
         response_shared_server = SHARED_SERVER.post_client(client_json)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            response = jsonify(json_data['user'])
+            client = json_data['user']
+            self._save_ref(client.get('id'), client.get('_ref'))
+            response = jsonify(client)
         else:
             response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
@@ -72,7 +76,9 @@ class ClientController:
         response_shared_server = SHARED_SERVER.put_client(client_id, client_json)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            response = jsonify(json_data['user'])
+            client = json_data['user']
+            self._save_ref(client_id, client.get('_ref'))
+            response = jsonify(client)
         else:
             response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
@@ -87,6 +93,8 @@ class ClientController:
             json_data = json.loads(response_shared_server.text)
         response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
+        if response_shared_server.status_code == 204:
+            self._delete_ref(client_id)
         return response
 
     # Metodos para manipular la informacion de los autos
@@ -165,11 +173,9 @@ class ClientController:
 
     ### Metodos privados ###
 
-    def _convert_clients_json(self, json_clients):
-        # Convertiremos el json que viene a nuestro propio json de clientes
-        return json_clients
-
     def _get_ref_client(self, client_id):
+        """ Este metodo devuelve el ref para manejar las colisiones de clientes
+            @param client_id identificador del cliente"""
         ref = self.refs.get(client_id)
         if ref:
             return ref
@@ -178,8 +184,20 @@ class ClientController:
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
             data_client = json_data['user']
-            self.refs[client_id] = data_client.get('_ref')
+            self._save_ref(client_id, data_client.get('_ref'))
             return data_client.get('_ref')
         else:
             #Hubo un problema al buscar el get asi que no conseguimos el ref
             return ''
+
+    def _save_ref(self, ref_id, ref):
+        """ Este metodo guarda el ref para manejar las colisiones con el sharedServer
+            @param ref_id identificador del objeto que maneja el sharedServer
+            @param ref es el dato que necesita el sharedServer para identificar colisiones"""
+        self.refs[ref_id] = ref
+
+    def _delete_ref(self, ref_id):
+        """ Este metodo elimina el ref
+            @param ref_id identificador del objeto que maneja el sharedServer"""
+        if self.refs.get(ref_id):
+            self.refs.pop(ref_id)
