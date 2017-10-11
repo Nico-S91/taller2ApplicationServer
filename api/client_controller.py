@@ -35,11 +35,12 @@ class ClientController:
     def get_clients(self, type_client):
         """ Este metodo devuelve la informacion de todos los cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        response_shared_server = SHARED_SERVER.get_clients(type_client)
+        response_shared_server = SHARED_SERVER.get_clients()
         #Hay que filtrar los usuarios por tipos
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
-            response = jsonify(json_data['users'])
+            clients = self._filter_user(json_data['users'], type_client)
+            response = jsonify(clients)
         else:
             response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
@@ -201,3 +202,13 @@ class ClientController:
             @param ref_id identificador del objeto que maneja el sharedServer"""
         if self.refs.get(ref_id):
             self.refs.pop(ref_id)
+
+    def _filter_user(self, users, type_client):
+        """ Este metodo filtra los usuarios segun su tipo
+            @param type_client tipo de clientes que se espera obtener
+            @param users es la informacion de todos los usuarios"""
+        clients = []
+        for user in users:
+            if user.get('type') == type_client:
+                clients.append(user)
+        return clients
