@@ -9,6 +9,7 @@ import requests
 from mock import MagicMock
 from resource.shared_server import SharedServer
 from model.client_shared import ClientShared
+from flask import jsonify
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
@@ -206,7 +207,8 @@ class TestClientController(unittest.TestCase):
         }
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -214,7 +216,7 @@ class TestClientController(unittest.TestCase):
             "message": "No se cumplio con las precondiciones"
         }""")
         self.assertEqual(response.status_code, 400)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_crear_chofer_sin_informacion(self):
