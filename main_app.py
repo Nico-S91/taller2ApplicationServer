@@ -239,7 +239,6 @@ def post_info_car(driver_id):
         return response_invalid_login()
     if not request.json:
         abort(400)
-    print(request.json)
     response = CLIENT_CONTROLLER.post_new_car(request.json, driver_id)
     return response
 
