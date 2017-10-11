@@ -116,17 +116,16 @@ class ClientController:
         response.status_code = response_shared_server.status_code
         return response
 
-    def post_new_car(self, car_json, client_id):
+    def post_new_car(self, car_json, driver_id):
         """ Este metodo permite crear un auto
             @param car_json informacion del auto
-            @param client_id identificador del cliente"""
+            @param driver_id identificador del cliente"""
         # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.post_car(car_json, client_id)
+        response_shared_server = SHARED_SERVER.post_car(car_json, driver_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            print(str(json_data))
             car = json_data['car']
-            self._save_ref(self._key_car(client_id, car.get('id')), car.get('_ref'))
+            self._save_ref(self._key_car(driver_id, car.get('id')), car.get('_ref'))
             response = jsonify(car)
         else:
             response = jsonify(json_data)
@@ -138,22 +137,16 @@ class ClientController:
             @param car_json informacion del auto
             @param car_id identificadore del auto
             @param driver_id identificador del conductor"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        propertiesjson = jsonify(
-            properties=car_json.get('properties')
-        )
         # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.put_car(propertiesjson, car_id, driver_id)
+        response_shared_server = SHARED_SERVER.put_car(car_json, car_id, driver_id)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue modificado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            car = json_data['car']
+            self._save_ref(self._key_car(driver_id, car.get('id')), car.get('_ref'))
+            response = jsonify(car)
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def delete_car(self, driver_id, car_id):
