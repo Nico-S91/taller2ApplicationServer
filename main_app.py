@@ -101,7 +101,7 @@ def response_invalid_login():
     """Devuelve el json con la respuesta que indica que el usuario no esta logueado o es invalido"""
     application.logger.info('No estaba logueado o estaba mal logueado')
     response = jsonify(mensaje=FALTA_LOGUEARSE)
-    response.status_code = 400
+    response.status_code = 401
     return response
 
 #Endpoints de Choferes
