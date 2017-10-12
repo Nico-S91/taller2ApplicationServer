@@ -477,8 +477,11 @@ class TestClientController(unittest.TestCase):
     def test_modificar_chofer_conflicto(self):
         """Prueba que al modificar un chofer entre en conflicto"""
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
-        payload = ''
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
             'cache-control': "no-cache",
@@ -491,7 +494,7 @@ class TestClientController(unittest.TestCase):
             "message": "conflictos de colision"
         }""")
         self.assertEqual(response.status_code, 409)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     #Delete chofer
@@ -500,7 +503,9 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
         response = self.app.delete('/api/v1/driver/23')
         self.assertEqual(response.status_code, 204)
 
@@ -508,7 +513,9 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         response = self.app.delete('/api/v1/driver/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -516,14 +523,16 @@ class TestClientController(unittest.TestCase):
             "message": "No esta autorizado a eliminar el usuario"
         }""")
         self.assertEqual(response.status_code, 401)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_eliminar_chofer_no_existente(self):
         """Prueba eliminar un chofer que no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         response = self.app.delete('/api/v1/driver/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -531,7 +540,7 @@ class TestClientController(unittest.TestCase):
             "message": "No existe el usuario"
         }""")
         self.assertEqual(response.status_code, 404)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     #Pruebas de cliente
