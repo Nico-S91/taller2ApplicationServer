@@ -90,72 +90,171 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/api/v1/driver/23')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
+        {
+            "id": "23",
+            "_ref": "string",
+            "applicationOwner": "string",
+            "type": "chofer",
+            "cars": [
             {
-                "birthdate": "01/01/1990",
-                "client_id": 23,
-                "country": "Valyria",
-                "email": "madre_dragones@got.com",
-                "fb_auth_token": "fb_auth_token",
-                "fb_user_id": "fb_user_id",
-                "first_name": "Daenerys",
-                "last_name": "Targaryen",
-                "type_client": "chofer",
-                "username": "Khaleesi"
+                "id": "string",
+                "_ref": "string",
+                "owner": "string",
+                "properties": [
+                {
+                    "name": "string",
+                    "value": "string"
+                }
+                ]
             }
-        """)
+            ],
+            "username": "Khaleesi",
+            "name": "Daenerys",
+            "surname": "Targaryen",
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "birthdate": "01/01/1990",
+            "images": [
+            "string"
+            ],
+            "balance": [
+            {
+                "currency": "string",
+                "value": 0
+            }
+            ]
+        }""")
         self.assertEqual(response.status_code, 200)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_chofer_no_autorizado(self):
         """Prueba que al obtener un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/9?token=tokenApi')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
-        assert_res = json.loads("""
-             "code": 1,
+        assert_res = json.loads("""{
+            "code": 1,
             "message": "No esta autorizado a obtener la info del usuario"
-        """)
+        }""")
         self.assertEqual(response.status_code, 401)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_chofer_no_existe(self):
         """Prueba que al obtener un chofer cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/99?token=tokenApi')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
-        assert_res = json.loads("""
+        assert_res = json.loads("""{
             "code": 2,
             "message": "No existe el usuario"
-        """)
+        }""")
         self.assertEqual(response.status_code, 404)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     #Get choferes
-
-    def test_obtener_choferes(self):
+    def test_obtener_chofereses(self):
         """Prueba que al obtener todos los choferes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/drivers')
-        #Adentro del loads hay que pegar el json que devuelve la url
-        assert_res = json.loads("""{
-            .............................
-        }""")
+        assert_res = json.loads("""[
+            {
+                "id": "c1",
+                "_ref": "2werwerfw",
+                "applicationOwner": "string",
+                "type": "driver",
+                "cars": [
+                    {
+                        "id": "1",
+                        "_ref": "erge",
+                        "owner": "c1",
+                        "properties": [
+                            {
+                                "name": "color",
+                                "value": "negro"
+                            },
+                            {
+                                "name": "marca",
+                                "value": "fiat"
+                            }
+                        ]
+                    }
+                ],
+                "username": "mz",
+                "name": "martin",
+                "surname": "tincho",
+                "country": "argentina",
+                "email": "m.t@gmail.com",
+                "birthdate": "12/12/2000",
+                "images": [
+                    "http://sdfpsdf.com/sfisdjfoosi.jpg"
+                ],
+                "balance": [
+                    {
+                        "currency": "peso",
+                        "value": 200
+                    },
+                    {
+                        "id": "c2",
+                        "_ref": "2werwedrfw",
+                        "applicationOwner": "string",
+                        "type": "driver",
+                        "cars": [
+                            {
+                                "id": "1",
+                                "_ref": "erge",
+                                "owner": "c1",
+                                "properties": [
+                                    {
+                                        "name": "color",
+                                        "value": "rojo"
+                                    },
+                                    {
+                                        "name": "marca",
+                                        "value": "fiat"
+                                    }
+                                ]
+                            }
+                        ],
+                        "username": "ht",
+                        "name": "homero",
+                        "surname": "simpson",
+                        "country": "argentina",
+                        "email": "h.t@gmail.com",
+                        "birthdate": "12/05/1970",
+                        "images": [
+                            "http://sdfpsdf.com/aaaaaaosi.jpg"
+                        ],
+                        "balance": [
+                            {
+                                "currency": "peso",
+                                "value": 9000
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]""")
         self.assertEqual(response.status_code, 200)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual.__self__.maxDiff = None
         self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_choferes_desautorizado(self):
