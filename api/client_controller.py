@@ -119,6 +119,31 @@ class ClientController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def get_cars(self, client_id):
+        """ Este metodo devuelve la informacion de los autos de un cliente
+            @param client_id el id del cliente del que se busca la info de los autos"""
+        informacion = SHARED_SERVER.get_cars(client_id)
+        if informacion.status_code == 200:
+            #obtencion de la informacion relevante
+            cars = json.loads(informacion.data.decode('utf-8'))['cars']
+            car_list = []
+            for car in cars:
+                car_id = car.get('id')
+                owner = car.get('owner')
+                properties = car.get('properties')
+                car_info = {
+                    "car_id": car_id,
+                    "owner": owner,
+                    "properties": properties
+                }
+                car_list.append(car_info)
+            response = jsonify(car_list)
+            response.status_code = 200
+        else:
+            #provisoriamente devolvemos igual, agregar error.
+            response = informacion
+        return response
+
     def post_new_car(self, car_json, driver_id):
         """ Este metodo permite crear un auto
             @param car_json informacion del auto
