@@ -96,10 +96,13 @@ class ClientController:
         json_data = ''
         if response_shared_server.text:
             json_data = json.loads(response_shared_server.text)
-        response = jsonify(json_data)
-        response.status_code = response_shared_server.status_code
         if response_shared_server.status_code == 204:
             self._delete_ref(client_id)
+            json_data = json.loads("""{
+                    "mensaje": "Se elimino correctamente el usuario"
+                }""")
+        response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     # Metodos para manipular la informacion de los autos
