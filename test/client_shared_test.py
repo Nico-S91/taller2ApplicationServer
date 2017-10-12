@@ -519,7 +519,7 @@ class TestClientController(unittest.TestCase):
             "id": "c1",
             "_ref": "2werwerfw",
             "applicationOwner": "string",
-            "type": "client",
+            "type": "passenger",
             "cars": [
                 {
                 "id": "1",
@@ -606,7 +606,7 @@ class TestClientController(unittest.TestCase):
             "id": "c1",
             "_ref": "2werwerfw",
             "applicationOwner": "string",
-            "type": "client",
+            "type": "passenger",
             "cars": [{
                 "id": "1",
                 "_ref": "erge",
@@ -638,7 +638,7 @@ class TestClientController(unittest.TestCase):
                     "id": "c2",
                     "_ref": "2werwedrfw",
                     "applicationOwner": "string",
-                    "type": "client",
+                    "type": "passenger",
                     "cars": [{
                         "id": "1",
                         "_ref": "erge",
@@ -918,14 +918,14 @@ class TestClientController(unittest.TestCase):
 
     #Delete cliente
 
-    def test_eliminar_cliente(self):
+    def test_eliminar_clienteww(self):
         """Prueba eliminar un chofer"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
-        response = self.app.delete('/api/v1/driver/23')
+        SharedServer._refresh_token = mock.MagicMock(return_value='')
+        response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
     def test_eliminar_cliente_no_autorizado(self):
@@ -935,7 +935,7 @@ class TestClientController(unittest.TestCase):
         SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        response = self.app.delete('/api/v1/driver/23')
+        response = self.app.delete('/api/v1/client/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
             "code": 1,
@@ -952,7 +952,7 @@ class TestClientController(unittest.TestCase):
         SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        response = self.app.delete('/api/v1/driver/23')
+        response = self.app.delete('/api/v1/client/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
             "code": 2,
@@ -1117,5 +1117,23 @@ class TestClientController(unittest.TestCase):
     def test_get_all_cars(self):
         """Prueba obtener todos los autos"""
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
         response = self.app.get('/api/v1/driver/23/cars')
         self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        cmp_test = json.loads("""[
+            {
+            "id": "string",
+            "_ref": "string",
+            "owner": "string",
+            "properties": [
+                {
+                "name": "string",
+                "value": "string"
+                }
+            ]
+            }
+        ]""")
+        self.assertEqual(cmp_test, cmp_response)
