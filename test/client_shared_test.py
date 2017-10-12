@@ -166,7 +166,7 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(assert_res, cmp_response)
 
     #Get choferes
-    def test_obtener_chofereses(self):
+    def test_obtener_choferes(self):
         """Prueba que al obtener todos los choferes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
@@ -261,7 +261,8 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/drivers')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -270,10 +271,10 @@ class TestClientController(unittest.TestCase):
             "message": "No estas autorizado"
         }""")
         self.assertEqual(response.status_code, 401)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
-    def test_crear_chofer(self):
+    def test_crear_chofersd(self):
         """Prueba que al crear un chofer con la informacion valida entonces devuelva
            un mensaje que se creo correctamente"""
         self.mockeamos_login_correcto()
@@ -285,14 +286,45 @@ class TestClientController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            .........................
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "driver",
+            "cars": [{
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [{
+                        "name": "color",
+                        "value": "negro"
+                    },
+                    {
+                        "name": "marca",
+                        "value": "fiat"
+                    }
+                ]
+            }],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [{
+                "currency": "peso",
+                "value": 200
+            }]
         }""")
         self.assertEqual(response.status_code, 201)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_crear_chofer_insuficientes_parametros(self):
