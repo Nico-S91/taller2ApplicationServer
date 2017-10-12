@@ -63,49 +63,11 @@ class SharedServer:
         """
         return self._get_shared_server('/api/v1/users/'+str(owner)+'/cars/'+str(id_car))
 
-    def get_cars(self, client_id):
+    def get_cars(self, owner):
         """ Devuelve la informacion de los autos de un cliente
-            @param client_id es el id del cliente buscado
+            @param owner es el id del cliente buscado
         """
-        #Aca va a ir el codigo para hacer el pedido de get de autos de cliente
-        metadata = {
-                "version": "1"
-            }
-        cars = [
-            {
-                "id": "1",
-                "_ref": "fgdf2",
-                "owner": "23",
-                "properties": [
-                    {
-                    "name": "color",
-                    "value": "gris"
-                    },
-                    {
-                    "name": "marca",
-                    "value": "fiat"
-                    }
-                ]
-                },
-                {
-                "id": "2",
-                "_ref": "fgsssdf2",
-                "owner": "23",
-                "properties": [
-                    {
-                    "name": "color",
-                    "value": "negro"
-                    },
-                    {
-                    "name": "marca",
-                    "value": "toyota"
-                    }
-                ]
-            }
-        ]
-        response = jsonify({'metadata': metadata, 'cars': cars})
-        response.status_code = 200
-        return response
+        return self._get_shared_server('/api/v1/users/'+str(owner)+'/cars')
 
     def post_car(self, car, driver_id):
         """ Crea un nuevo auto para el chofer
