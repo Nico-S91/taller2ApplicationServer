@@ -8,120 +8,99 @@ from flask import jsonify
 
 SHARED_SERVER = SharedServer()
 CODIGO_OK = 0
-TIPO_CLIENTE = "cliente"
-TIPO_CHOFER = "chofer"
+TIPO_CLIENTE = "passenger"
+TIPO_CHOFER = "driver"
+CAMPO_COLISIONES = '_ref'
+JSON_CAR = 'car'
+JSON_CLIENT = 'user'
+
 
 class ClientController:
     """Esta clase tiene los metodos para manajar la informacion de los clientes"""
 
     def __init__(self):
         """The constructor."""
-        self.ref = ""
-
-    def get_info_new_client(self, tipo):
-        """ Este metodo solo sirve para las pruebas"""
-        client = ClientShared.new_client(1, tipo, "Khaleesi", "Dragones3", "fb_user_id",
-                                         "fb_auth_token", "Daenerys", "Targaryen", "Valyria",
-                                         "madre_dragones@got.com", "01/01/1990")
-        return client.get_json_new_client()
+        self.refs = {}
 
     def get_client(self, client_id):
         """ Este metodo devuelve la informacion del cliente buscado
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        informacion = SHARED_SERVER.get_client(client_id)
-        response = jsonify(
-            client_id=informacion.client_id,
-            type_client=informacion.type_client,
-            username=informacion.username,
-            fb_user_id=informacion.fb_user_id,
-            fb_auth_token=informacion.fb_auth_token,
-            first_name=informacion.first_name,
-            last_name=informacion.last_name,
-            country=informacion.country,
-            email=informacion.email,
-            birthdate=informacion.birthdate
-        )
-        response.status_code = 200
-        return response
-
-    def get_driver(self, driver_id):
-        """ Este metodo devuelve la informacion del chofer buscado
-            @param driver_id es el id del chofer del que se esta buscando la informacion"""
-        informacion = SHARED_SERVER.get_driver(driver_id)
-        response = jsonify(
-            client_id=informacion.get("client_id"),
-            type_client=informacion.get("type_client"),
-            username=informacion.get("username"),
-            fb_user_id=informacion.get("fb_user_id"),
-            fb_auth_token=informacion.get("fb_auth_token"),
-            first_name=informacion.get("first_name"),
-            last_name=informacion.get("last_name"),
-            country=informacion.get("country"),
-            email=informacion.get("email"),
-            birthdate=informacion.get("birthdate")
-        )
-        response.status_code = 200
+        response_shared_server = SHARED_SERVER.get_client(client_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            client = json_data[JSON_CLIENT]
+            self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            response = jsonify(client)
+        else:
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def get_clients(self, type_client):
         """ Este metodo devuelve la informacion de todos los cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        response_shared_server = SHARED_SERVER.get_clients(type_client)
+        response_shared_server = SHARED_SERVER.get_clients()
+        #Hay que filtrar los usuarios por tipos
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
-            # Vamos a convertir nuestro json de clientes a uno con la info que corresponde
-            # Hay que enviar response_shared_server.data y no el response
-            response = self._convert_clients_json(response_shared_server)
-            response.status_code = response_shared_server.status_code
+            clients = self._filter_user(json_data['users'], type_client)
+            response = jsonify(clients)
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def post_new_client(self, client_json, type_client):
         """ Este metodo permite crear un cliente
             @param client informacion del cliente
             @param type_client tipo de cliente"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        client = ClientShared.new_client_json(client_json, type_client)
+        # Le agregamos el tipo al cliente
+        client_json['type'] = type_client
+
         # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.post_client(client)
+        response_shared_server = SHARED_SERVER.post_client(client_json)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue creado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            client = json_data[JSON_CLIENT]
+            self._save_ref(client.get('id'), client.get(CAMPO_COLISIONES))
+            response = jsonify(client)
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def put_new_client(self, client_json, type_client, client_id):
         """ Este metodo permite modificar un cliente
             @param client informacion del cliente
             @param type_client tipo de cliente"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        client = ClientShared.new_client_json(client_json, type_client)
+        # Le agregamos el tipo al cliente
+        client_json['type'] = type_client
+        client_json[CAMPO_COLISIONES] = self._get_ref_client(client_id)
+
         # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.put_client(client_id, client)
+        response_shared_server = SHARED_SERVER.put_client(client_id, client_json)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue modificado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            client = json_data[JSON_CLIENT]
+            self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            response = jsonify(client)
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def delete_client(self, client_id):
         """ Este metodo permite eliminar un cliente
             @param client_id identificador del cliente"""
         response_shared_server = SHARED_SERVER.delete_client(client_id)
-        #Devolvemos la respuesta que nos da el shared
-        return response_shared_server
+        json_data = ''
+        if response_shared_server.text:
+            json_data = json.loads(response_shared_server.text)
+        response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
+        if response_shared_server.status_code == 204:
+            self._delete_ref(client_id)
+        return response
 
     # Metodos para manipular la informacion de los autos
 
@@ -129,19 +108,15 @@ class ClientController:
         """ Este metodo devuelve la informacion del auto de un cliente
             @param id_car es el id del auto del cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        informacion = SHARED_SERVER.get_car(id_car, client_id)
-        if informacion.status_code == 200:
-            #Filtro los datos que no le interesa al cliente
-            car = json.loads(informacion.data)['car']
-            response = jsonify(
-                car_id=car.get('id'),
-                owner=car.get('owner'),
-                properties=car.get('properties')
-            )
-            response.status_code = 200
+        response_shared_server = SHARED_SERVER.get_car(id_car, client_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            car = json_data[JSON_CAR]
+            self._save_ref(self._key_car(client_id, id_car), car.get(CAMPO_COLISIONES))
+            response = jsonify(car)
         else:
-            # Si vino un error por el momento lo devuelvo, quizas hay que ver si conviene crear nuestros errores
-            response = informacion
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def get_cars(self, client_id):
@@ -169,26 +144,19 @@ class ClientController:
             response = informacion
         return response
 
-    def post_new_car(self, car_json, client_id):
+    def post_new_car(self, car_json, driver_id):
         """ Este metodo permite crear un auto
             @param car_json informacion del auto
-            @param client_id identificador del cliente"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        propertiesjson = jsonify(
-            properties=car_json.get('properties')
-        )
-        # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.post_car(propertiesjson, client_id)
+            @param driver_id identificador del cliente"""
+        response_shared_server = SHARED_SERVER.post_car(car_json, driver_id)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue creado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            car = json_data[JSON_CAR]
+            self._save_ref(self._key_car(driver_id, car.get('id')), car.get(CAMPO_COLISIONES))
+            response = jsonify(car)
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def put_new_car(self, car_json, car_id, driver_id):
@@ -196,22 +164,15 @@ class ClientController:
             @param car_json informacion del auto
             @param car_id identificadore del auto
             @param driver_id identificador del conductor"""
-        # Convertimos la info en el cliente y le ponemos el tipo
-        propertiesjson = jsonify(
-            properties=car_json.get('properties')
-        )
-        # Mandamos la info al shared server
-        response_shared_server = SHARED_SERVER.put_car(propertiesjson, car_id, driver_id)
+        response_shared_server = SHARED_SERVER.put_car(car_json, car_id, driver_id)
+        json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
-            #Esto lo hago asi porque el cuerpo del mensaje va a tener mucha info que no
-            # necesita el cliente
-            response = jsonify(
-                mensaje="El cliente fue modificado correctamente",
-                codigo=CODIGO_OK,
-            )
-            response.status_code = response_shared_server.status_code
+            car = json_data[JSON_CAR]
+            self._save_ref(self._key_car(driver_id, car_id), car.get(CAMPO_COLISIONES))
+            response = jsonify(car)
         else:
-            response = response_shared_server
+            response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
         return response
 
     def delete_car(self, driver_id, car_id):
@@ -219,11 +180,57 @@ class ClientController:
             @param car_id identificadore del auto
             @param driver_id identificador del conductor"""
         response_shared_server = SHARED_SERVER.delete_car(driver_id, car_id)
-        #Devolvemos la respuesta que nos da el shared
-        return response_shared_server
+        json_data = ''
+        if response_shared_server.text:
+            json_data = json.loads(response_shared_server.text)
+        response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
+        if response_shared_server.status_code == 204:
+            self._delete_ref(self._key_car(driver_id, car_id))
+        return response
 
     ### Metodos privados ###
 
-    def _convert_clients_json(self, json_clients):
-        # Convertiremos el json que viene a nuestro propio json de clientes
-        return json_clients
+    def _get_ref_client(self, client_id):
+        """ Este metodo devuelve el ref para manejar las colisiones de clientes
+            @param client_id identificador del cliente"""
+        ref = self.refs.get(client_id)
+        if ref:
+            return ref
+        #Si no tenemos el ref lo buscamos
+        response_shared_server = SHARED_SERVER.get_client(client_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            data_client = json_data[JSON_CLIENT]
+            self._save_ref(client_id, data_client.get(CAMPO_COLISIONES))
+            return data_client.get(CAMPO_COLISIONES)
+        else:
+            #Hubo un problema al buscar el get asi que no conseguimos el ref
+            return ''
+
+    def _save_ref(self, ref_id, ref):
+        """ Este metodo guarda el ref para manejar las colisiones con el sharedServer
+            @param ref_id identificador del objeto que maneja el sharedServer
+            @param ref es el dato que necesita el sharedServer para identificar colisiones"""
+        self.refs[ref_id] = ref
+
+    def _delete_ref(self, ref_id):
+        """ Este metodo elimina el ref
+            @param ref_id identificador del objeto que maneja el sharedServer"""
+        if self.refs.get(ref_id):
+            self.refs.pop(ref_id)
+
+    def _key_car(self, client_id, id_car):
+        """ Devuelve la key de un auto para manejar los colisiones
+        """
+        return str(client_id) + '&' + str(id_car)
+
+    def _filter_user(self, users, type_client):
+        """ Este metodo filtra los usuarios segun su tipo
+            @param type_client tipo de clientes que se espera obtener
+            @param users es la informacion de todos los usuarios"""
+        clients = []
+        for user in users:
+            if user.get('type') == type_client:
+                clients.append(user)
+        return clients
