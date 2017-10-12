@@ -8,7 +8,7 @@ from flask import jsonify
 
 SHARED_SERVER = SharedServer()
 CODIGO_OK = 0
-TIPO_CLIENTE = "passenger"
+TIPO_CLIENTE = "client"
 TIPO_CHOFER = "driver"
 CAMPO_COLISIONES = '_ref'
 JSON_CAR = 'car'
