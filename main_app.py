@@ -101,7 +101,7 @@ def response_invalid_login():
     """Devuelve el json con la respuesta que indica que el usuario no esta logueado o es invalido"""
     application.logger.info('No estaba logueado o estaba mal logueado')
     response = jsonify(mensaje=FALTA_LOGUEARSE)
-    response.status_code = 400
+    response.status_code = 401
     return response
 
 #Endpoints de Choferes
@@ -228,13 +228,13 @@ def get_info_car(driver_id, car_id):
     response = CLIENT_CONTROLLER.get_car(car_id, driver_id)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>/cars', methods=['GET'])
+@application.route('/api/v1/driver/<string:driver_id>/cars', methods=['GET'])
 def get_all_cars(driver_id):
     """Devuelve la informacion de todos los autos asociados a un conductor"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id))
     #login check
-    # if not is_logged():
-    #     return response_invalid_login()
+    if not is_logged():
+        return response_invalid_login()
     response = CLIENT_CONTROLLER.get_cars(driver_id)
     return response
 
