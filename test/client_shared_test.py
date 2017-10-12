@@ -551,55 +551,84 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/23?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
-        assert_res = json.loads("""
-            {
-                "birthdate": "01/01/1990",
-                "client_id": 23,
-                "country": "Valyria",
-                "email": "madre_dragones@got.com",
-                "fb_auth_token": "fb_auth_token",
-                "fb_user_id": "fb_user_id",
-                "first_name": "Daenerys",
-                "last_name": "Targaryen",
-                "type_client": "passenger",
-                "username": "Khaleesi"
-            }
-        """)
+        assert_res = json.loads("""{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "client",
+            "cars": [
+                {
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [
+                    {
+                    "name": "color",
+                    "value": "negro"
+                    },
+                    {
+                    "name": "marca",
+                    "value": "fiat"
+                    }
+                ]
+                }
+            ],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [
+                {
+                "currency": "peso",
+                "value": 200
+                }]
+        }""")
         self.assertEqual(response.status_code, 200)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_cliente_no_autorizado(self):
         """Prueba que al obtener un cliente cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/9?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
-        assert_res = json.loads("""
-             "code": 1,
+        assert_res = json.loads("""{
+            "code": 1,
             "message": "No esta autorizado a obtener la info del usuario"
-        """)
+        }""")
         self.assertEqual(response.status_code, 401)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_cliente_no_existe(self):
         """Prueba que al obtener un cliente cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://demo4909478.mockable.io/users/99?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
-        assert_res = json.loads("""
+        assert_res = json.loads("""{
             "code": 2,
             "message": "No existe el usuario"
-        """)
+        }""")
         self.assertEqual(response.status_code, 404)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     #Get clientes
@@ -608,22 +637,91 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los clientes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
         #Adentro del loads hay que pegar el json que devuelve la url
-        assert_res = json.loads("""{
-            .............................
-        }""")
+        assert_res = json.loads("""[{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "client",
+            "cars": [{
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [{
+                        "name": "color",
+                        "value": "negro"
+                    },
+                    {
+                        "name": "marca",
+                        "value": "fiat"
+                    }
+                ]
+            }],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [{
+                    "currency": "peso",
+                    "value": 200
+                },
+                {
+                    "id": "c2",
+                    "_ref": "2werwedrfw",
+                    "applicationOwner": "string",
+                    "type": "client",
+                    "cars": [{
+                        "id": "1",
+                        "_ref": "erge",
+                        "owner": "c1",
+                        "properties": [{
+                                "name": "color",
+                                "value": "rojo"
+                            },
+                            {
+                                "name": "marca",
+                                "value": "fiat"
+                            }
+                        ]
+                    }],
+                    "username": "ht",
+                    "name": "homero",
+                    "surname": "simpson",
+                    "country": "argentina",
+                    "email": "h.t@gmail.com",
+                    "birthdate": "12/05/1970",
+                    "images": [
+                        "http://sdfpsdf.com/aaaaaaosi.jpg"
+                    ],
+                    "balance": [{
+                        "currency": "peso",
+                        "value": 9000
+                    }]
+                }
+            ]
+        }]""")
         self.assertEqual(response.status_code, 200)
-        cmp_response = json.loads(response.data)
+        self.assertEqual.__self__.maxDiff = None
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_obtener_clientes_desautorizado(self):
         """Prueba que al obtener todos los clientes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -632,7 +730,7 @@ class TestClientController(unittest.TestCase):
             "message": "No estas autorizado"
         }""")
         self.assertEqual(response.status_code, 401)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     #Post cliente
@@ -649,14 +747,45 @@ class TestClientController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            .........................
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "passenger",
+            "cars": [{
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [{
+                    "name": "color",
+                    "value": "negro"
+                },
+                {
+                "name": "marca",
+                "value": "fiat"
+                }]
+            }],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [{
+                "currency": "peso",
+                "value": 200
+            }]
         }""")
         self.assertEqual(response.status_code, 201)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_crear_cliente_insuficientes_parametros(self):
@@ -670,7 +799,9 @@ class TestClientController(unittest.TestCase):
         }
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer.get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -678,7 +809,7 @@ class TestClientController(unittest.TestCase):
             "message": "No se cumplio con las precondiciones"
         }""")
         self.assertEqual(response.status_code, 400)
-        cmp_response = json.loads(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
     def test_crear_cliente_sin_informacion(self):
