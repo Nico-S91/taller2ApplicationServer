@@ -91,6 +91,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
         #Hacemos la llamada normal
@@ -138,6 +139,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         #Hacemos la llamada normal
@@ -154,6 +156,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         #Hacemos la llamada normal
@@ -171,6 +174,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         #Hacemos la llamada normal
@@ -262,6 +266,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
         #Hacemos la llamada normal
@@ -286,7 +291,7 @@ class TestClientController(unittest.TestCase):
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
          #Mockeamos la llamada
-        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
@@ -338,7 +343,7 @@ class TestClientController(unittest.TestCase):
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
         #Mockeamos la llamada
-        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
         SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
