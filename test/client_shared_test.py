@@ -9,6 +9,8 @@ import requests
 from mock import MagicMock
 from resource.shared_server import SharedServer
 from model.client_shared import ClientShared
+from api.client_controller import ClientController
+from flask import jsonify
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
@@ -34,17 +36,18 @@ class TestClientController(unittest.TestCase):
     #Pruebas del login
     # def test_login_correcto(self):
     #     """Pruebo que se loguee correctamente el usuario"""
-    #     client = ClientShared.new_client(1, "chofer", "Khaleesi", "Dragones3",
-    #                                      "fb_user_id", "fb_auth_token", "Daenerys",
-    #                                      "Targaryen", "Valyria", "madre_dragones@got.com",
-    #                                      "01/01/1990")
-    #     return_value = client.get_json_new_client()
-    #     LoginService.login = mock.MagicMock(return_value=return_value)
+    #     response_api = json.loads("""
+    #     {
+    #         "respuesta": "Se logueo correctamente",
+    #     }
+    #     """)
+    #     LoginService.login = mock.MagicMock(return_value=response_api)
     #     response = self.app.post('/login/username/user/password/pass')
     #     print(str(response.data))
     #     self.assertTrue(LoginService.login.called)
     #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(response.data, b'{\n  "respuesta": "Se logueo correctamente"\n}\n')
+    #     cmp_response = json.loads(response.data)
+    #     self.assertEqual(response_api, cmp_response)
 
     # def test_login_con_usuario_o_contrasenia_incorrecta(self):
     #     """Pruebo que se loguee correctamente el usuario"""
@@ -82,70 +85,200 @@ class TestClientController(unittest.TestCase):
 
     #Pruebas de chofer
 
-    def test_obtener_chofer_default(self):
-        """Prueba de obtencion de chofer default"""
-        self.mockeamos_login_correcto()
-        response = self.app.get('/api/v1/driverdefault')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "chofer", \n  "username": "Khaleesi"\n}\n')
+    #Get chofer
 
     def test_obtener_chofer(self):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
-        # response = self.app.get('/api/v1/driver/23')
-        response = requests.get('http://demo4909478.mockable.io/api/v1/driver/23')
-
-        assert_res = json.loads("""
-            {
-                "username": "Khaleesi",
-                "first_name": "Daenerys",
-                "last_name": "Targaryen",
-                "country": "Valyria",
-                "fb_user_id": "fb_user_id",
-                "birthdate": "01/01/1990",
-                "type_client": "chofer",
-                "fb_auth_token": "fb_auth_token",
-                "client_id": 23,
-                "email": "madre_dragones@got.com"
-            }
-        """)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json() == assert_res)
-
-    def test_obtener_choferes(self):
-        """Prueba que al obtener todos los choferes, viene el default"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        response = requests.get('https://demo4909478.mockable.io/api/v1/drivers')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
+        {
+            "id": "23",
+            "_ref": "string",
+            "applicationOwner": "string",
+            "type": "chofer",
+            "cars": [
+            {
+                "id": "string",
+                "_ref": "string",
+                "owner": "string",
+                "properties": [
                 {
-            "list": [
-                {
-                    "birthdate": "08/04/2005",
-                    "client_id": 15,
-                    "country": "Winterfell",
-                    "email": "chica_sin_cara@got.com",
-                    "fb_auth_token": "fb_auth_token",
-                    "fb_user_id": "fb_user_id",
-                    "first_name": "Arya",
-                    "last_name": "Stark",
-                    "type_client": "chofer",
-                    "username": "ChicaSinRostro"
-                },
-                {
-                    "birthdate": "01/01/1990",
-                    "client_id": 15,
-                    "country": "Valyria",
-                    "email": "madre_dragones@got.com",
-                    "fb_auth_token": "fb_auth_token",
-                    "fb_user_id": "fb_user_id",
-                    "first_name": "Daenerys",
-                    "last_name": "Targaryen",
-                    "type_client": "chofer",
-                    "username": "Khaleesi"
+                    "name": "string",
+                    "value": "string"
                 }
+                ]
+            }
+            ],
+            "username": "Khaleesi",
+            "name": "Daenerys",
+            "surname": "Targaryen",
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "birthdate": "01/01/1990",
+            "images": [
+            "string"
+            ],
+            "balance": [
+            {
+                "currency": "string",
+                "value": 0
+            }
             ]
         }""")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json() == assert_res)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_chofer_no_autorizado(self):
+        """Prueba que al obtener un chofer cuando no esta autorizado"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/23')
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No esta autorizado a obtener la info del usuario"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_chofer_no_existe(self):
+        """Prueba que al obtener un chofer cuando no existe"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/23')
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    #Get choferes
+    def test_obtener_choferes(self):
+        """Prueba que al obtener todos los choferes, viene el default"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/drivers')
+        assert_res = json.loads("""[
+            {
+                "id": "c1",
+                "_ref": "2werwerfw",
+                "applicationOwner": "string",
+                "type": "driver",
+                "cars": [
+                    {
+                        "id": "1",
+                        "_ref": "erge",
+                        "owner": "c1",
+                        "properties": [
+                            {
+                                "name": "color",
+                                "value": "negro"
+                            },
+                            {
+                                "name": "marca",
+                                "value": "fiat"
+                            }
+                        ]
+                    }
+                ],
+                "username": "mz",
+                "name": "martin",
+                "surname": "tincho",
+                "country": "argentina",
+                "email": "m.t@gmail.com",
+                "birthdate": "12/12/2000",
+                "images": [
+                    "http://sdfpsdf.com/sfisdjfoosi.jpg"
+                ],
+                "balance": [
+                    {
+                        "currency": "peso",
+                        "value": 200
+                    },
+                    {
+                        "id": "c2",
+                        "_ref": "2werwedrfw",
+                        "applicationOwner": "string",
+                        "type": "driver",
+                        "cars": [
+                            {
+                                "id": "1",
+                                "_ref": "erge",
+                                "owner": "c1",
+                                "properties": [
+                                    {
+                                        "name": "color",
+                                        "value": "rojo"
+                                    },
+                                    {
+                                        "name": "marca",
+                                        "value": "fiat"
+                                    }
+                                ]
+                            }
+                        ],
+                        "username": "ht",
+                        "name": "homero",
+                        "surname": "simpson",
+                        "country": "argentina",
+                        "email": "h.t@gmail.com",
+                        "birthdate": "12/05/1970",
+                        "images": [
+                            "http://sdfpsdf.com/aaaaaaosi.jpg"
+                        ],
+                        "balance": [
+                            {
+                                "currency": "peso",
+                                "value": 9000
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual.__self__.maxDiff = None
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_choferes_desautorizado(self):
+        """Prueba que al obtener todos los choferes sin autorizacion"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/drivers')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 3,
+            "message": "No estas autorizado"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
 
     def test_crear_chofer(self):
         """Prueba que al crear un chofer con la informacion valida entonces devuelva
@@ -157,11 +290,71 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
-        response = self.app.post(
-            '/api/v1/driver', data=payload, headers=headers)
+         #Mockeamos la llamada
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        response = self.app.post('/api/v1/driver', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "driver",
+            "cars": [{
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [{
+                        "name": "color",
+                        "value": "negro"
+                    },
+                    {
+                        "name": "marca",
+                        "value": "fiat"
+                    }
+                ]
+            }],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [{
+                "currency": "peso",
+                "value": 200
+            }]
+        }""")
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue creado correctamente"\n}\n')
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_crear_chofer_insuficientes_parametros(self):
+        """Prueba que al crear un chofer con falta de informacion devuelva codigo de error de precondiciones"""
+        self.mockeamos_login_correcto()
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        #Mockeamos la llamada
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
+        response = self.app.post('/api/v1/driver', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No se cumplio con las precondiciones"
+        }""")
+        self.assertEqual(response.status_code, 400)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
 
     def test_crear_chofer_sin_informacion(self):
         """Prueba que al crear un chofer sin mandar la informacion devuelva el codigo de
@@ -173,14 +366,20 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
-        response = self.app.post(
-            '/api/v1/driver', data=payload, headers=headers)
+        response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
+
+    #Put chofer
 
     def test_modificar_chofer(self):
         """Prueba que al modificar un chofer con la informacion valida entonces devuelve
            un mensaje que se creo correctamente"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApiDriver')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApiDriver')
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -189,15 +388,57 @@ class TestClientController(unittest.TestCase):
         }
         response = self.app.put(
             '/api/v1/driver/88', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "driver",
+            "cars": [
+            {
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [
+                {
+                    "name": "color",
+                    "value": "negro"
+                },
+            {
+                    "name": "marca",
+                    "value": "fiat"
+                }
+                ]
+            }
+            ],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+            "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [
+            {
+                "currency": "peso",
+                "value": 200
+            }]
+        }""")
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue modificado correctamente"\n}\n')
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
 
     def test_modificar_chofer_sin_informacion(self):
         """Prueba que al modificar un chofer sin mandar la informacion devuelva el codigo de
            error correspondiente"""
         self.mockeamos_login_correcto()
-        payload = ''
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        payload = "{\r\n  \"\": \"\"}"
         headers = {
             'content-type': "application/json",
             'cache-control': "no-cache",
@@ -205,36 +446,253 @@ class TestClientController(unittest.TestCase):
         }
         response = self.app.put(
             '/api/v1/driver/14', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 400)
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No se cumplio con las precondiciones"
+        }""")
+        print(response.data)
 
-    def test_eliminar_chofer(self):
-        """Prueba eliminar un chofer"""
+        self.assertEqual(response.status_code, 400)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_chofer_no_existe(self):
+        """Prueba que al modificar un chofer que no existe"""
         self.mockeamos_login_correcto()
-        response = self.app.delete('/api/v1/driver/45')
-        self.assertEqual(response.status_code, 204)
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        payload = '{\r\n  \"\": \"\"}'
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_chofer_conflicto(self):
+        """Prueba que al modificar un chofer entre en conflicto"""
+        self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 3,
+            "message": "conflictos de colision"
+        }""")
+        self.assertEqual(response.status_code, 409)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
 
     #Pruebas de cliente
 
-    def test_obtener_cliente_default(self):
-        """Prueba que al obtener un cliente sea el que viene por defecto"""
-        self.mockeamos_login_correcto()
-        response = self.app.get('/api/v1/clientedefault')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "_ref": 1, \n  "birthdate": "01/01/1990", \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "password": "Dragones3", \n  "type_client": "cliente", \n  "username": "Khaleesi"\n}\n')
+    #Get cliente
 
     def test_obtener_cliente(self):
-        """Prueba que al obtener un cliente sea el que viene por defecto"""
+        """Prueba que al obtener un cliente este sea igual al que viene por defecto"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
+        assert_res = json.loads("""{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "passenger",
+            "cars": [
+                {
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [
+                    {
+                    "name": "color",
+                    "value": "negro"
+                    },
+                    {
+                    "name": "marca",
+                    "value": "fiat"
+                    }
+                ]
+                }
+            ],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [
+                {
+                "currency": "peso",
+                "value": 200
+                }]
+        }""")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "birthdate": "01/01/1990", \n  "client_id": 23, \n  "country": "Valyria", \n  "email": "madre_dragones@got.com", \n  "fb_auth_token": "fb_auth_token", \n  "fb_user_id": "fb_user_id", \n  "first_name": "Daenerys", \n  "last_name": "Targaryen", \n  "type_client": "cliente", \n  "username": "Khaleesi"\n}\n')
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_cliente_no_autorizado(self):
+        """Prueba que al obtener un cliente cuando no esta autorizado"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23')
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No esta autorizado a obtener la info del usuario"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_cliente_no_existe(self):
+        """Prueba que al obtener un cliente cuando no existe"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23')
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    #Get clientes
 
     def test_obtener_clientes(self):
-        """Prueba que al obtener todos los cliente que viene por defecto"""
+        """Prueba que al obtener todos los clientes, viene el default"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""[{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "passenger",
+            "cars": [{
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [{
+                        "name": "color",
+                        "value": "negro"
+                    },
+                    {
+                        "name": "marca",
+                        "value": "fiat"
+                    }
+                ]
+            }],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [{
+                    "currency": "peso",
+                    "value": 200
+                },
+                {
+                    "id": "c2",
+                    "_ref": "2werwedrfw",
+                    "applicationOwner": "string",
+                    "type": "passenger",
+                    "cars": [{
+                        "id": "1",
+                        "_ref": "erge",
+                        "owner": "c1",
+                        "properties": [{
+                                "name": "color",
+                                "value": "rojo"
+                            },
+                            {
+                                "name": "marca",
+                                "value": "fiat"
+                            }
+                        ]
+                    }],
+                    "username": "ht",
+                    "name": "homero",
+                    "surname": "simpson",
+                    "country": "argentina",
+                    "email": "h.t@gmail.com",
+                    "birthdate": "12/05/1970",
+                    "images": [
+                        "http://sdfpsdf.com/aaaaaaosi.jpg"
+                    ],
+                    "balance": [{
+                        "currency": "peso",
+                        "value": 9000
+                    }]
+                }
+            ]
+        }]""")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'{\n  "list": [\n    {\n      "birthdate": "08/04/2005", \n      "client_id": 15, \n      "country": "Winterfell", \n      "email": "chica_sin_cara@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Arya", \n      "last_name": "Stark", \n      "type_client": "cliente", \n      "username": "ChicaSinRostro"\n    }, \n    {\n      "birthdate": "01/01/1990", \n      "client_id": 15, \n      "country": "Valyria", \n      "email": "madre_dragones@got.com", \n      "fb_auth_token": "fb_auth_token", \n      "fb_user_id": "fb_user_id", \n      "first_name": "Daenerys", \n      "last_name": "Targaryen", \n      "type_client": "cliente", \n      "username": "Khaleesi"\n    }\n  ]\n}\n')
+        self.assertEqual.__self__.maxDiff = None
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_clientes_desautorizado(self):
+        """Prueba que al obtener todos los clientes sin autorizacion"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/clients')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 3,
+            "message": "No estas autorizado"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    #Post cliente
 
     def test_crear_cliente(self):
         """Prueba que al crear un cliente con la informacion valida entonces devuelva
@@ -246,29 +704,51 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
-        response = self.app.post(
-            '/api/v1/client', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue creado correctamente"\n}\n')
-
-    def test_crear_cliente_sin_informacion(self):
-        """Prueba que al crear un cliente sin mandar la informacion tire el codigo de
-           error correspondiente"""
+         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        payload = ''
-        headers = {
-            'content-type': "application/json",
-            'cache-control': "no-cache",
-            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
-        }
-        response = self.app.post(
-            '/api/v1/client', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 400)
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        response = self.app.post('/api/v1/client', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "passenger",
+            "cars": [{
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [{
+                    "name": "color",
+                    "value": "negro"
+                },
+                {
+                "name": "marca",
+                "value": "fiat"
+                }]
+            }],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [{
+                "currency": "peso",
+                "value": 200
+            }]
+        }""")
+        self.assertEqual(response.status_code, 201)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
 
-    def test_modificar_cliente(self):
-        """Prueba que al modificar un cliente con la informacion valida entonces devuelva
-           un mensaje que se creo correctamente"""
+    def test_crear_cliente_insuficientes_parametros(self):
+        """Prueba que al crear un cliente con falta de informacion"""
         self.mockeamos_login_correcto()
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
@@ -276,14 +756,23 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
-        response = self.app.put(
-            '/api/v1/client/22', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            response.data, b'{\n  "codigo": 0, \n  "mensaje": "El cliente fue modificado correctamente"\n}\n')
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
+        response = self.app.post('/api/v1/client', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No se cumplio con las precondiciones"
+        }""")
+        self.assertEqual(response.status_code, 400)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
 
-    def test_modificar_cliente_sin_informacion(self):
-        """Prueba que al modificar un cliente sin mandar la informacion tire el codigo de
+    def test_crear_cliente_sin_informacion(self):
+        """Prueba que al crear un cliente sin mandar la informacion devuelva el codigo de
            error correspondiente"""
         self.mockeamos_login_correcto()
         payload = ''
@@ -292,71 +781,359 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
-        response = self.app.put(
-            '/api/v1/client/22', data=payload, headers=headers)
+        response = self.app.post(
+            '/api/v1/client', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
 
-    def test_eliminar_cliente(self):
-        """Prueba eliminar un cliente"""
+    #Put cliente
+
+    def test_modificar_cliente(self):
+        """Prueba que al modificar un cliente con la informacion valida entonces devuelve
+           un mensaje que se creo correctamente"""
+        #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/client/88', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "id": "c1",
+            "_ref": "2werwerfw",
+            "applicationOwner": "string",
+            "type": "cliente",
+            "cars": [
+                {
+                "id": "1",
+                "_ref": "erge",
+                "owner": "c1",
+                "properties": [
+                    {
+                    "name": "color",
+                    "value": "negro"
+                    },
+            {
+                    "name": "marca",
+                    "value": "fiat"
+                    }
+                ]
+                }
+            ],
+            "username": "mz",
+            "name": "martin",
+            "surname": "tincho",
+            "country": "argentina",
+            "email": "m.t@gmail.com",
+            "birthdate": "12/12/2000",
+            "images": [
+                "http://sdfpsdf.com/sfisdjfoosi.jpg"
+            ],
+            "balance": [
+                {
+                "currency": "peso",
+                "value": 200
+                }]
+        }""")
+        self.assertEqual(response.status_code, 201)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_cliente_sin_informacion(self):
+        """Prueba que al modificar un cliente sin mandar la informacion devuelva el codigo de
+           error correspondiente"""
+        self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        payload = '{\r\n  \"\": \"\"}'
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/client/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No se cumplio con las precondiciones"
+        }""")
+        self.assertEqual(response.status_code, 400)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_cliente_no_existe(self):
+        """Prueba que al modificar un cliente que no existe"""
+        self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        payload = '{\r\n  \"\": \"\"}'
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/client/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_cliente_conflicto(self):
+        """Prueba que al modificar un cliente entre en conflicto"""
+        self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        payload = '{\r\n  \"\": \"\"}'
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/client/14', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 3,
+            "message": "conflictos de colision"
+        }""")
+        self.assertEqual(response.status_code, 409)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    #Delete cliente
+
+    def test_eliminar_clienteww(self):
+        """Prueba eliminar un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='')
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
-## Test con Mocks
-    def test_obtener_lista_choferes(self):
+    def test_eliminar_cliente_no_autorizado(self):
+        """Prueba eliminar un chofer cuando no esta autorizado"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        response = self.app.delete('/api/v1/client/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 1,
+            "message": "No esta autorizado a eliminar el usuario"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_eliminar_cliente_no_existente(self):
+        """Prueba eliminar un chofer que no existe"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        response = self.app.delete('/api/v1/client/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No existe el usuario"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    # Test de autos
+
+    def test_obtener_auto_cliente(self):
+        """Prueba obtener un auto correctamente"""
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/1?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/1?token=tokenApi')
+        response = self.app.get('api/v1/driver/23/cars/1')
+        self.assertEqual(response.status_code, 200)
         cmp_test = json.loads("""{
-        "list": [
+                "car_id": "1",
+                "owner": "23",
+                "properties": [
+                {
+                    "name": "color",
+                    "value": "negro"
+                },
+                {
+                    "name": "modelo",
+                    "value": "punto"
+                },
+                {
+                    "name": "marca",
+                    "value": "fiat"
+                }]}""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(cmp_test, cmp_response)
+
+#    def test_obtener_auto_cliente_inexistente(self):
+ #       """Prueba obtener un auto de un cliente inexistente"""
+  #      self.mockeamos_login_correcto()
+   #     response = self.app.get('/api/v1/driver/0/cars/1')
+    #    self.assertEqual(response.status_code, 404)
+     #   cmp_test = json.loads("""
+      #  """)
+       # cmp_response = json.loads(response.data)
+        #self.assertEqual(cmp_test, cmp_response)
+
+#    def test_obtener_auto_inexistente(self):
+ #       """Prueba obtener un auto que no tiene el cliente"""
+  #      self.mockeamos_login_correcto()
+   #     response = self.app.get('/api/v1/driver/23/cars/99')
+    #    self.assertEqual(response.status_code, 404)
+     #   cmp_test = json.loads("""
+      #  """)
+       # cmp_response = json.loads(response.data)
+        #self.assertEqual(cmp_test, cmp_response)
+
+    def test_crear_auto_cliente(self):
+        """Prueba crear un auto correctamente"""
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.post(
+            '/api/v1/driver/23/cars', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 201)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        cmp_test = json.loads("""{
+            "id": "2",
+            "_ref": "fgsssdf2",
+            "owner": "23",
+            "properties": [
+                {
+                    "name": "color",
+                    "value": "negro"
+                },
+                {
+                    "name": "marca",
+                    "value": "toyota"
+                }
+            ]
+        }""")
+        self.assertEqual(cmp_test, cmp_response)
+
+    def test_crear_auto_cliente_sin_propiedades(self):
+        """Prueba crear un auto sin propiedades"""
+        self.mockeamos_login_correcto()
+        payload = ''
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.post(
+            '/api/v1/driver/23/cars', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_modificar_auto_cliente(self):
+        """Prueba modificar un auto correctamente"""
+        self.mockeamos_login_correcto()
+        ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/2?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/2?token=tokenApi')
+        payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/23/cars/45', data=payload, headers=headers)
+        print(str(response.data))
+        self.assertEqual(response.status_code, 201)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        cmp_test = json.loads("""{
+            "id": "2",
+            "_ref": "fgsssdf2",
+            "owner": "23",
+            "properties": [
+                {
+                    "name": "color",
+                    "value": "negro"
+                },
+                {
+                    "name": "marca",
+                    "value": "toyota"
+                }
+            ]
+        }""")
+        self.assertEqual(cmp_test, cmp_response)
+
+    def test_modificar_auto_cliente_sin_propiedades(self):
+        """Prueba para modificar un auto sin propiedades"""
+        self.mockeamos_login_correcto()
+        payload = ''
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put(
+            '/api/v1/driver/23/cars/45', data=payload, headers=headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_eliminar_auto(self):
+        """Prueba eliminar un auto de un chofer"""
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        response = self.app.delete('/api/v1/driver/23/cars/45')
+        self.assertEqual(response.status_code, 204)
+
+    def test_get_all_cars(self):
+        """Prueba obtener todos los autos"""
+        self.mockeamos_login_correcto()
+        SharedServer._get_token_initial = ' '
+        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        response = self.app.get('/api/v1/driver/23/cars')
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        cmp_test = json.loads("""[
             {
-            "birthdate": "08/04/2005",
-            "client_id": 15,
-            "country": "Winterfell",
-            "email": "chica_sin_cara@got.com",
-            "fb_auth_token": "fb_auth_token",
-            "fb_user_id": "fb_user_id",
-            "first_name": "Arya",
-            "last_name": "Stark",
-            "type_client": "chofer",
-            "username": "ChicaSinRostro"
-            },
-            {
-            "birthdate": "01/01/1990",
-            "client_id": 15,
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "fb_auth_token": "fb_auth_token",
-            "fb_user_id": "fb_user_id",
-            "first_name": "Daenerys",
-            "last_name": "Targaryen",
-            "type_client": "chofer",
-            "username": "Khaleesi"
+            "id": "string",
+            "_ref": "string",
+            "owner": "string",
+            "properties": [
+                {
+                "name": "string",
+                "value": "string"
+                }
+            ]
             }
-        ]
-        }""")
-
-        SharedServer.change_url(SharedServer, 'demo4909478.mockable.io')
-        response = self.app.get('/api/v1/drivers')
-        cmp_response = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(cmp_response == cmp_test)
-
-
-    def test_mock_obtener_chofer(self):
-        cmp_test = json.loads("""{
-            "birthdate": "01/01/1990",
-            "client_id": 23,
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "fb_auth_token": "fb_auth_token",
-            "fb_user_id": "fb_user_id",
-            "first_name": "Daenerys",
-            "last_name": "Targaryen",
-            "type_client": "chofer",
-            "username": "Khaleesi"
-        }""")
-
-        # mock_url = MagicMock(return_value='demo4909478.mockable.io')
-        SharedServer.change_url(SharedServer, 'demo4909478.mockable.io')
-        response = self.app.get('/api/v1/driver/23')
-        cmp_response = json.loads(response.data.decode('utf-8'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(cmp_response == cmp_test)
+        ]""")
+        self.assertEqual(cmp_test, cmp_response)

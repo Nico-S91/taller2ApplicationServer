@@ -1,5 +1,4 @@
 """ Facilita la operacion con la base de datos de mongo """
-
 import os
 from pymongo import MongoClient
 
@@ -23,10 +22,11 @@ if not DB_URL:
     usando url de BBDD por defecto: """, DEF_DB_URL)
     DB_URL = 'mongodb://localhost:27017/'
 
+CLIENT = MongoClient(DB_URL, maxPoolSize=5)
+
 def get_client():
     """ Obtiene un cliente de mongo para operar """
-    client = MongoClient(DB_URL)
-    return client
+    return CLIENT
 
 def get_database(db_name='test'):
     """ Obtiene una base de datos de mongo con la cual operar. El nombre por defecto es test """
@@ -46,7 +46,7 @@ def main():
 
     # Inserto un post y obtengo su id
     post_id = posts.insert_one(post).inserted_id
-    print(post_id)
+    print(post_id.__str__())
 
 if __name__ == '__main__':
     main()
