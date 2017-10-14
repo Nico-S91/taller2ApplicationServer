@@ -7,8 +7,7 @@ import json
 import main_app
 import requests
 from mock import MagicMock
-from resource.shared_server import SharedServer
-from model.client_shared import ClientShared
+from service.shared_server import SharedServer
 from api.client_controller import ClientController
 from flask import jsonify
 

@@ -52,6 +52,15 @@ def log_test():
     application.logger.info('Testeando Info!')
     return "Testeando el Logger..."
 
+#Seniales de vida
+@application.route('/api/v1/keepalive', methods=['GET'])
+def keepalive():
+    """Damos seniales de vida"""
+    application.logger.info('[GET] /api/v1/keepalive')
+    response = jsonify(code='OK')
+    response.status_code = 200
+    return response
+
 #Login y logout
 
 def is_logged():
@@ -63,6 +72,7 @@ def login_facebook(facebook_auth_token):
     """Logueamos al usuario
     @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
     if request.method == 'POST':
+        application.logger.info('[POST] /login/facebookAuthToken/' + str(facebook_auth_token))
         if not facebook_auth_token:
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         return LOGIN_SERVICE.login_facebook(facebook_auth_token, session)
@@ -79,6 +89,7 @@ def login(username, password):
     @param username es el nombre del usuario que guardo en el sistema
     @param password es la contraseña del usuario"""
     if request.method == 'POST':
+        application.logger.info('[POST] /login/username/' + str(username) + '/password/' + str(password))
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         return LOGIN_SERVICE.login(username, password, session)
@@ -92,6 +103,7 @@ def login(username, password):
 @application.route('/logout', methods=['POST', 'GET'])
 def logout():
     """Deslogueamos al usuario"""
+    application.logger.info('[POST] /logout')
     LOGIN_SERVICE.logout(session)
     response = jsonify(mensaje='Se deslogueo correctamente')
     response.status_code = 200

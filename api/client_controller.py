@@ -1,9 +1,7 @@
 """ @package client_controller
 """
 import json
-from resource.shared_server import SharedServer
-from model.client_shared import ClientShared
-from model.car_shared import CarShared
+from service.shared_server import SharedServer
 from flask import jsonify
 
 SHARED_SERVER = SharedServer()
