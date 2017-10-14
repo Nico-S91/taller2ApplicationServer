@@ -1,4 +1,4 @@
-""" @package client_controller
+""" @package api.client_controller
 """
 import json
 from service.shared_server import SharedServer

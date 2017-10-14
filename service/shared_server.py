@@ -92,6 +92,13 @@ class SharedServer:
         return self._delete_shared_server('/api/v1/users/' + str(driver_id) + '/cars/'
                                           + str(car_id))
 
+    #Metodos para manipular viajes
+
+    def get_payment_methods(self):
+        """ Este metodo devuelve los metodos de pagos que acepta el Shared server
+        """
+        return self._get_shared_server('/api/v1/paymethods')
+
     # Metodos privados
 
     def _get_token_initial(self):

@@ -5,6 +5,7 @@ from flask import Flask, jsonify, abort, make_response, request, session
 from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
+from api.trip_controller import TripController
 from api.client_controller import TIPO_CLIENTE
 from api.client_controller import TIPO_CHOFER
 from service.login_service import LoginService
@@ -12,8 +13,11 @@ from service.login_service import LoginService
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
 application = Flask(__name__)
+
+TRIP_CONTROLLER = TripController()
 CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
+
 FALTA_LOGUEARSE = 'Falta loguearse'
 
 #Secret key para las session
@@ -277,6 +281,17 @@ def delete_info_car(driver_id, car_id):
     if not is_logged():
         return response_invalid_login()
     response = CLIENT_CONTROLLER.delete_car(driver_id, car_id)
+    return response
+
+#Endpoints para cobranzas
+
+@application.route('/api/v1/paymentmethods', methods=['GET'])
+def get_paymentmethods():
+    application.logger.info('[GET] /api/v1/paymentmethods')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_payment_methods()
     return response
 
 #Para pruebas

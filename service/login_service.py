@@ -1,4 +1,4 @@
-""" @package login_service
+""" @package service.login_service
 """
 from service.shared_server import SharedServer
 
