@@ -52,6 +52,15 @@ def log_test():
     application.logger.info('Testeando Info!')
     return "Testeando el Logger..."
 
+#Seniales de vida
+@application.route('/api/v1/keepalive', methods=['GET'])
+def keepalive():
+    """Damos seniales de vida"""
+    application.logger.info('[GET] /api/v1/keepalive')
+    response = jsonify(code='OK')
+    response.status_code = 200
+    return response
+
 #Login y logout
 
 def is_logged():
