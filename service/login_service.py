@@ -1,6 +1,6 @@
 """ @package login_service
 """
-from resource.shared_server import SharedServer
+from service.shared_server import SharedServer
 
 SHARED_SERVER = SharedServer()
 
