@@ -16,9 +16,11 @@ class TripController:
     def get_payment_methods(self):
         """Este metodo devuelve la informacion de todos los medios de pago"""
         response_shared_server = SHARED_SERVER.get_payment_methods()
-        #Hay que filtrar los usuarios por tipos
         json_data = json.loads(response_shared_server.text)
-        json_response = json_data['paymethods']
+        if response_shared_server.status_code == 200:
+            json_response = json_data['paymethods']
+        else:
+            json_response = json_data
         response = jsonify(json_response)
         response.status_code = response_shared_server.status_code
         return response
