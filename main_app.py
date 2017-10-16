@@ -319,6 +319,19 @@ def get_trip_client(client_id, trip_id):
     response = TRIP_CONTROLLER.get_trip(TIPO_CLIENTE, client_id, trip_id)
     return response
 
+@application.route('/api/v1/trips/estimate', methods=['POST'])
+def post_estimate():
+    """Devuelve la estimacion de un viaje
+    """
+    application.logger.info('[POST] /api/v1/trips/estimate')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRIP_CONTROLLER.post_new_estimate(request.json)
+    return response
+
 #Para pruebas
 
 @swag_from('swagger/helloWord.yml')

@@ -45,6 +45,18 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def post_new_estimate(self, data):
+        """ Este metodo permite devuelve la estimacion de un viaje
+            @param car_json informacion del auto
+            @param driver_id identificador del cliente"""
+        response_shared_server = SHARED_SERVER.post_trip_estimate(data)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 201:
+            json_data = json_data['cost']
+        response = jsonify(json_data)
+        response.status_code = response_shared_server.status_code
+        return response
+
     #Metodos privados
 
     def _is_your_trip(self, type_user, user_id, json_response):

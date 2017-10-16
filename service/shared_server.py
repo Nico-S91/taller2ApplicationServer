@@ -107,6 +107,12 @@ class SharedServer:
             @param trip_id identificadore del viaje"""
         return self._get_shared_server('/api/v1/trips/' + str(trip_id))
 
+    def post_trip_estimate(self, data):
+        """ Calcula la estimacion de un viaje
+            @param estimate informacion necesaria para estimar un viaje
+        """
+        return self._post_shared_server('/api/v1/trips/estimate', data)
+
     # Metodos privados
 
     def _get_token_initial(self):
