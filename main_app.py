@@ -300,6 +300,7 @@ def get_paymentmethods():
 @application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>', methods=['GET'])
 def get_trip_driver(driver_id, trip_id):
     """Obtiene la informacion del viaje de un chofer
+    @param driver_id es el identificador del chofer
     @param trip_id es el identificador del viaje"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id))
     #Veo si esta logueado
@@ -311,12 +312,36 @@ def get_trip_driver(driver_id, trip_id):
 @application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>', methods=['GET'])
 def get_trip_client(client_id, trip_id):
     """Obtiene la informacion del viaje de un cliente
+    @param client_id es el identificador del cliente
     @param trip_id es el identificador del viaje"""
     application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/trips/' + str(trip_id))
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
     response = TRIP_CONTROLLER.get_trip(TIPO_CLIENTE, client_id, trip_id)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/trips', methods=['GET'])
+def get_trips_driver(driver_id):
+    """Obtiene la informacion del viaje de un chofer
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/trips')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trips(driver_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips', methods=['GET'])
+def get_trips_client(client_id):
+    """Obtiene la informacion de los viajes de un cliente
+    @param client_id es el identificador del cliente"""
+    application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/trips')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
 @application.route('/api/v1/trips/estimate', methods=['POST'])
