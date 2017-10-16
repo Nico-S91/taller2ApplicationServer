@@ -5,6 +5,9 @@ import requests
 from model import client_shared
 from flask import jsonify
 
+TIPO_CLIENTE = "passenger"
+TIPO_CHOFER = "driver"
+
 class SharedServer:
     """Conexion con el Shared server"""
 
