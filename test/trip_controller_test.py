@@ -545,6 +545,452 @@ class TestTripController(unittest.TestCase):
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
+    #GET informacion de los viajes de un cliente
+
+    def test_informacion_viajes_cliente(self):
+        """Prueba que al obtener la informacion de los viajes de un cliente"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'trips': [
+                {
+                    'id': '1',
+                    'applicationOwner': 'App',
+                    'driver': 'jose',
+                    'passenger': '23',
+                    'start': {
+                        'address': {
+                            'street': 'Calle falsa 123',
+                            'location': {
+                                'lat': -34.619996,
+                                'lon': -58.686680
+                            }
+                        },
+                        'timestamp': 1523377380000
+                    },
+                    'end': {
+                        'address': {
+                            'street': 'Cactus 852',
+                            'location': {
+                                'lat': -34.649372,
+                                'lon': -58.617885
+                            }
+                        },
+                        'timestamp': 1523378880000
+                    },
+                    'totalTime': 1500000,
+                    'waitTime': 20000,
+                    'travelTime': 0,
+                    'distance': 8,
+                    'route': [
+                        {
+                            'location': {
+                                'lat': 0,
+                                'lon': 0
+                            },
+                            'timestamp': 0
+                        }
+                    ],
+                    'cost': {
+                        'currency': 'tarjeta Violeta',
+                        'value': 56
+                    }
+                },
+                {
+                    'id': '1',
+                    'applicationOwner': 'App',
+                    'driver': 'carolina',
+                    'passenger': '23',
+                    'start': {
+                        'address': {
+                            'street': 'Calle falsa 123',
+                            'location': {
+                                'lat': -34.619996,
+                                'lon': -58.686680
+                            }
+                        },
+                        'timestamp': 1523377380000
+                    },
+                    'end': {
+                        'address': {
+                            'street': 'Cactus 852',
+                            'location': {
+                                'lat': -34.649372,
+                                'lon': -58.617885
+                            }
+                        },
+                        'timestamp': 1523378880000
+                    },
+                    'totalTime': 1500000,
+                    'waitTime': 20000,
+                    'travelTime': 0,
+                    'distance': 8,
+                    'route': [
+                        {
+                            'location': {
+                                'lat': 0,
+                                'lon': 0
+                            },
+                            'timestamp': 0
+                        }
+                    ],
+                    'cost': {
+                        'currency': 'tarjeta Violeta',
+                        'value': 105
+                    }
+                }
+            ]
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_trips = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23/trips')
+        print(response)
+        assert_res = json.loads("""
+        [
+            {
+                "id": "1",
+                "applicationOwner": "App",
+                "driver": "jose",
+                "passenger": "23",
+                "start": {
+                    "address": {
+                        "street": "Calle falsa 123",
+                        "location": {
+                            "lat": -34.619996,
+                            "lon": -58.686680
+                        }
+                    },
+                    "timestamp": 1523377380000
+                },
+                "end": {
+                    "address": {
+                        "street": "Cactus 852",
+                        "location": {
+                            "lat": -34.649372,
+                            "lon": -58.617885
+                        }
+                    },
+                    "timestamp": 1523378880000
+                },
+                "totalTime": 1500000,
+                "waitTime": 20000,
+                "travelTime": 0,
+                "distance": 8,
+                "route": [
+                    {
+                        "location": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "timestamp": 0
+                    }
+                ],
+                "cost": {
+                    "currency": "tarjeta Violeta",
+                    "value": 56
+                }
+            },
+            {
+                "id": "1",
+                "applicationOwner": "App",
+                "driver": "carolina",
+                "passenger": "23",
+                "start": {
+                    "address": {
+                        "street": "Calle falsa 123",
+                        "location": {
+                            "lat": -34.619996,
+                            "lon": -58.686680
+                        }
+                    },
+                    "timestamp": 1523377380000
+                },
+                "end": {
+                    "address": {
+                        "street": "Cactus 852",
+                        "location": {
+                            "lat": -34.649372,
+                            "lon": -58.617885
+                        }
+                    },
+                    "timestamp": 1523378880000
+                },
+                "totalTime": 1500000,
+                "waitTime": 20000,
+                "travelTime": 0,
+                "distance": 8,
+                "route": [
+                    {
+                        "location": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "timestamp": 0
+                    }
+                ],
+                "cost": {
+                    "currency": "tarjeta Violeta",
+                    "value": 105
+                }
+            }
+        ]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_viajes_cliente_sin_autorizacion(self):
+        """Prueba que al obtener la informacion de los viajes de un cliente sin autorizacion"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': '0',
+            'message': 'Ups...no tiene autorizacion'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_trips = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/8/trips')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "code": "0",
+            "message": "Ups...no tiene autorizacion"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    # GET informacion de los viajes de un chofer
+
+    def test_informacion_viajes_chofer(self):
+        """Prueba que al obtener la informacion de los viajes de un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'trips': [
+                {
+                    'id': '1',
+                    'applicationOwner': 'App',
+                    'driver': '2',
+                    'passenger': 'carlos',
+                    'start': {
+                        'address': {
+                            'street': 'Calle falsa 123',
+                            'location': {
+                                'lat': -34.619996,
+                                'lon': -58.686680
+                            }
+                        },
+                        'timestamp': 1523377380000
+                    },
+                    'end': {
+                        'address': {
+                            'street': 'Cactus 852',
+                            'location': {
+                                'lat': -34.649372,
+                                'lon': -58.617885
+                            }
+                        },
+                        'timestamp': 1523378880000
+                    },
+                    'totalTime': 1500000,
+                    'waitTime': 20000,
+                    'travelTime': 0,
+                    'distance': 8,
+                    'route': [
+                        {
+                            'location': {
+                                'lat': 0,
+                                'lon': 0
+                            },
+                            'timestamp': 0
+                        }
+                    ],
+                    'cost': {
+                        'currency': 'tarjeta Violeta',
+                        'value': 56
+                    }
+                },
+                {
+                    'id': '1',
+                    'applicationOwner': 'App',
+                    'driver': '2',
+                    'passenger': 'pamela',
+                    'start': {
+                        'address': {
+                            'street': 'Calle falsa 123',
+                            'location': {
+                                'lat': -34.619996,
+                                'lon': -58.686680
+                            }
+                        },
+                        'timestamp': 1523377380000
+                    },
+                    'end': {
+                        'address': {
+                            'street': 'Cactus 852',
+                            'location': {
+                                'lat': -34.649372,
+                                'lon': -58.617885
+                            }
+                        },
+                        'timestamp': 1523378880000
+                    },
+                    'totalTime': 1500000,
+                    'waitTime': 20000,
+                    'travelTime': 0,
+                    'distance': 8,
+                    'route': [
+                        {
+                            'location': {
+                                'lat': 0,
+                                'lon': 0
+                            },
+                            'timestamp': 0
+                        }
+                    ],
+                    'cost': {
+                        'currency': 'tarjeta Azul',
+                        'value': 90
+                    }
+                }
+            ]
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_trips = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/2/trips')
+        print(response)
+        assert_res = json.loads("""
+        [
+            {
+                "id": "1",
+                "applicationOwner": "App",
+                "driver": "2",
+                "passenger": "carlos",
+                "start": {
+                    "address": {
+                        "street": "Calle falsa 123",
+                        "location": {
+                            "lat": -34.619996,
+                            "lon": -58.686680
+                        }
+                    },
+                    "timestamp": 1523377380000
+                },
+                "end": {
+                    "address": {
+                        "street": "Cactus 852",
+                        "location": {
+                            "lat": -34.649372,
+                            "lon": -58.617885
+                        }
+                    },
+                    "timestamp": 1523378880000
+                },
+                "totalTime": 1500000,
+                "waitTime": 20000,
+                "travelTime": 0,
+                "distance": 8,
+                "route": [
+                    {
+                        "location": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "timestamp": 0
+                    }
+                ],
+                "cost": {
+                    "currency": "tarjeta Violeta",
+                    "value": 56
+                }
+            },
+            {
+                "id": "1",
+                "applicationOwner": "App",
+                "driver": "2",
+                "passenger": "pamela",
+                "start": {
+                    "address": {
+                        "street": "Calle falsa 123",
+                        "location": {
+                            "lat": -34.619996,
+                            "lon": -58.686680
+                        }
+                    },
+                    "timestamp": 1523377380000
+                },
+                "end": {
+                    "address": {
+                        "street": "Cactus 852",
+                        "location": {
+                            "lat": -34.649372,
+                            "lon": -58.617885
+                        }
+                    },
+                    "timestamp": 1523378880000
+                },
+                "totalTime": 1500000,
+                "waitTime": 20000,
+                "travelTime": 0,
+                "distance": 8,
+                "route": [
+                    {
+                        "location": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "timestamp": 0
+                    }
+                ],
+                "cost": {
+                    "currency": "tarjeta Azul",
+                    "value": 90
+                }
+            }
+        ]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_viajes_chofer_sin_autorizacion(self):
+        """Prueba que al obtener la informacion de los viaje de un chofer sin autorizacion"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': '0',
+            'message': 'Ups...no tiene autorizacion'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_trips = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/8/trips')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "code": "0",
+            "message": "Ups...no tiene autorizacion"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
     # POST de la estimacion de un viaje
 
     def test_obtener_estimacion(self):
