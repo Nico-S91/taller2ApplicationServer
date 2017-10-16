@@ -7,8 +7,7 @@ import json
 import main_app
 import requests
 from mock import MagicMock
-from resource.shared_server import SharedServer
-from model.client_shared import ClientShared
+from service.shared_server import SharedServer
 from api.client_controller import ClientController
 from flask import jsonify
 
@@ -20,6 +19,8 @@ class TestClientController(unittest.TestCase):
         self.app = main_app.application.test_client()
         # propagate the exceptions to the test client
         self.app.testing = True
+        SharedServer._get_token_initial = mock.MagicMock(return_value='')
+        SharedServer._refresh_token = mock.MagicMock(return_value='')
 
     def mockeamos_login_correcto(self):
         """Mockeamos para que el login de correcto"""
@@ -91,9 +92,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
@@ -139,9 +138,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""{
@@ -156,9 +153,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""{
@@ -174,9 +169,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/drivers')
         assert_res = json.loads("""[
@@ -266,9 +259,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/drivers')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -291,9 +282,7 @@ class TestClientController(unittest.TestCase):
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
          #Mockeamos la llamada
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -343,9 +332,7 @@ class TestClientController(unittest.TestCase):
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
         #Mockeamos la llamada
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriverInsufParam')
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -377,9 +364,7 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApiDriver')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApiDriver')
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -435,9 +420,7 @@ class TestClientController(unittest.TestCase):
            error correspondiente"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         payload = "{\r\n  \"\": \"\"}"
         headers = {
             'content-type': "application/json",
@@ -460,9 +443,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un chofer que no existe"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         payload = '{\r\n  \"\": \"\"}'
         headers = {
             'content-type': "application/json",
@@ -483,9 +464,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un chofer entre en conflicto"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
         payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
@@ -510,9 +489,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -560,9 +537,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -577,9 +552,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -596,9 +569,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los clientes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -678,9 +649,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los clientes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -706,9 +675,7 @@ class TestClientController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -758,9 +725,7 @@ class TestClientController(unittest.TestCase):
         }
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -793,9 +758,7 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -851,9 +814,7 @@ class TestClientController(unittest.TestCase):
            error correspondiente"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         payload = '{\r\n  \"\": \"\"}'
         headers = {
             'content-type': "application/json",
@@ -874,9 +835,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un cliente que no existe"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         payload = '{\r\n  \"\": \"\"}'
         headers = {
             'content-type': "application/json",
@@ -897,9 +856,7 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un cliente entre en conflicto"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
         payload = '{\r\n  \"\": \"\"}'
         headers = {
             'content-type': "application/json",
@@ -922,9 +879,7 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='')
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
@@ -932,9 +887,7 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
         response = self.app.delete('/api/v1/client/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -949,9 +902,7 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer que no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
         response = self.app.delete('/api/v1/client/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -967,9 +918,7 @@ class TestClientController(unittest.TestCase):
     def test_obtener_auto_cliente(self):
         """Prueba obtener un auto correctamente"""
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/1?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/1?token=tokenApi')
         response = self.app.get('api/v1/driver/23/cars/1')
         self.assertEqual(response.status_code, 200)
         cmp_test = json.loads("""{
@@ -1014,9 +963,7 @@ class TestClientController(unittest.TestCase):
     def test_crear_auto_cliente(self):
         """Prueba crear un auto correctamente"""
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
         payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -1061,9 +1008,7 @@ class TestClientController(unittest.TestCase):
         """Prueba modificar un auto correctamente"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/2?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/2?token=tokenApi')
         payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -1108,32 +1053,48 @@ class TestClientController(unittest.TestCase):
     def test_eliminar_auto(self):
         """Prueba eliminar un auto de un chofer"""
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
         response = self.app.delete('/api/v1/driver/23/cars/45')
         self.assertEqual(response.status_code, 204)
 
     def test_get_all_cars(self):
         """Prueba obtener todos los autos"""
         self.mockeamos_login_correcto()
-        SharedServer._get_token_initial = ' '
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
-        SharedServer._refresh_token = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        url = 'http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi'
+        SharedServer._get_url = mock.MagicMock(return_value=url)
         response = self.app.get('/api/v1/driver/23/cars')
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
-        cmp_test = json.loads("""[
+        cmp_test = json.loads(json.dumps([
             {
-            "id": "string",
-            "_ref": "string",
-            "owner": "string",
-            "properties": [
-                {
-                "name": "string",
-                "value": "string"
-                }
-            ]
+                '_ref': 'fgdf2',
+                'id': '1',
+                'owner': '23',
+                'properties':[
+                    {
+                        'name': 'color',
+                        'value': 'gris'
+                    },
+                    {
+                        'name': 'marca',
+                        'value': 'fiat'
+                    }
+                ]
+            },
+            {
+                '_ref': 'fgsssdf2',
+                'id': '2',
+                'owner': '23',
+                'properties': [
+                    {
+                        'name': 'color',
+                        'value': 'negro'
+                    },
+                    {
+                        'name': 'marca',
+                        'value': 'toyota'
+                    }
+                ]
             }
-        ]""")
+        ]))
         self.assertEqual(cmp_test, cmp_response)

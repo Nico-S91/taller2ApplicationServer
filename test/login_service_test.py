@@ -1,6 +1,6 @@
 import unittest
 import mock
-from resource.shared_server import SharedServer
+from service.shared_server import SharedServer
 from service.login_service import LoginService
 import main_app
 

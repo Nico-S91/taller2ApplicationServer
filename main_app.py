@@ -5,6 +5,7 @@ from flask import Flask, jsonify, abort, make_response, request, session
 from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
+from api.trip_controller import TripController
 from api.client_controller import TIPO_CLIENTE
 from api.client_controller import TIPO_CHOFER
 from service.login_service import LoginService
@@ -12,8 +13,11 @@ from service.login_service import LoginService
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
 
 application = Flask(__name__)
+
+TRIP_CONTROLLER = TripController()
 CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
+
 FALTA_LOGUEARSE = 'Falta loguearse'
 
 #Secret key para las session
@@ -52,6 +56,15 @@ def log_test():
     application.logger.info('Testeando Info!')
     return "Testeando el Logger..."
 
+#Seniales de vida
+@application.route('/api/v1/keepalive', methods=['GET'])
+def keepalive():
+    """Damos seniales de vida"""
+    application.logger.info('[GET] /api/v1/keepalive')
+    response = jsonify(code='OK')
+    response.status_code = 200
+    return response
+
 #Login y logout
 
 def is_logged():
@@ -63,6 +76,7 @@ def login_facebook(facebook_auth_token):
     """Logueamos al usuario
     @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
     if request.method == 'POST':
+        application.logger.info('[POST] /login/facebookAuthToken/' + str(facebook_auth_token))
         if not facebook_auth_token:
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         return LOGIN_SERVICE.login_facebook(facebook_auth_token, session)
@@ -79,6 +93,7 @@ def login(username, password):
     @param username es el nombre del usuario que guardo en el sistema
     @param password es la contraseña del usuario"""
     if request.method == 'POST':
+        application.logger.info('[POST] /login/username/' + str(username) + '/password/' + str(password))
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         return LOGIN_SERVICE.login(username, password, session)
@@ -92,6 +107,7 @@ def login(username, password):
 @application.route('/logout', methods=['POST', 'GET'])
 def logout():
     """Deslogueamos al usuario"""
+    application.logger.info('[POST] /logout')
     LOGIN_SERVICE.logout(session)
     response = jsonify(mensaje='Se deslogueo correctamente')
     response.status_code = 200
@@ -265,6 +281,17 @@ def delete_info_car(driver_id, car_id):
     if not is_logged():
         return response_invalid_login()
     response = CLIENT_CONTROLLER.delete_car(driver_id, car_id)
+    return response
+
+#Endpoints para cobranzas
+
+@application.route('/api/v1/paymentmethods', methods=['GET'])
+def get_paymentmethods():
+    application.logger.info('[GET] /api/v1/paymentmethods')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_payment_methods()
     return response
 
 #Para pruebas
