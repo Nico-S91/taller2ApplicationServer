@@ -287,11 +287,25 @@ def delete_info_car(driver_id, car_id):
 
 @application.route('/api/v1/paymentmethods', methods=['GET'])
 def get_paymentmethods():
+    """Devuelve los metodos de pago que acepta el sistema"""
     application.logger.info('[GET] /api/v1/paymentmethods')
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
     response = TRIP_CONTROLLER.get_payment_methods()
+    return response
+
+#Endpoints de viajes
+
+@application.route('/api/v1/trips/<int:trip_id>', methods=['GET'])
+def get_trip(trip_id):
+    """Obtiene la informacion de un viaje
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[GET] /trips/' + str(trip_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trip(trip_id)
     return response
 
 #Para pruebas

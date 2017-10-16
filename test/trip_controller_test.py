@@ -92,3 +92,158 @@ class TestTripController(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+
+    def test_informacion_viaje(self):
+        """Prueba que al obtener la informacion de un viaje"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'trip': {
+                'id': '1',
+                'applicationOwner': 'App',
+                'driver': 'jose',
+                'passenger': 'pepito',
+                'start': {
+                    'address': {
+                        'street': 'Calle falsa 123',
+                        'location': {
+                            'lat': -34.619996,
+                            'lon': -58.686680
+                        }
+                    },
+                    'timestamp': 1523377380000
+                },
+                'end': {
+                    'address': {
+                        'street': 'Cactus 852',
+                        'location': {
+                            'lat': -34.649372,
+                            'lon': -58.617885
+                        }
+                    },
+                    'timestamp': 1523378880000
+                },
+                'totalTime': 1500000,
+                'waitTime': 20000,
+                'travelTime': 0,
+                'distance': 8,
+                'route': [
+                    {
+                        'location': {
+                            'lat': 0,
+                            'lon': 0
+                        },
+                        'timestamp': 0
+                    }
+                ],
+                'cost': {
+                    'currency': 'tarjeta Violeta',
+                    'value': 56
+                }
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_trip = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "id": "1",
+            "applicationOwner": "App",
+            "driver": "jose",
+            "passenger": "pepito",
+            "start": {
+                "address": {
+                    "street": "Calle falsa 123",
+                    "location": {
+                        "lat": -34.619996,
+                        "lon": -58.686680
+                    }
+                },
+                "timestamp": 1523377380000
+            },
+            "end": {
+                "address": {
+                    "street": "Cactus 852",
+                    "location": {
+                        "lat": -34.649372,
+                        "lon": -58.617885
+                    }
+                },
+                "timestamp": 1523378880000
+            },
+            "totalTime": 1500000,
+            "waitTime": 20000,
+            "travelTime": 0,
+            "distance": 8,
+            "route": [
+                {
+                    "location": {
+                        "lat": 0,
+                        "lon": 0
+                    },
+                    "timestamp": 0
+                }
+            ],
+            "cost": {
+                "currency": "tarjeta Violeta",
+                "value": 56
+            }
+        }""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_viaje_sin_autorizacion(self):
+        """Prueba que al obtener la informacion de un viaje sin autorizacion"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': '0',
+            'message': 'Ups...no tiene autorizacion'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_trip = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "code": "0",
+            "message": "Ups...no tiene autorizacion"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_viaje_que_no_existe(self):
+        """Prueba que al obtener la informacion de un viaje que no existe"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': '1',
+            'message': 'No existe el viaje'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_trip = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/trips/2')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "code": "1",
+            "message": "No existe el viaje"
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)

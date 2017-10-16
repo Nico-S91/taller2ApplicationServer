@@ -24,3 +24,15 @@ class TripController:
         response = jsonify(json_response)
         response.status_code = response_shared_server.status_code
         return response
+
+    def get_trip(self, trip_id):
+        """Este metodo devuelve la informacion de un viaje"""
+        response_shared_server = SHARED_SERVER.get_trip(trip_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            json_response = json_data['trip']
+        else:
+            json_response = json_data
+        response = jsonify(json_response)
+        response.status_code = response_shared_server.status_code
+        return response
