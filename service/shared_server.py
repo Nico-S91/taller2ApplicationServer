@@ -1,9 +1,12 @@
-""" @package shared_server
+""" @package service.shared_server
 """
 import json
 import requests
 from model import client_shared
 from flask import jsonify
+
+TIPO_CLIENTE = "passenger"
+TIPO_CHOFER = "driver"
 
 class SharedServer:
     """Conexion con el Shared server"""
@@ -98,6 +101,11 @@ class SharedServer:
         """ Este metodo devuelve los metodos de pagos que acepta el Shared server
         """
         return self._get_shared_server('/api/v1/paymethods')
+
+    def get_trip(self, trip_id):
+        """ Este metodo devuelve la informacion de un viaje
+            @param trip_id identificadore del viaje"""
+        return self._get_shared_server('/api/v1/trips/' + str(trip_id))
 
     # Metodos privados
 
