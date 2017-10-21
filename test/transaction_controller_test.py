@@ -372,3 +372,82 @@ class TestTransactionController(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+
+    # POST de las transacciones de los choferes
+
+    def test_guardar_transaccion_chofer(self):
+        """Prueba guardar una transaccion de un chofer"""
+        self.mockeamos_login_correcto()
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'XX'
+            },
+            'transaction': {
+                'id': 'claudia',
+                'trip': '1',
+                'timestamp': 123333000,
+                'cost': {
+                    'currency': 'pesos',
+                    'value': 65
+                },
+                'description': 'Algo...no se',
+                'data': {}
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.post_transactions = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/driver/23/transactions', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "id": "claudia",
+            "trip": "1",
+            "timestamp": 123333000,
+            "cost": {
+                "currency": "pesos",
+                "value": 65
+            },
+            "description": "Algo...no se",
+            "data": {}
+        }""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_guardar_transaccion_sin_autorizacion_chofer(self):
+        """Prueba guardar una transaccion sin autorizacion de un chofer"""
+        self.mockeamos_login_correcto()
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No esta autorizado'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        SharedServer.post_transactions = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/driver/8/transactions', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 2,
+            "message": "No esta autorizado"
+        }""")
+        self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
