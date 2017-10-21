@@ -103,7 +103,7 @@ class SharedServer:
         return self._get_shared_server('/api/v1/paymethods')
 
     def get_transactions(self, user_id):
-        """ Este metodo permite obtener la informacion de las transacciones 
+        """ Este metodo permite obtener la informacion de las transacciones
             de un usuario
             @param user_id identificador del usuario"""
         return self._get_shared_server('/api/v1/users/' + str(user_id) + '/transactions')
@@ -113,8 +113,9 @@ class SharedServer:
             @param transaction es la informacion de la transaccion
             @param user_id es el identificador del usuario
         """
-        return self._post_shared_server('/api/v1/users/' + str(user_id) + '/transactions', transaction)
-    
+        return self._post_shared_server('/api/v1/users/' + str(user_id) + '/transactions',
+                                        transaction)
+
     #Metodos para manipular viajes
 
     def get_trip(self, trip_id):
@@ -126,13 +127,18 @@ class SharedServer:
         """ Este metodo devuelve la informacion de un viaje
             @param client_id identificadore del cliente"""
         return self._get_shared_server('/api/v1/users/' + str(client_id) + '/trips')
-    
 
     def post_trip_estimate(self, data):
         """ Calcula la estimacion de un viaje
             @param estimate informacion necesaria para estimar un viaje
         """
         return self._post_shared_server('/api/v1/trips/estimate', data)
+
+    def post_trip(self, data):
+        """ Guardar un viaje realizado
+            @param data informacion informacion del viaje realizado
+        """
+        return self._post_shared_server('/api/v1/trips', data)
 
     # Metodos privados
 
