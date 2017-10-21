@@ -1462,7 +1462,31 @@ class TestClientController(unittest.TestCase):
     def test_crear_auto_cliente(self):
         """Prueba crear un auto correctamente"""
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'car':{
+                'id': '2',
+                '_ref': 'fgsssdf2',
+                'owner': '23',
+                'properties': [
+                    {
+                        'name': 'color',
+                        'value': 'negro'
+                    },
+                    {
+                        'name': 'marca',
+                        'value': 'toyota'
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.post_car = MagicMock(return_value=response_mock)
         payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -1507,7 +1531,31 @@ class TestClientController(unittest.TestCase):
         """Prueba modificar un auto correctamente"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars/2?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': '1'
+            },
+            'car': {
+                'id': '2',
+                '_ref': 'fgsssdf2',
+                'owner': '23',
+                'properties': [
+                    {
+                        'name': 'color',
+                        'value': 'negro'
+                    },
+                    {
+                        'name': 'marca',
+                        'value': 'toyota'
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.put_car = MagicMock(return_value=response_mock)
         payload = "{\r\n\t\"properties\": [\r\n\t\t{\r\n\t\t    \"name\": \"color\",\r\n\t\t    \"value\": \"negro\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"modelo\",\r\n\t\t    \"value\": \"punto\"\r\n\t\t},\r\n\t\t{\r\n\t\t    \"name\": \"marca\",\r\n\t\t    \"value\": \"fiat\"\r\n\t\t}\r\n\t]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -1552,7 +1600,14 @@ class TestClientController(unittest.TestCase):
     def test_eliminar_auto(self):
         """Prueba eliminar un auto de un chofer"""
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23/cars?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': '0'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(204)
+        SharedServer.delete_car = MagicMock(return_value=response_mock)
         response = self.app.delete('/api/v1/driver/23/cars/45')
         self.assertEqual(response.status_code, 204)
 
