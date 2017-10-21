@@ -6,6 +6,7 @@ from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.trip_controller import TripController
+from api.transaction_controller import TransactionController
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
 from service.login_service import LoginService
@@ -14,6 +15,7 @@ from service.login_service import LoginService
 
 application = Flask(__name__)
 
+TRANSACTION_CONTROLLER = TransactionController()
 TRIP_CONTROLLER = TripController()
 CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
@@ -292,7 +294,7 @@ def get_paymentmethods():
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
-    response = TRIP_CONTROLLER.get_payment_methods()
+    response = TRANSACTION_CONTROLLER.get_payment_methods()
     return response
 
 #Endpoints de viajes
