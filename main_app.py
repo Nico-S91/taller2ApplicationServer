@@ -6,6 +6,7 @@ from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.trip_controller import TripController
+from api.transaction_controller import TransactionController
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
 from service.login_service import LoginService
@@ -14,6 +15,7 @@ from service.login_service import LoginService
 
 application = Flask(__name__)
 
+TRANSACTION_CONTROLLER = TransactionController()
 TRIP_CONTROLLER = TripController()
 CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
@@ -292,7 +294,53 @@ def get_paymentmethods():
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
-    response = TRIP_CONTROLLER.get_payment_methods()
+    response = TRANSACTION_CONTROLLER.get_payment_methods()
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/transactions', methods=['GET'])
+def get_transactions_driver(driver_id):
+    """Devuelve los metodos de pago que acepta el sistema"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRANSACTION_CONTROLLER.get_transactions(driver_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/transactions', methods=['GET'])
+def get_transactions_client(client_id):
+    """Devuelve los metodos de pago que acepta el sistema"""
+    application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRANSACTION_CONTROLLER.get_transactions(client_id)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/transactions', methods=['POST'])
+def post_info_transaction_driver(driver_id):
+    """Guarda la informacion de la transaccion del chofer
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[POST] /api/v1/driver/'+str(driver_id)+'/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRANSACTION_CONTROLLER.post_transactions(request.json, driver_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/transactions', methods=['POST'])
+def post_info_transaction_client(client_id):
+    """Guarda la informacion de la transaccion del cliente
+    @param client_id es el identificador del cliente"""
+    application.logger.info('[POST] /api/v1/client/'+str(client_id)+'/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRANSACTION_CONTROLLER.post_transactions(request.json, client_id)
     return response
 
 #Endpoints de viajes
