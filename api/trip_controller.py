@@ -15,18 +15,6 @@ class TripController:
         """The constructor."""
         self.refs = {}
 
-    def get_payment_methods(self):
-        """Este metodo devuelve la informacion de todos los medios de pago"""
-        response_shared_server = SHARED_SERVER.get_payment_methods()
-        json_data = json.loads(response_shared_server.text)
-        if response_shared_server.status_code == 200:
-            json_response = json_data['paymethods']
-        else:
-            json_response = json_data
-        response = jsonify(json_response)
-        response.status_code = response_shared_server.status_code
-        return response
-
     def get_trip(self, type_user, user_id, trip_id):
         """ Este metodo devuelve la informacion de un viaje
             @param type_user es el tipo de usuario del viaje
