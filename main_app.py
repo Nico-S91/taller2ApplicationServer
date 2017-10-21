@@ -6,8 +6,8 @@ from flasgger import Swagger
 from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.trip_controller import TripController
-from api.client_controller import TIPO_CLIENTE
-from api.client_controller import TIPO_CHOFER
+from service.shared_server import TIPO_CLIENTE
+from service.shared_server import TIPO_CHOFER
 from service.login_service import LoginService
 
 #Para levantar swagger hay que ir a http://localhost:5000/apidocs/
@@ -287,11 +287,74 @@ def delete_info_car(driver_id, car_id):
 
 @application.route('/api/v1/paymentmethods', methods=['GET'])
 def get_paymentmethods():
+    """Devuelve los metodos de pago que acepta el sistema"""
     application.logger.info('[GET] /api/v1/paymentmethods')
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
     response = TRIP_CONTROLLER.get_payment_methods()
+    return response
+
+#Endpoints de viajes
+
+@application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>', methods=['GET'])
+def get_trip_driver(driver_id, trip_id):
+    """Obtiene la informacion del viaje de un chofer
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trip(TIPO_CHOFER, driver_id, trip_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>', methods=['GET'])
+def get_trip_client(client_id, trip_id):
+    """Obtiene la informacion del viaje de un cliente
+    @param client_id es el identificador del cliente
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/trips/' + str(trip_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trip(TIPO_CLIENTE, client_id, trip_id)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/trips', methods=['GET'])
+def get_trips_driver(driver_id):
+    """Obtiene la informacion del viaje de un chofer
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/trips')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trips(driver_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips', methods=['GET'])
+def get_trips_client(client_id):
+    """Obtiene la informacion de los viajes de un cliente
+    @param client_id es el identificador del cliente"""
+    application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/trips')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.get_trips(client_id)
+    return response
+
+@application.route('/api/v1/trips/estimate', methods=['POST'])
+def post_estimate():
+    """Devuelve la estimacion de un viaje
+    """
+    application.logger.info('[POST] /api/v1/trips/estimate')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRIP_CONTROLLER.post_new_estimate(request.json)
     return response
 
 #Para pruebas
