@@ -297,6 +297,26 @@ def get_paymentmethods():
     response = TRANSACTION_CONTROLLER.get_payment_methods()
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/transactions', methods=['GET'])
+def get_transactions_driver(driver_id):
+    """Devuelve los metodos de pago que acepta el sistema"""
+    application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRANSACTION_CONTROLLER.get_transactions(driver_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/transactions', methods=['GET'])
+def get_transactions_client(client_id):
+    """Devuelve los metodos de pago que acepta el sistema"""
+    application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRANSACTION_CONTROLLER.get_transactions(client_id)
+    return response
+
 #Endpoints de viajes
 
 @application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>', methods=['GET'])

@@ -95,12 +95,20 @@ class SharedServer:
         return self._delete_shared_server('/api/v1/users/' + str(driver_id) + '/cars/'
                                           + str(car_id))
 
-    #Metodos para manipular viajes
+    #Metodos para manipular las transacciones
 
     def get_payment_methods(self):
         """ Este metodo devuelve los metodos de pagos que acepta el Shared server
         """
         return self._get_shared_server('/api/v1/paymethods')
+
+    def get_transactions(self, user_id):
+        """ Este metodo permite obtener la informacion de las transacciones 
+            de un usuario
+            @param user_id identificador del usuario"""
+        return self._get_shared_server('/api/v1/users/' + str(user_id) + '/transactions')
+    
+    #Metodos para manipular viajes
 
     def get_trip(self, trip_id):
         """ Este metodo devuelve la informacion de un viaje
