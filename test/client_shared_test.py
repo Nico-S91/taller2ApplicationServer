@@ -421,7 +421,7 @@ class TestClientController(unittest.TestCase):
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        payload = "{\r\n  \"\": \"\"}"
+        payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
             'cache-control': "no-cache",
@@ -836,7 +836,7 @@ class TestClientController(unittest.TestCase):
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
-        payload = '{\r\n  \"\": \"\"}'
+        payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
             'cache-control': "no-cache",
@@ -857,7 +857,7 @@ class TestClientController(unittest.TestCase):
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
         SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
-        payload = '{\r\n  \"\": \"\"}'
+        payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
             'cache-control': "no-cache",
