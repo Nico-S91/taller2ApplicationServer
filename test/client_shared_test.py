@@ -10,6 +10,7 @@ from mock import MagicMock
 from service.shared_server import SharedServer
 from api.client_controller import ClientController
 from flask import jsonify
+from test.response_mock import ResponseMock
 
 class TestClientController(unittest.TestCase):
     """Esta clase tiene los test de los endpoint del controller_client
@@ -92,7 +93,50 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/api/v1/driver/23')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'chofer',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
@@ -138,7 +182,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No esta autorizado a obtener la info del usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""{
@@ -153,7 +205,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un chofer cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""{
@@ -169,7 +229,100 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiDriver')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'count': 2,
+                'total': 2,
+                'next': 'string',
+                'prev': 'string',
+                'first': 'string',
+                'last': 'string',
+                'version': 'string'
+            },
+            'users': [
+                {
+                    'id': 'c1',
+                    '_ref': '2werwerfw',
+                    'applicationOwner': 'string',
+                    'type': 'driver',
+                    'cars': [
+                        {
+                            'id': '1',
+                            '_ref': 'erge',
+                            'owner': 'c1',
+                            'properties': [
+                                {
+                                    'name': 'color',
+                                    'value': 'negro'
+                                },
+                                {
+                                    'name': 'marca',
+                                    'value': 'fiat'
+                                }
+                            ]
+                        }
+                    ],
+                    'username': 'mz',
+                    'name': 'martin',
+                    'surname': 'tincho',
+                    'country': 'argentina',
+                    'email': 'm.t@gmail.com',
+                    'birthdate': '12/12/2000',
+                    'images': [
+                        'http://sdfpsdf.com/sfisdjfoosi.jpg'
+                    ],
+                    'balance': [
+                        {
+                            'currency': 'peso',
+                            'value': 200
+                        },
+                        {
+                            'id': 'c2',
+                            '_ref': '2werwedrfw',
+                            'applicationOwner': 'string',
+                            'type': 'driver',
+                            'cars': [
+                                {
+                                    'id': '1',
+                                    '_ref': 'erge',
+                                    'owner': 'c1',
+                                    'properties': [
+                                        {
+                                            'name': 'color',
+                                            'value': 'rojo'
+                                        },
+                                        {
+                                            'name': 'marca',
+                                            'value': 'fiat'
+                                        }
+                                    ]
+                                }
+                            ],
+                            'username': 'ht',
+                            'name': 'homero',
+                            'surname': 'simpson',
+                            'country': 'argentina',
+                            'email': 'h.t@gmail.com',
+                            'birthdate': '12/05/1970',
+                            'images': [
+                                'http://sdfpsdf.com/aaaaaaosi.jpg'
+                            ],
+                            'balance': [
+                                {
+                                    'currency': 'peso',
+                                    'value': 9000
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_clients = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/drivers')
         assert_res = json.loads("""[
@@ -259,7 +412,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los choferes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 3,
+            'message': 'No estas autorizado'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_clients = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/drivers')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -364,7 +525,54 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApiDriver')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': '1'
+            },
+            'user': {
+                'id': 'c1',
+                '_ref': '2werwerfw',
+                'applicationOwner': 'string',
+                'type': 'driver',
+                'cars': [
+                    {
+                        'id': '1',
+                        '_ref': 'erge',
+                        'owner': 'c1',
+                        'properties': [
+                            {
+                                'name': 'color',
+                                'value': 'negro'
+                            },
+                            {
+                                'name': 'marca',
+                                'value': 'fiat'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'mz',
+                'name': 'martin',
+                'surname': 'tincho',
+                'country': 'argentina',
+                'email': 'm.t@gmail.com',
+                'birthdate': '12/12/2000',
+                'images': [
+                    'http://sdfpsdf.com/sfisdjfoosi.jpg'
+                ],
+                'balance': [
+                    {
+                        'currency': 'peso',
+                        'value': 200
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -420,7 +628,15 @@ class TestClientController(unittest.TestCase):
            error correspondiente"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No se cumplio con las precondiciones'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(400)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
@@ -443,7 +659,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un chofer que no existe"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = '{\r\n  \"\": \"\"}'
         headers = {
             'content-type': "application/json",
@@ -464,7 +688,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un chofer entre en conflicto"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 3,
+            'message': 'conflictos de colision'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(409)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
@@ -489,7 +721,54 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente este sea igual al que viene por defecto"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': '1'
+            },
+            'user': {
+                'id': 'c1',
+                '_ref': '2werwerfw',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': '1',
+                        '_ref': 'erge',
+                        'owner': 'c1',
+                        'properties': [
+                            {
+                                'name': 'color',
+                                'value': 'negro'
+                            },
+                            {
+                                'name': 'marca',
+                                'value': 'fiat'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'mz',
+                'name': 'martin',
+                'surname': 'tincho',
+                'country': 'argentina',
+                'email': 'm.t@gmail.com',
+                'birthdate': '12/12/2000',
+                'images': [
+                    'http://sdfpsdf.com/sfisdjfoosi.jpg'
+                ],
+                'balance': [
+                    {
+                        'currency': 'peso',
+                        'value': 200
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -537,7 +816,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No esta autorizado a obtener la info del usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -552,7 +839,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener un cliente cuando no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -569,7 +864,99 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los clientes, viene el default"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'count': 2,
+                'total': 2,
+                'next': 'string',
+                'prev': 'string',
+                'first': 'string',
+                'last': 'string',
+                'version': 'string'
+            },
+            'users': [
+                {
+                    'id': 'c1',
+                    '_ref': '2werwerfw',
+                    'applicationOwner': 'string',
+                    'type': 'passenger',
+                    'cars': [
+                        {
+                            'id': '1',
+                            '_ref': 'erge',
+                            'owner': 'c1',
+                            'properties': [{
+                                    'name': 'color',
+                                    'value': 'negro'
+                                },
+                                {
+                                    'name': 'marca',
+                                    'value': 'fiat'
+                                }
+                            ]
+                        }
+                    ],
+                    'username': 'mz',
+                    'name': 'martin',
+                    'surname': 'tincho',
+                    'country': 'argentina',
+                    'email': 'm.t@gmail.com',
+                    'birthdate': '12/12/2000',
+                    'images': [
+                        'http://sdfpsdf.com/sfisdjfoosi.jpg'
+                    ],
+                    'balance': [
+                        {
+                            'currency': 'peso',
+                            'value': 200
+                        },
+                        {
+                            'id': 'c2',
+                            '_ref': '2werwedrfw',
+                            'applicationOwner': 'string',
+                            'type': 'passenger',
+                            'cars': [
+                                {
+                                    'id': '1',
+                                    '_ref': 'erge',
+                                    'owner': 'c1',
+                                    'properties': [
+                                        {
+                                            'name': 'color',
+                                            'value': 'rojo'
+                                        },
+                                        {
+                                            'name': 'marca',
+                                            'value': 'fiat'
+                                        }
+                                    ]
+                                }
+                            ],
+                            'username': 'ht',
+                            'name': 'homero',
+                            'surname': 'simpson',
+                            'country': 'argentina',
+                            'email': 'h.t@gmail.com',
+                            'birthdate': '12/05/1970',
+                            'images': [
+                                'http://sdfpsdf.com/aaaaaaosi.jpg'
+                            ],
+                            'balance': [
+                                {
+                                    'currency': 'peso',
+                                    'value': 9000
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_clients = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -649,7 +1036,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al obtener todos los clientes sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApi2')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 3,
+            'message': 'No estas autorizado'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_clients = MagicMock(return_value=response_mock)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/clients')
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -725,7 +1120,15 @@ class TestClientController(unittest.TestCase):
         }
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users?token=tokenApiInsufParam')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No se cumplio con las precondiciones'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(400)
+        SharedServer.post_client = MagicMock(return_value=response_mock)
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -758,7 +1161,54 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': '1'
+            },
+            'user': {
+                'id': 'c1',
+                '_ref': '2werwerfw',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': '1',
+                        '_ref': 'erge',
+                        'owner': 'c1',
+                        'properties': [
+                            {
+                                'name': 'color',
+                                'value': 'negro'
+                            },
+                            {
+                                'name': 'marca',
+                                'value': 'fiat'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'mz',
+                'name': 'martin',
+                'surname': 'tincho',
+                'country': 'argentina',
+                'email': 'm.t@gmail.com',
+                'birthdate': '12/12/2000',
+                'images': [
+                    'http://sdfpsdf.com/sfisdjfoosi.jpg'
+                ],
+                'balance': [
+                    {
+                        'currency': 'peso',
+                        'value': 200
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
@@ -772,22 +1222,22 @@ class TestClientController(unittest.TestCase):
             "id": "c1",
             "_ref": "2werwerfw",
             "applicationOwner": "string",
-            "type": "cliente",
+            "type": "passenger",
             "cars": [
                 {
-                "id": "1",
-                "_ref": "erge",
-                "owner": "c1",
-                "properties": [
-                    {
-                    "name": "color",
-                    "value": "negro"
-                    },
-            {
-                    "name": "marca",
-                    "value": "fiat"
-                    }
-                ]
+                    "id": "1",
+                    "_ref": "erge",
+                    "owner": "c1",
+                    "properties": [
+                        {
+                            "name": "color",
+                            "value": "negro"
+                        },
+                        {
+                            "name": "marca",
+                            "value": "fiat"
+                        }
+                    ]
                 }
             ],
             "username": "mz",
@@ -801,9 +1251,10 @@ class TestClientController(unittest.TestCase):
             ],
             "balance": [
                 {
-                "currency": "peso",
-                "value": 200
-                }]
+                    "currency": "peso",
+                    "value": 200
+                }
+            ]
         }""")
         self.assertEqual(response.status_code, 201)
         cmp_response = json.loads(response.data.decode('utf-8'))
@@ -814,8 +1265,16 @@ class TestClientController(unittest.TestCase):
            error correspondiente"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
-        payload = '{\r\n  \"\": \"\"}'
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No se cumplio con las precondiciones'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(400)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
             'content-type': "application/json",
             'cache-control': "no-cache",
@@ -829,13 +1288,22 @@ class TestClientController(unittest.TestCase):
         }""")
         self.assertEqual(response.status_code, 400)
         cmp_response = json.loads(response.data.decode('utf-8'))
+        print(response.data)
         self.assertEqual(assert_res, cmp_response)
 
     def test_modificar_cliente_no_existe(self):
         """Prueba que al modificar un cliente que no existe"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
@@ -856,7 +1324,15 @@ class TestClientController(unittest.TestCase):
         """Prueba que al modificar un cliente entre en conflicto"""
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/32?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 3,
+            'message': 'conflictos de colision'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(409)
+        SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = '{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}'
         headers = {
             'content-type': "application/json",
@@ -879,7 +1355,14 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/23?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 'ok'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(204)
+        SharedServer.delete_client = MagicMock(return_value=response_mock)
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
@@ -887,7 +1370,15 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer cuando no esta autorizado"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/9?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No esta autorizado a eliminar el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.delete_client = MagicMock(return_value=response_mock)
         response = self.app.delete('/api/v1/client/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -902,7 +1393,15 @@ class TestClientController(unittest.TestCase):
         """Prueba eliminar un chofer que no existe"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        SharedServer._get_url = mock.MagicMock(return_value='http://llevamesharedserver.mocklab.io/users/99?token=tokenApi')
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.delete_client = MagicMock(return_value=response_mock)
         response = self.app.delete('/api/v1/client/23')
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
