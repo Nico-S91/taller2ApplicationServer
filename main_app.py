@@ -317,6 +317,32 @@ def get_transactions_client(client_id):
     response = TRANSACTION_CONTROLLER.get_transactions(client_id)
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/transactions', methods=['POST'])
+def post_info_transaction_driver(driver_id):
+    """Guarda la informacion de la transaccion del chofer
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[POST] /api/v1/driver/'+str(driver_id)+'/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRANSACTION_CONTROLLER.post_transactions(request.json, driver_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/transactions', methods=['POST'])
+def post_info_transaction_client(client_id):
+    """Guarda la informacion de la transaccion del cliente
+    @param client_id es el identificador del cliente"""
+    application.logger.info('[POST] /api/v1/client/'+str(client_id)+'/transactions')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRANSACTION_CONTROLLER.post_transactions(request.json, client_id)
+    return response
+
 #Endpoints de viajes
 
 @application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>', methods=['GET'])

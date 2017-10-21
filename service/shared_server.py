@@ -107,6 +107,13 @@ class SharedServer:
             de un usuario
             @param user_id identificador del usuario"""
         return self._get_shared_server('/api/v1/users/' + str(user_id) + '/transactions')
+
+    def post_transactions(self, transaction, user_id):
+        """ Crea una nueva transaccion para este usuario
+            @param transaction es la informacion de la transaccion
+            @param user_id es el identificador del usuario
+        """
+        return self._post_shared_server('/api/v1/users/' + str(user_id) + '/transactions', transaction)
     
     #Metodos para manipular viajes
 

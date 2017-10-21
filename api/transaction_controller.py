@@ -34,3 +34,17 @@ class TransactionController:
         response = jsonify(json_response)
         response.status_code = response_shared_server.status_code
         return response
+
+    def post_transactions(self, transaction, id_user):
+        """ Este metodo permite guardar la informacion de una transaccion de un usuario
+            @param transaction informacion de la transaccion
+            @param id_user identificador del usuario"""
+        response_shared_server = SHARED_SERVER.post_transactions(transaction, id_user)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            json_response = json_data['transaction']
+        else:
+            json_response = json_data
+        response = jsonify(json_response)
+        response.status_code = response_shared_server.status_code
+        return response
