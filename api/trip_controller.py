@@ -99,10 +99,6 @@ class TripController:
         user_type = data.get('user_type')
         lat = data.get('lat')
         lon = data.get('long')
-        print(user_id)
-        print(user_type)
-        print(lat)
-        print(lon)
         operation_result = MODEL_MANAGER.add_last_known_position(user_id, user_type, lat, lon)
         response = jsonify({
             'operation_result': operation_result
