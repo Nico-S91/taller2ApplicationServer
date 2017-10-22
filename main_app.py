@@ -405,6 +405,23 @@ def post_estimate():
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
     return response
 
+@application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
+def get_last_location(client_id):
+    """Devuelve la ultima ubicacion conocida de un usuario
+    """
+    application.logger.info('[GET] /api/v1/lastlocation')
+    response = TRIP_CONTROLLER.get_last_location(client_id)
+    return response
+
+@application.route('/api/v1/lastlocation', methods=['POST'])
+def add_last_location():
+    """ Agrega la ultima ubicacion asociada a un usuario
+    """
+    application.logger.info('[POST] /api/v1/lastlocation')
+    #falta agregar el logueo?
+    response = TRIP_CONTROLLER.post_new_last_location(request.json)
+    return response
+
 #Para pruebas
 
 @swag_from('swagger/helloWord.yml')
