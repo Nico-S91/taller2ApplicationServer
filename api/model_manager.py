@@ -12,13 +12,13 @@ class ModelManager:
         """constructor"""
         self.db_manager = model.db_manager
 
-    def add_last_known_position(self, user_id, user_type, lat, lon):
+    def add_last_known_position(self, user_id, user_type, latitud, longitud):
         """Este metodo graba en la base de datos 'UltimasPosiciones'
             la ultima posicion registrada del usuario.
             @param user_id el id del usuario
             @param user_type el tipo de usuario
-            @param lat latitud en mapa
-            @param lon longitud en mapa
+            @param latitud latitud en mapa
+            @param longitud longitud en mapa
         """
         #obtengo la tabla de ultimas posiciones
         ultimas_posiciones = self.db_manager.get_table('ultimasPosiciones')
@@ -26,13 +26,13 @@ class ModelManager:
         #busco si ya hay una posicion registrada para el usuario con esta id
         last_position = ultimas_posiciones.find_one({'idUsuario': user_id})
 
-        if last_position.count() == 0:
+        if last_position is None:
             #no hay ultima posicion, entonces creo una nueva entrada
             nueva_posicion = {
                 "idUsuario": user_id,
                 "tipo_usuario": user_type,
-                "lat": lat,
-                "long": lon,
+                "lat": latitud,
+                "long": longitud,
                 "stamp": str(datetime.now())
             }
 
@@ -43,8 +43,8 @@ class ModelManager:
                 '_id': str(last_position.get('_id'))
             }, {
                 '$set': {
-                    'lat': lat,
-                    'long': lon
+                    'lat': latitud,
+                    'long': longitud
                 }
             }, upsert=False).acknowledged
 

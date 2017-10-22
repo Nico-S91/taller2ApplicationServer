@@ -5,9 +5,10 @@ from flask import jsonify
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
-from model.db_manager import ModelManager
+from api.model_manager import ModelManager
 
 SHARED_SERVER = SharedServer()
+MODEL_MANAGER = ModelManager()
 
 class TripController:
     """Esta clase tiene los metodos para manajar la informacion de los viajes"""
@@ -85,7 +86,7 @@ class TripController:
         """ Devuelve response de ultima ubicacion
             @param user_id un id de usuario
         """
-        response = ModelManager.get_last_known_position(user_id)
+        response = MODEL_MANAGER.get_last_known_position(user_id)
         response.status_code = 200
         return response
 
@@ -98,6 +99,13 @@ class TripController:
         user_type = data.get('user_type')
         lat = data.get('lat')
         lon = data.get('long')
-        response = ModelManager.add_last_known_position(user_id, user_type, lat, lon)
+        print(user_id)
+        print(user_type)
+        print(lat)
+        print(lon)
+        operation_result = MODEL_MANAGER.add_last_known_position(user_id, user_type, lat, lon)
+        response = jsonify({
+            'operation_result': operation_result
+        })
         response.status_code = 200
         return response
