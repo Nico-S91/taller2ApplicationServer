@@ -5,6 +5,7 @@ from flask import jsonify
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
+from model.db_manager import ModelManager
 
 SHARED_SERVER = SharedServer()
 
@@ -78,4 +79,25 @@ class TripController:
             'message': 'El viaje no pertenece al usuario'
         })
         response.status_code = 401
+        return response
+
+    def get_last_location(self, user_id):
+        """ Devuelve response de ultima ubicacion
+            @param user_id un id de usuario
+        """
+        response = ModelManager.get_last_known_position(user_id)
+        response.status_code = 200
+        return response
+
+    def post_new_last_location(self, data):
+        """ guarda la nueva ultima ubicacion de un usuario
+            si no habia una anterior, la crea, sino la modifica
+            @param data el json de request para dar de alta la ubicacion
+        """
+        user_id = data.get('user_id')
+        user_type = data.get('user_type')
+        lat = data.get('lat')
+        lon = data.get('long')
+        response = ModelManager.add_last_known_position(user_id, user_type, lat, lon)
+        response.status_code = 200
         return response
