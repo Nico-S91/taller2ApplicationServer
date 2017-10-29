@@ -38,6 +38,9 @@ def get_table(table_name, db_name='test'):
     database = get_database(db_name)
     return database[table_name]
 
+def get_locations_by_type(type):
+    return []
+
 def main():
     """ Modulo principal para pruebas """
     posts = get_table('posts')

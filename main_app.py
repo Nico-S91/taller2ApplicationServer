@@ -145,6 +145,22 @@ def get_info_drivers():
     response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
     return response
 
+@application.route('/api/v1/closestdrivers/latitude/<string:lat>/length/<string:lon>/radio/<string:radio>', methods=['GET'])
+def get_info_closest_drivers(lat, lon, radio):
+    """Devuelve la informacion de todos los choferes cercanos
+        @param lat es la latitud del lugar donde se busca a los choferes
+        @param lon es la longitud del lugar donde se busca a los choferes
+        @param radio es el radio donde se va a buscar a los choferes"""
+    application.logger.info('[GET] /api/v1/closestdrivers')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    _lat = float(lat)
+    _lon = float(lon)
+    _radio = float(radio)
+    response = CLIENT_CONTROLLER.get_closest_clients(TIPO_CHOFER, _lat, _lon, _radio)
+    return response
+
 @application.route('/api/v1/driver', methods=['POST'])
 def post_info_driver():
     """Crea un nuevo chofer"""

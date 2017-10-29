@@ -2,6 +2,7 @@
 """
 import json
 from flask import jsonify
+from model import db_manager
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
@@ -61,27 +62,6 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
-    #Metodos privados
-
-    def _is_your_trip(self, type_user, user_id, json_response):
-        """ Este metodo devuelve la informacion de un viaje
-            @param type_user es el tipo de usuario del viaje
-            @param user_id es el identificador del usuario
-            @param json_response es la informacion del viaje"""
-        if type_user == TIPO_CHOFER or type_user == TIPO_CLIENTE:
-            if json_response[type_user] == user_id:
-                return True
-        return False
-
-    def _get_response_trip_unauthorized(self):
-        """ Devuelve el response que indica que el viaje no pertenece al usuario"""
-        response = jsonify({
-            'code': -1,
-            'message': 'El viaje no pertenece al usuario'
-        })
-        response.status_code = 401
-        return response
-
     def get_last_location(self, user_id):
         """ Devuelve response de ultima ubicacion
             @param user_id un id de usuario
@@ -104,4 +84,51 @@ class TripController:
             'operation_result': operation_result
         })
         response.status_code = 200
+        return response
+
+    def get_closest_clients(self, type_client, lat, lon, radio):
+        """ Este metodo devuelve los ids de los clientes que se encontraron en el radio de busqueda
+            @param type_user es el tipo de usuario del viaje
+            @param lat es la latitud de la ubicacion
+            @param lon es la longitud de la ubicacion
+            @param radio es el radio de busqueda"""
+        #Calculo la latitud de busqueda
+        min_lat = lat - radio
+        max_lat = lat + radio
+        #Calculo la latitud de busqueda
+        min_lon = lon - radio
+        max_lon = lon + radio
+        #Busco las ubicaciones de todos los clientes que son del tipo type_client
+        clients = db_manager.get_locations_by_type(type_client)
+        if clients == []:
+            return []
+        #Filtro los clientes que cumplen con la latitud y longitud buscada
+        ids = []
+        for client in clients:
+            lat_client = float(client.get("lat"))
+            lon_client = float(client.get("long"))
+            if min_lat <= lat_client <= max_lat:
+                if min_lon <= lon_client <= max_lon:
+                    ids.append(client.get("id"))
+        return ids
+
+    #Metodos privados
+
+    def _is_your_trip(self, type_user, user_id, json_response):
+        """ Este metodo devuelve la informacion de un viaje
+            @param type_user es el tipo de usuario del viaje
+            @param user_id es el identificador del usuario
+            @param json_response es la informacion del viaje"""
+        if type_user == TIPO_CHOFER or type_user == TIPO_CLIENTE:
+            if json_response[type_user] == user_id:
+                return True
+        return False
+
+    def _get_response_trip_unauthorized(self):
+        """ Devuelve el response que indica que el viaje no pertenece al usuario"""
+        response = jsonify({
+            'code': -1,
+            'message': 'El viaje no pertenece al usuario'
+        })
+        response.status_code = 401
         return response
