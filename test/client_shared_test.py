@@ -2283,3 +2283,61 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_choferes_cercanos_con_usuario_inexistente(self):
+        """Prueba obtener los choferes cercanos cuando existe un usuario cerca"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            }
+        ]
+        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""[]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_choferes_cercanos_con_usuario_no_autorizado(self):
+        """Prueba obtener los choferes cercanos cuando existe un usuario cerca"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            }
+        ]
+        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No esta autorizado a obtener la info del usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""[]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
