@@ -2,6 +2,7 @@
 """
 import json
 from flask import jsonify
+from model import db_manager
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
@@ -98,7 +99,9 @@ class TripController:
         min_lon = lon - radio
         max_lon = lon + radio
         #Busco las ubicaciones de todos los clientes que son del tipo type_client
-        clients = []
+        clients = db_manager.get_locations_by_type(type_client)
+        if clients == []:
+            return []
         #Filtro los clientes que cumplen con la latitud y longitud buscada
         ids = []
         for client in clients:
