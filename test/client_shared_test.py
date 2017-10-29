@@ -1817,10 +1817,13 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         #Mock de la respuesta de la base de datos al pedir los choferes
-        list_locations = [{
-            "client_id": "1",
-            "lat": "-34.619996",
-            "long": "-58.686680"}]
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            }
+        ]
         db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
@@ -1903,6 +1906,380 @@ class TestClientController(unittest.TestCase):
             }
             ]
         }]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_choferes_cercanos2(self):
+        """Prueba obtener los choferes cercanos cuando existe un usuario cerca y otro usuario lejos"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            },
+            {
+                "client_id": "2",
+                "lat": "-44.619996",
+                "long": "-48.686680"
+            }
+        ]
+        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'chofer',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""
+        [{
+            "id": "23",
+            "_ref": "string",
+            "applicationOwner": "string",
+            "type": "chofer",
+            "cars": [
+            {
+                "id": "string",
+                "_ref": "string",
+                "owner": "string",
+                "properties": [
+                {
+                    "name": "string",
+                    "value": "string"
+                }
+                ]
+            }
+            ],
+            "username": "Khaleesi",
+            "name": "Daenerys",
+            "surname": "Targaryen",
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "birthdate": "01/01/1990",
+            "images": [
+            "string"
+            ],
+            "balance": [
+            {
+                "currency": "string",
+                "value": 0
+            }
+            ]
+        }]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_choferes_cercanos3(self):
+        """Prueba obtener los choferes cercanos cuando existe dos usuario cerca y otro usuario lejos"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            },
+            {
+                "client_id": "2",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            },
+            {
+                "client_id": "3",
+                "lat": "-44.619996",
+                "long": "-48.686680"
+            }
+        ]
+        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'chofer',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""
+        [{
+            "id": "23",
+            "_ref": "string",
+            "applicationOwner": "string",
+            "type": "chofer",
+            "cars": [
+            {
+                "id": "string",
+                "_ref": "string",
+                "owner": "string",
+                "properties": [
+                {
+                    "name": "string",
+                    "value": "string"
+                }
+                ]
+            }
+            ],
+            "username": "Khaleesi",
+            "name": "Daenerys",
+            "surname": "Targaryen",
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "birthdate": "01/01/1990",
+            "images": [
+            "string"
+            ],
+            "balance": [
+            {
+                "currency": "string",
+                "value": 0
+            }
+            ]
+        },
+        {
+            "id": "23",
+            "_ref": "string",
+            "applicationOwner": "string",
+            "type": "chofer",
+            "cars": [
+            {
+                "id": "string",
+                "_ref": "string",
+                "owner": "string",
+                "properties": [
+                {
+                    "name": "string",
+                    "value": "string"
+                }
+                ]
+            }
+            ],
+            "username": "Khaleesi",
+            "name": "Daenerys",
+            "surname": "Targaryen",
+            "country": "Valyria",
+            "email": "madre_dragones@got.com",
+            "birthdate": "01/01/1990",
+            "images": [
+            "string"
+            ],
+            "balance": [
+            {
+                "currency": "string",
+                "value": 0
+            }
+            ]
+        }]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_choferes_cercanos_pero_no_hay_choferes_cercanos(self):
+        """Prueba obtener los choferes cercanos cuando existe usuarios lejos"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-54.619996",
+                "long": "-58.686680"
+            },
+            {
+                "client_id": "2",
+                "lat": "-44.619996",
+                "long": "-48.686680"
+            }
+        ]
+        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'chofer',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""
+        []""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_choferes_cercanos_pero_no_hay_choferes(self):
+        """Prueba obtener los choferes cercanos cuando existe usuarios lejos"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        list_locations = []
+        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'chofer',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""
+        []""")
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
