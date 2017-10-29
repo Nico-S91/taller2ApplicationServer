@@ -112,9 +112,10 @@ class ClientController:
         ids = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
         clients = []
         for id_client in ids:
-            response_client = self.get_client(id_client, type_client)
+            response_client = self.get_client(id_client)
             if response_client.status_code == 200:
-                clients.append(response_client.text)
+                json_data = json.loads(response_client.data)
+                clients.append(json_data)
         return jsonify(clients)
 
     # Metodos para manipular la informacion de los autos

@@ -105,8 +105,8 @@ class TripController:
         #Filtro los clientes que cumplen con la latitud y longitud buscada
         ids = []
         for client in clients:
-            lat_client = client.get("lat")
-            lon_client = client.get("long")
+            lat_client = float(client.get("lat"))
+            lon_client = float(client.get("long"))
             if min_lat <= lat_client <= max_lat:
                 if min_lon <= lon_client <= max_lon:
                     ids.append(client.get("id"))

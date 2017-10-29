@@ -155,7 +155,10 @@ def get_info_closest_drivers(lat, lon, radio):
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
-    response = CLIENT_CONTROLLER.get_closest_clients(TIPO_CHOFER, lat, lon, radio)
+    _lat = float(lat)
+    _lon = float(lon)
+    _radio = float(radio)
+    response = CLIENT_CONTROLLER.get_closest_clients(TIPO_CHOFER, _lat, _lon, _radio)
     return response
 
 @application.route('/api/v1/driver', methods=['POST'])
