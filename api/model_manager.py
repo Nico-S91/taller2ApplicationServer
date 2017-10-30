@@ -12,6 +12,42 @@ class ModelManager:
         """constructor"""
         self.db_manager = model.db_manager
 
+    def get_info_usuario(self, user_id):
+        """Este metodo obtiene la informacion de un usuario en base de datos de Mongo
+            @param user_id id del usuario
+        """
+
+        usuarios = self.db_manager.get_table('usuarios')
+        user_info = usuarios.find_one({'idUsuario': user_id})
+
+        if user_info is None:
+            return {}
+        else:
+            response = {
+                'username': str(user_info.get('username')),
+                'type_client': str(user_info.get('type_client'))
+            }
+            return response
+    
+    def add_usuario(self, user_id, user_type, username):
+        """Este metodo agrega un usuario a la coleccion de usuarios en Mongo
+            @param user_id el id del nuevo usuario
+            @param user_type el tipo de usuario (chofer o pasajero)
+            @param username su nickname
+        """
+
+        #creo el nuevo user
+        new_user = {
+            "username": username,
+            "id_usuario": user_id,
+            "type_client": user_type
+        }
+
+        usuarios = self.db_manager.get_table('usuarios')
+
+        return usuarios.insert_one(new_user).acknowledged
+
+
     def add_last_known_position(self, user_id, user_type, latitud, longitud):
         """Este metodo graba en la base de datos 'UltimasPosiciones'
             la ultima posicion registrada del usuario.
