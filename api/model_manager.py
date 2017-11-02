@@ -135,6 +135,32 @@ class ModelManager:
 
         return None
 
+    def start_trip(self, trip_id):
+        """ Este metodo inicia el timestamp del atributo start de un viaje
+            @param trip_id el id del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
+        
+        return False
+
+    def end_trip(self, trip_id):
+        """ Este metodo termina, y marca con un timestamp del atributo end de un viaje
+            @param trip_id el id del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.datetime.now()}}, upsert=False).acknowledged
+
+        return False
+
     def add_last_known_position(self, user_id, user_type, latitud, longitud):
         """ Este metodo graba en la base de datos 'UltimasPosiciones'
             la ultima posicion registrada del usuario.
