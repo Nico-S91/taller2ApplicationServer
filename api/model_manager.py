@@ -25,7 +25,7 @@ class ModelManager:
         else:
             response = {
                 'username': str(user_info.get('username')),
-                'type_client': str(user_info.get('type_client'))
+                'typeClient': str(user_info.get('typeClient'))
             }
             return response
     
@@ -39,14 +39,56 @@ class ModelManager:
         #creo el nuevo user
         new_user = {
             "username": username,
-            "id_usuario": user_id,
-            "type_client": user_type
+            "idUsuario": user_id,
+            "typeClient": user_type
         }
 
         usuarios = self.db_manager.get_table('usuarios')
-
         return usuarios.insert_one(new_user).acknowledged
 
+    def add_viaje(self, info_viaje):
+        """Este metodo guarda la informacion de un nuevo viaje publicado
+            @param info_viaje un dictionary con la info del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+
+        new_viaje = {
+            "idViaje": info_viaje.idViaje,
+            "idDriver": info_viaje.idDriver,
+            "idPassenger": info_viaje.idPassenger,
+            "trip": info_viaje.tripInfo,
+            "paymethod": info_viaje.payMethod,
+            "route": [],
+            "aceptoViaje": info_viaje.aceptoViaje
+        }
+
+        return viajes.insert_one(new_viaje).acknowledged
+
+    def get_locations_by_type(self, client_type):
+        """ Este metodo devuelve un array de ubicaciones de todos los clientes 
+            con el tipo dado con su id y el par <latitud, longitud>
+            @param client_type el tipo de cliente
+        """
+        result = []
+
+        #Obtengo todos los usuarios del tipo client_type
+        usuarios = self.db_manager.get_table('usuarios')
+        usuarios_by_tipo = usuarios.find({'typeClient': client_type}, {"_id": 0, "idUsuario": 1})
+
+        ubicaciones = self.db_manager.get_table('ubicaciones')
+
+        for user_id in usuarios_by_tipo:
+            last_location = ubicaciones.find_one({'idUsuario': user_id})
+            if last_location is not None:
+                new_last_location = {
+                    "client_id": user_id,
+                    "lat": last_location.get('lat'),
+                    "long": last_location.get('long')
+                }
+                result.append(new_last_location)
+        
+        return result
 
     def add_last_known_position(self, user_id, user_type, latitud, longitud):
         """Este metodo graba en la base de datos 'UltimasPosiciones'
@@ -66,7 +108,7 @@ class ModelManager:
             #no hay ultima posicion, entonces creo una nueva entrada
             nueva_posicion = {
                 "idUsuario": user_id,
-                "tipo_usuario": user_type,
+                "tipoUsuario": user_type,
                 "lat": latitud,
                 "long": longitud,
                 "stamp": str(datetime.now())
