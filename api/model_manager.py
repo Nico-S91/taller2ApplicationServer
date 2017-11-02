@@ -149,6 +149,28 @@ class ModelManager:
                 }
             }, upsert=False).acknowledged
 
+    def get_trip(self, trip_id):
+        """ Este metodo obtiene el viaje dado su id
+            @param trip_id el id del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            response = {
+                "trip_id": viaje.get('idViaje'),
+                "driver_id": viaje.get('idDriver'),
+                "passenger_id": viaje.get('idPassenger'),
+                "trip": viaje.get('trip'),
+                "paymethod": viaje.get('paymethod'),
+                "route": viaje.get('route'),
+                "aceptoViaje": viaje.get('aceptoViaje')
+            }
+            return response
+
+        return None
+
     def get_last_known_position(self, client_id):
         """Este metodo obtiene la ultima posicion conocida por
         el app server de un usuario"""
