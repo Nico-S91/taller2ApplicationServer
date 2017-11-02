@@ -87,11 +87,34 @@ class ModelManager:
                     "long": last_location.get('long')
                 }
                 result.append(new_last_location)
+        return result
+
+    def add_location_to_trip(self, location, trip_id):
+        """ Este metodo agrega una ubicacion a un viaje
+            @param location una ubicacion
+            @param trip_id el id del viaje
+        """
+
+        result = False
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            locations = viaje.get('route')
+            new_location = {
+                "location": {
+                    "lat": location.get('lat'),
+                    "long": location.get('long')
+                },
+                "timestamp": datetime.datetime.now().date()
+            }
+            locations.append(new_location)
+            result = viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'route': locations}}, upsert=False).acknowledged
         
         return result
 
     def add_last_known_position(self, user_id, user_type, latitud, longitud):
-        """Este metodo graba en la base de datos 'UltimasPosiciones'
+        """ Este metodo graba en la base de datos 'UltimasPosiciones'
             la ultima posicion registrada del usuario.
             @param user_id el id del usuario
             @param user_type el tipo de usuario
