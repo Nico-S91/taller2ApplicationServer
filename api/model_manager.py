@@ -46,6 +46,14 @@ class ModelManager:
         usuarios = self.db_manager.get_table('usuarios')
         return usuarios.insert_one(new_user).acknowledged
 
+    def delete_usuario(self, user_id):
+        """ Este metodo elimina un usuario de la coleccion de usuarios en Mongo
+            @param user_id un id de usuario
+        """
+
+        usuarios = self.db_manager.get_table('usuarios')
+        return usuarios.delete_one({'idUsuario': user_id}).acknowledged
+
     def add_viaje(self, info_viaje):
         """Este metodo guarda la informacion de un nuevo viaje publicado
             @param info_viaje un dictionary con la info del viaje
