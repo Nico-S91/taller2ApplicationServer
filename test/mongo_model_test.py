@@ -51,5 +51,11 @@ class TestMongoMOdel(unittest.TestCase):
         # print(str(recovered_trip.get("paymethod")))
         # print(str(recovered_trip.get("route")))
         # print(str(recovered_trip.get("aceptoViaje")))
-
+        self.assertEqual(recovered_trip.get('trip_id'), 1)
+        self.assertEqual(recovered_trip.get('driver_id'), 28)
+        self.assertEqual(recovered_trip.get('passenger_id'), 10)
+        self.assertEqual(recovered_trip.get('trip'), trip_info)
+        self.assertEqual(recovered_trip.get('paymethod'), pay_method)
+        self.assertEqual(recovered_trip.get('route'), [])
+        self.assertEqual(recovered_trip.get('aceptoViaje'), False)
         self.assertTrue(self.model_manager.delete_trip(viaje))
