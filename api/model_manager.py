@@ -54,7 +54,7 @@ class ModelManager:
         usuarios = self.db_manager.get_table('usuarios')
         return usuarios.delete_one({'idUsuario': user_id}).acknowledged
 
-    def add_viaje(self, info_viaje):
+    def add_trip(self, info_viaje):
         """Este metodo guarda la informacion de un nuevo viaje publicado
             @param info_viaje un dictionary con la info del viaje
         """
@@ -62,13 +62,13 @@ class ModelManager:
         viajes = self.db_manager.get_table('viajes')
 
         new_viaje = {
-            "idViaje": info_viaje.idViaje,
-            "idDriver": info_viaje.idDriver,
-            "idPassenger": info_viaje.idPassenger,
-            "trip": info_viaje.tripInfo,
-            "paymethod": info_viaje.payMethod,
+            "idViaje": info_viaje.get("trip_id"),
+            "idDriver": info_viaje.get("driver"),
+            "idPassenger": info_viaje.get("passenger"),
+            "trip": info_viaje.get("trip"),
+            "paymethod": info_viaje.get("paymethod"),
             "route": [],
-            "aceptoViaje": info_viaje.aceptoViaje
+            "aceptoViaje": info_viaje.get("accepted")
         }
 
         return viajes.insert_one(new_viaje).acknowledged
@@ -142,6 +142,14 @@ class ModelManager:
             return response
 
         return None
+
+    def delete_trip(self, trip_id):
+        """ Este metodo elimina un viaje
+            @param trip_id el id del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        return viajes.delete_one({'idViaje': trip_id}).acknowledged
 
     def start_trip(self, trip_id):
         """ Este metodo inicia el timestamp del atributo start de un viaje

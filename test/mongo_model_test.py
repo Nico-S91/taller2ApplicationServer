@@ -16,7 +16,7 @@ class TestMongoMOdel(unittest.TestCase):
         self.model_manager = ModelManager()
 
     def test_add_get_usuario(self):
-        """Se prueban las operaciones de Alta, Baja, y Modificacion de Usuario"""
+        """Se prueban las operaciones de Alta, Baja y Modificacion de Usuario"""
         user_id = 28
         user_type = "driver"
         username = "Nico"
@@ -27,3 +27,29 @@ class TestMongoMOdel(unittest.TestCase):
         self.assertEqual(recovered_user.get('typeClient'), user_type)
         #Borro el usuario creado
         self.assertTrue(self.model_manager.delete_usuario(user_id))
+
+    def test_add_get_viaje(self):
+        """Se prueban las operaciones de Alta, Baja y Modificacion de Viaje"""
+        trip_info = '{\r\n  \"trip\": {\r\n    \"driver\": \"string\",\r\n    \"passenger\": \"string\",\r\n    \"start\": {\r\n      \"address\": {\r\n        \"street\": \"string\",\r\n        \"location\": {\r\n          \"lat\": 0,\r\n          \"lon\": 0\r\n        }\r\n      }\r\n    },\r\n    \"end\": {\r\n      \"address\": {\r\n        \"street\": \"string\",\r\n        \"location\": {\r\n          \"lat\": 0,\r\n          \"lon\": 0\r\n        }\r\n      }\r\n    },\r\n    \"distance\": 0\r\n  }\r\n}'
+        pay_method = '{\r\n    \"paymethod\": \"string\",\r\n    \"parameters\": {}\r\n  }'
+        viaje = {
+            "trip_id": 1,
+            "driver": 28,
+            "passenger": 10,
+            "trip": trip_info,
+            "paymethod": pay_method,
+            "accepted": False
+        }
+
+        self.assertTrue(self.model_manager.add_trip(viaje))
+        recovered_trip = self.model_manager.get_trip(1)
+
+        # print(str(recovered_trip.get("trip_id")))
+        # print(str(recovered_trip.get("driver_id")))
+        # print(str(recovered_trip.get("passenger_id")))
+        # print(str(recovered_trip.get("trip")))
+        # print(str(recovered_trip.get("paymethod")))
+        # print(str(recovered_trip.get("route")))
+        # print(str(recovered_trip.get("aceptoViaje")))
+
+        self.assertTrue(self.model_manager.delete_trip(viaje))
