@@ -247,3 +247,16 @@ class ModelManager:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'idDriver': driver_id}}, upsert=False).acknowledged
         else:
             return False
+    
+    def accept_trip(self, trip_id):
+        """ Este metodo tilda al viaje como aceptado
+            @param trip_id el id del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged
+        else:
+            return False
