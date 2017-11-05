@@ -161,7 +161,7 @@ class ModelManager:
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
-        
+
         return False
 
     def end_trip(self, trip_id):
@@ -233,3 +233,30 @@ class ModelManager:
         }
 
         return jsonify(response)
+
+    def add_driver_to_trip(self, trip_id,  driver_id):
+        """ Este metodo agrega el chofer asignado a un viaje.
+            @param trip_id el id del viaje
+            @param driver_id el id del chofer asignado
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'idDriver': driver_id}}, upsert=False).acknowledged
+        else:
+            return False
+    
+    def accept_trip(self, trip_id):
+        """ Este metodo tilda al viaje como aceptado
+            @param trip_id el id del viaje
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viaje = viajes.find_one({'idViaje': trip_id})
+
+        if viaje is not None:
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged
+        else:
+            return False
