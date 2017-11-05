@@ -177,55 +177,59 @@ class ModelManager:
 
         return False
 
-    def add_last_known_position(self, user_id, user_type, latitud, longitud):
+    def add_last_known_position(self, user_id, latitud, longitud, accuracy):
         """ Este metodo graba en la base de datos 'UltimasPosiciones'
             la ultima posicion registrada del usuario.
             @param user_id el id del usuario
-            @param user_type el tipo de usuario
             @param latitud latitud en mapa
             @param longitud longitud en mapa
+            @param accuracy el radio de precision
         """
         #obtengo la tabla de ultimas posiciones
-        ultimas_posiciones = self.db_manager.get_table('ultimasPosiciones')
+        ubicaciones = self.db_manager.get_table('ubicaciones')
 
         #busco si ya hay una posicion registrada para el usuario con esta id
-        last_position = ultimas_posiciones.find_one({'idUsuario': user_id})
+        ultima_ubicacion = ubicaciones.find_one({'idUsuario': user_id})
 
-        if last_position is None:
+        if ultima_ubicacion is None:
             #no hay ultima posicion, entonces creo una nueva entrada
             nueva_posicion = {
                 "idUsuario": user_id,
-                "tipoUsuario": user_type,
+                "timestamp": str(datetime.now()),
                 "lat": latitud,
                 "long": longitud,
-                "stamp": str(datetime.now())
+                "accuracy": accuracy
             }
 
             #agrego la nueva posicion a la coleccion y devuelvo el resultado de la operacion
-            return ultimas_posiciones.insert_one(nueva_posicion).acknowledged
+            return ubicaciones.insert_one(nueva_posicion).acknowledged
         else:
-            return ultimas_posiciones.update_one({
-                '_id': str(last_position.get('_id'))
+            return ubicaciones.update_one({
+                '_id': str(ultima_ubicacion.get('_id'))
             }, {
                 '$set': {
                     'lat': latitud,
-                    'long': longitud
+                    'long': longitud,
+                    'accuracy': accuracy
                 }
             }, upsert=False).acknowledged
 
     def get_last_known_position(self, client_id):
         """Este metodo obtiene la ultima posicion conocida por
-        el app server de un usuario"""
+            el app server de un usuario
+            @param client_id el id del cliente
+        """
 
         #obtengo la coleccion
-        ultimas_posiciones = self.db_manager.get_table('ultimasPosiciones')
+        ubicaciones = self.db_manager.get_table('ubicaciones')
 
-        ultima_pos = ultimas_posiciones.find_one({'idUsuario': client_id})
+        ultima_ubicacion = ubicaciones.find_one({'idUsuario': client_id})
 
         response = {
-            "lat": str(ultima_pos.get('lat')),
-            "long": str(ultima_pos.get('long')),
-            "stamp": str(ultima_pos.get('stamp'))
+            "lat": str(ultima_ubicacion.get('lat')),
+            "long": str(ultima_ubicacion.get('long')),
+            "accuracy": str(ultima_ubicacion.get('accuracy')),
+            "stamp": str(ultima_ubicacion.get('stamp'))
         }
 
         return jsonify(response)

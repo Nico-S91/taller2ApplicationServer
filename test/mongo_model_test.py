@@ -59,3 +59,6 @@ class TestMongoMOdel(unittest.TestCase):
         self.assertEqual(recovered_trip.get('route'), [])
         self.assertEqual(recovered_trip.get('aceptoViaje'), False)
         self.assertTrue(self.model_manager.delete_trip(viaje))
+
+    def get_locations_by_type(self):
+        """Se prueba que se obtienen las ubicaciones de todos los usuarios de un determinado tipo"""
