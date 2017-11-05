@@ -188,8 +188,6 @@ class ModelManager:
         #obtengo la tabla de ultimas posiciones
         ubicaciones = self.db_manager.get_table('ubicaciones')
 
-        print(self.db_manager.DB_URL)
-
         #busco si ya hay una posicion registrada para el usuario con esta id
         ultima_ubicacion = ubicaciones.find_one({'idUsuario': user_id})
 
