@@ -10,6 +10,7 @@ from model import db_manager
 from mock import MagicMock
 from service.shared_server import SharedServer
 from api.client_controller import ClientController
+from api.model_manager import ModelManager
 from flask import jsonify
 from test.response_mock import ResponseMock
 
@@ -1824,7 +1825,7 @@ class TestClientController(unittest.TestCase):
                 "long": "-58.686680"
             }
         ]
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -1927,7 +1928,7 @@ class TestClientController(unittest.TestCase):
                 "long": "-48.686680"
             }
         ]
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -2035,7 +2036,7 @@ class TestClientController(unittest.TestCase):
                 "long": "-48.686680"
             }
         ]
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -2172,7 +2173,7 @@ class TestClientController(unittest.TestCase):
                 "long": "-48.686680"
             }
         ]
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -2231,7 +2232,7 @@ class TestClientController(unittest.TestCase):
         self.mockeamos_login_correcto()
         #Mock de la respuesta de la base de datos al pedir los choferes
         list_locations = []
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -2296,7 +2297,7 @@ class TestClientController(unittest.TestCase):
                 "long": "-58.686680"
             }
         ]
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -2325,7 +2326,7 @@ class TestClientController(unittest.TestCase):
                 "long": "-58.686680"
             }
         ]
-        db_manager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
