@@ -28,7 +28,7 @@ class ModelManager:
                 'typeClient': str(user_info.get('typeClient'))
             }
             return response
-    
+
     def add_usuario(self, user_id, user_type, username):
         """Este metodo agrega un usuario a la coleccion de usuarios en Mongo
             @param user_id el id del nuevo usuario
@@ -74,7 +74,7 @@ class ModelManager:
         return viajes.insert_one(new_viaje).acknowledged
 
     def get_locations_by_type(self, client_type):
-        """ Este metodo devuelve un array de ubicaciones de todos los clientes 
+        """ Este metodo devuelve un array de ubicaciones de todos los clientes
             con el tipo dado con su id y el par <latitud, longitud>
             @param client_type el tipo de cliente
         """

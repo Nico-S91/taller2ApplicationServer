@@ -405,6 +405,7 @@ def post_estimate():
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
     return response
 
+#Endpoints test de mongo!
 @application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
 def get_last_location(client_id):
     """Devuelve la ultima ubicacion conocida de un usuario
