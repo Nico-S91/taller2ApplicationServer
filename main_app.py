@@ -412,7 +412,7 @@ def get_trips_client(client_id):
 def get_trips_driver_accept(driver_id, trip_id):
     """Obtiene la informacion de los viajes de un cliente
     @param driver_id es el identificador del cliente"""
-    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id))
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id) + '/accept')
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
