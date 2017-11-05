@@ -50,6 +50,21 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def accept_trip(self, driver_id, trip_id):
+        """ Este metodo al conductor aceptar un viaje
+            @param driver_id identificador del cliente
+            @param trip_id identificador del viaje"""
+        #Vamos a verificar que el driver_id es un chofer
+            #sino tirar excepcion "El usuario no es un chofer"
+
+        #Vamos a verificar que el conductor puede aceptar ese viaje
+        #si el driver_id es el mismo que el que guarda el viaje
+            #entonce se acepta el viaje
+        #si esta vacio el identificador en el viaje
+            #entonces se le agrega el identificador al viaje y se acepta
+        #sino tirar excepcion "El viaje ya esta asignado a otro chofer"
+
+
     def post_new_estimate(self, data):
         """ Este metodo permite devuelve la estimacion de un viaje
             @param car_json informacion del auto

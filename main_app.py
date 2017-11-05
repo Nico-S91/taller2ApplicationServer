@@ -408,6 +408,17 @@ def get_trips_client(client_id):
     response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>/accept', methods=['PUT'])
+def get_trips_driver_accept(driver_id, trip_id):
+    """Obtiene la informacion de los viajes de un cliente
+    @param driver_id es el identificador del cliente"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
+    return response
+
 @application.route('/api/v1/trips/estimate', methods=['POST'])
 def post_estimate():
     """Devuelve la estimacion de un viaje
