@@ -2,11 +2,14 @@
 """
 import json
 from flask import jsonify
+from model import db_manager
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
+from api.model_manager import ModelManager
 
 SHARED_SERVER = SharedServer()
+MODEL_MANAGER = ModelManager()
 
 class TripController:
     """Esta clase tiene los metodos para manajar la informacion de los viajes"""
@@ -58,6 +61,56 @@ class TripController:
         response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         return response
+
+    def get_last_location(self, user_id):
+        """ Devuelve response de ultima ubicacion
+            @param user_id un id de usuario
+        """
+        response = MODEL_MANAGER.get_last_known_position(user_id)
+        response.status_code = 200
+        return response
+
+    def post_new_last_location(self, data):
+        """ guarda la nueva ultima ubicacion de un usuario
+            si no habia una anterior, la crea, sino la modifica
+            @param data el json de request para dar de alta la ubicacion
+        """
+        user_id = data.get('user_id')
+        lat = data.get('lat')
+        lon = data.get('long')
+        accuracy = data.get('accuracy')
+        operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
+        response = jsonify({
+            'operation_result': operation_result
+        })
+        response.status_code = 200
+        return response
+
+    def get_closest_clients(self, type_client, lat, lon, radio):
+        """ Este metodo devuelve los ids de los clientes que se encontraron en el radio de busqueda
+            @param type_user es el tipo de usuario del viaje
+            @param lat es la latitud de la ubicacion
+            @param lon es la longitud de la ubicacion
+            @param radio es el radio de busqueda"""
+        #Calculo la latitud de busqueda
+        min_lat = lat - radio
+        max_lat = lat + radio
+        #Calculo la latitud de busqueda
+        min_lon = lon - radio
+        max_lon = lon + radio
+        #Busco las ubicaciones de todos los clientes que son del tipo type_client
+        clients = MODEL_MANAGER.get_locations_by_type(type_client)
+        if clients == []:
+            return []
+        #Filtro los clientes que cumplen con la latitud y longitud buscada
+        ids = []
+        for client in clients:
+            lat_client = float(client.get("lat"))
+            lon_client = float(client.get("long"))
+            if min_lat <= lat_client <= max_lat:
+                if min_lon <= lon_client <= max_lon:
+                    ids.append(client.get("id"))
+        return ids
 
     #Metodos privados
 

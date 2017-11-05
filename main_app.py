@@ -145,6 +145,22 @@ def get_info_drivers():
     response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
     return response
 
+@application.route('/api/v1/closestdrivers/latitude/<string:lat>/length/<string:lon>/radio/<string:radio>', methods=['GET'])
+def get_info_closest_drivers(lat, lon, radio):
+    """Devuelve la informacion de todos los choferes cercanos
+        @param lat es la latitud del lugar donde se busca a los choferes
+        @param lon es la longitud del lugar donde se busca a los choferes
+        @param radio es el radio donde se va a buscar a los choferes"""
+    application.logger.info('[GET] /api/v1/closestdrivers')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    _lat = float(lat)
+    _lon = float(lon)
+    _radio = float(radio)
+    response = CLIENT_CONTROLLER.get_closest_clients(TIPO_CHOFER, _lat, _lon, _radio)
+    return response
+
 @application.route('/api/v1/driver', methods=['POST'])
 def post_info_driver():
     """Crea un nuevo chofer"""
@@ -403,6 +419,24 @@ def post_estimate():
     if not request.json:
         abort(400)
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
+    return response
+
+#Endpoints test de mongo!
+@application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
+def get_last_location(client_id):
+    """Devuelve la ultima ubicacion conocida de un usuario
+    """
+    application.logger.info('[GET] /api/v1/lastlocation')
+    response = TRIP_CONTROLLER.get_last_location(client_id)
+    return response
+
+@application.route('/api/v1/lastlocation', methods=['POST'])
+def add_last_location():
+    """ Agrega la ultima ubicacion asociada a un usuario
+    """
+    application.logger.info('[POST] /api/v1/lastlocation')
+    #falta agregar el logueo?
+    response = TRIP_CONTROLLER.post_new_last_location(request.json)
     return response
 
 #Para pruebas
