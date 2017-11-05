@@ -76,10 +76,10 @@ class TripController:
             @param data el json de request para dar de alta la ubicacion
         """
         user_id = data.get('user_id')
-        user_type = data.get('user_type')
         lat = data.get('lat')
         lon = data.get('long')
-        operation_result = MODEL_MANAGER.add_last_known_position(user_id, user_type, lat, lon)
+        accuracy = data.get('accuracy')
+        operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
         response = jsonify({
             'operation_result': operation_result
         })
