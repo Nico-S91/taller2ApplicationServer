@@ -2,14 +2,15 @@
 """
 import json
 from service.shared_server import SharedServer
+from api.trip_controller import TripController
 from flask import jsonify
 
 SHARED_SERVER = SharedServer()
+TRIP_CONTROLLER = TripController()
 CODIGO_OK = 0
 CAMPO_COLISIONES = '_ref'
 JSON_CAR = 'car'
 JSON_CLIENT = 'user'
-
 
 class ClientController:
     """Esta clase tiene los metodos para manajar la informacion de los clientes"""
@@ -100,6 +101,22 @@ class ClientController:
         response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         return response
+
+    def get_closest_clients(self, type_client, lat, lon, ratio):
+        """ Este metodo devuelve los clientes que esten cercanos a una determinada posicion
+            @param type_client es el tipo de cliente
+            @param lat es la latitud del lugar donde se busca
+            @param lon es la longitud del lugar donde se busca
+            @param ratio es el radio que se busca a los clientes"""
+        #Primero busco los ids de los choferes
+        ids = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
+        clients = []
+        for id_client in ids:
+            response_client = self.get_client(id_client)
+            if response_client.status_code == 200:
+                json_data = json.loads(response_client.data)
+                clients.append(json_data)
+        return jsonify(clients)
 
     # Metodos para manipular la informacion de los autos
 
