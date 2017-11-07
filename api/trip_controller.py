@@ -109,10 +109,10 @@ class TripController:
             @param data el json de request para dar de alta la ubicacion
         """
         user_id = data.get('user_id')
-        user_type = data.get('user_type')
         lat = data.get('lat')
         lon = data.get('long')
-        operation_result = MODEL_MANAGER.add_last_known_position(user_id, user_type, lat, lon)
+        accuracy = data.get('accuracy')
+        operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
         response = jsonify({
             'operation_result': operation_result
         })
@@ -132,7 +132,7 @@ class TripController:
         min_lon = lon - radio
         max_lon = lon + radio
         #Busco las ubicaciones de todos los clientes que son del tipo type_client
-        clients = db_manager.get_locations_by_type(type_client)
+        clients = MODEL_MANAGER.get_locations_by_type(type_client)
         if clients == []:
             return []
         #Filtro los clientes que cumplen con la latitud y longitud buscada

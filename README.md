@@ -31,3 +31,6 @@ Para correr el linter de la aplicacion, correr el comando **pylint --rcfile=.pyl
 
 ## Tests
 Para correr los tests de la aplicación, correr el comando **pytest test/**
+
+##Levantar MongoDB en UBUNTU
+Para levantar la instancia de MongoDB correr el comando **sudo service mongod start**
