@@ -6,10 +6,12 @@ from model import db_manager
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
+from api.client_controller import ClientController
 from api.model_manager import ModelManager
 
 SHARED_SERVER = SharedServer()
 MODEL_MANAGER = ModelManager()
+CLIENT_CONTROLLER = ClientController()
 
 class TripController:
     """Esta clase tiene los metodos para manajar la informacion de los viajes"""
@@ -49,6 +51,37 @@ class TripController:
         response = jsonify(json_response)
         response.status_code = response_shared_server.status_code
         return response
+
+    def post_accept_trip(self, user_id, trip_id):
+        """ Este metodo permite que un chofer acepte realizar un viaje
+            @param user_id es el identificador del usuario
+            @param trip_id es el identificador del viaje"""
+        #Primero verifico que el usuario sea de un chofer
+        info_usuario = {} #Hay que pedirle a Mongo la info
+        if info_usuario == {}:
+            response_client = CLIENT_CONTROLLER.get_client(user_id)
+            if response_client.status_code == 200:
+                info_usuario = json.loads(response_client.data)
+            else:
+                response = jsonify(code=10, message='El usuario ' + str(user_id) + ' no existe')
+                response.status_code = 404
+                return response
+        if info_usuario.get('type_client') == TIPO_CLIENTE:
+            response = jsonify(code=10, message='El usuario no es un chofer, por lo tanto no puede aceptar un viaje')
+            response.status_code = 400
+            return response
+        #Busco la informacion del viaje
+        info_trip = {} #Hay que pedirle a Mongo la info
+        if info_trip == {}:
+             response = jsonify(code=10, message='El viaje '+ str(trip_id) +' no existe')
+                response.status_code = 404
+                return response
+        #Si tiene un chofer asignado entonces verifico que sea el mismo id sino tirar error
+        #Si no tiene un chofer asignado entonces le asigno el chofer
+        #Si llego hasta aca entonces le pongo a la info del viaje que esta aprobada
+        #Guardo la informacion en Mongo
+        #Devuelvo la info actualizada
+        return jsonify()
 
     def post_new_estimate(self, data):
         """ Este metodo permite devuelve la estimacion de un viaje
