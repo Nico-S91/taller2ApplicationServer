@@ -56,19 +56,22 @@ class TripController:
             @param trip_id identificador del viaje"""
         is_driver = True
         info_user = MODEL_MANAGER.get_info_usuario(driver_id)
-        #Verificamos que el usuario se un chofer
-        if info_user is None:
+        #Verificamos que el usuario sea un chofer
+        if info_user == {}:
             response_shared_server = SHARED_SERVER.get_client(driver_id)
             if response_shared_server.status_code != 200:
                 #VER QUE OTROS ERRORES PUEDE DEVOLVER EL SHARED SERVER!!!
                 #No existe el usuario
                 response = jsonify(code=-5, message='El usuario ' + str(driver_id) + ' no existe.')
-                response.status_code = 400
+                response.status_code = 404
                 return response
             else:
                 info_user = json.loads(response_shared_server.text).get('user')
                 if info_user.get('type') != TIPO_CHOFER:
                     is_driver = False
+                #Agrego la info a la base
+                MODEL_MANAGER.add_usuario(driver_id, info_user.get('type'),
+                                          info_user.get('username'))
         else:
             if info_user.get('typeClient') != TIPO_CHOFER:
                 is_driver = False
@@ -79,27 +82,27 @@ class TripController:
             return response
 
         #Vamos a verificar que el conductor puede aceptar ese viaje
-        response_mongo = 0
+        response_mongo = False
         info_trip = MODEL_MANAGER.get_trip(trip_id)
         if info_trip is None:
             response = jsonify(code=-4, message='El viaje ' + str(trip_id) + ' no existe.')
-            response.status_code = 400
+            response.status_code = 404
             return response
         if info_trip.get('driver_id') is None:
-            #El viaje no tiene un chofer asignado
-            #entonces se le agrega el identificador al viaje, se acepta y guardo
-            #la respuesta en response_mongo
-            response_mongo=0
+            #Agrego el identificador al viaje y se acepto
+            response_mongo = MODEL_MANAGER.add_driver_to_trip(trip_id, driver_id)
+            if response_mongo:
+                response_mongo = MODEL_MANAGER.accept_trip(trip_id)
         else:
             if info_trip.get('driver_id') == driver_id:
-                #entonce se acepta el viaje y guardo la respuesta en response_mongo
-                response_mongo=0
+                #Acepto el viaje
+                response_mongo = MODEL_MANAGER.accept_trip(trip_id)
             else:
                 response = jsonify(code=-3, message='El viaje ' + str(trip_id) +
                                    ' esta asignado a otro chofer.')
                 response.status_code = 400
                 return response
-        if response_mongo == 0:
+        if response_mongo:
             #Se pudo aceptar el viaje
             response = jsonify(code=0, message='El chofer ' + str(driver_id) +
                                ' acepto el viaje ' + str(trip_id) + '.')
