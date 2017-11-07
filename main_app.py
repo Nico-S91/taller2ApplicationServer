@@ -410,13 +410,28 @@ def get_trips_client(client_id):
 
 @application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>/accept', methods=['PUT'])
 def get_trips_driver_accept(driver_id, trip_id):
-    """Obtiene la informacion de los viajes de un cliente
-    @param driver_id es el identificador del cliente"""
-    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id) + '/accept')
+    """El chofer acepta realizar un viaje
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/'
+                            + str(trip_id) + '/accept')
     #Veo si esta logueado
     if not is_logged():
         return response_invalid_login()
     response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/start', methods=['PUT'])
+def get_trips_client_start(client_id, trip_id):
+    """El cliente confirma que comenzo el viaje
+    @param client_id es el identificador del cliente
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(client_id) + '/trips/'
+                            + str(trip_id) + '/start')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.start_trip(client_id, trip_id)
     return response
 
 @application.route('/api/v1/trips/estimate', methods=['POST'])
