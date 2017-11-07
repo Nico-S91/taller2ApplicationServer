@@ -6,7 +6,7 @@ import main_app
 from flask import jsonify
 from api.model_manager import ModelManager
 
-class TestMongoMOdel(unittest.TestCase):
+# class TestMongoMOdel(unittest.TestCase):
     # """ Esta clase tiene los test de los metodos de manipulacion del modelo en MongoDB
     # """
 
@@ -62,4 +62,3 @@ class TestMongoMOdel(unittest.TestCase):
 
     # # def get_locations_by_type(self):
     # #     """Se prueba que se obtienen las ubicaciones de todos los usuarios de un determinado tipo"""
-        

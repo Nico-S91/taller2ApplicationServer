@@ -162,7 +162,7 @@ class TripController:
         min_lon = lon - radio
         max_lon = lon + radio
         #Busco las ubicaciones de todos los clientes que son del tipo type_client
-        clients = db_manager.get_locations_by_type(type_client)
+        clients = MODEL_MANAGER.get_locations_by_type(type_client)
         if clients == []:
             return []
         #Filtro los clientes que cumplen con la latitud y longitud buscada
