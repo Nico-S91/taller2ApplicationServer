@@ -50,6 +50,79 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def finish_trip(self, client_id, trip_id):
+        """ Este metodo indica que se comenzo un viaje
+            @param client_id identificador del cliente
+            @param trip_id identificador del viaje"""
+        is_client = True
+        info_user = MODEL_MANAGER.get_info_usuario(client_id)
+        #Verificamos que el usuario sea un cliente
+        if info_user == {}:
+            response_shared_server = SHARED_SERVER.get_client(client_id)
+            if response_shared_server.status_code != 200:
+                #VER QUE OTROS ERRORES PUEDE DEVOLVER EL SHARED SERVER!!!
+                #No existe el usuario
+                response = jsonify(code=-5, message='El usuario ' + str(client_id) + ' no existe.')
+                response.status_code = 404
+                return response
+            else:
+                info_user = json.loads(response_shared_server.text).get('user')
+                if info_user.get('type') != TIPO_CLIENTE:
+                    is_client = False
+                #Agrego la info a la base
+                MODEL_MANAGER.add_usuario(client_id, info_user.get('type'),
+                                          info_user.get('username'))
+        else:
+            if info_user.get('typeClient') != TIPO_CLIENTE:
+                is_client = False
+        if is_client is False:
+            response = jsonify(code=-2, message='El usuario ' + str(client_id) +
+                               ' no es un pasajero.')
+            response.status_code = 400
+            return response
+
+        #Vamos a verificar que el viaje pertenezca al cliente
+        response_mongo = False
+        info_trip = MODEL_MANAGER.get_trip(trip_id)
+        if info_trip is None:
+            response = jsonify(code=-4, message='El viaje ' + str(trip_id) + ' no existe.')
+            response.status_code = 404
+            return response
+        if info_trip.get('passenger_id') is None:
+            response = jsonify(code=-4, message='El viaje ' + str(trip_id) +
+                               ' no le pertenece al usuario ' + client_id + '.')
+            response.status_code = 400
+            return response
+        else:
+            if info_trip.get('passenger_id') == client_id:
+                #Veo si el viaje fue comenzado
+                if info_trip.get('startStamp') is None:
+                    response = jsonify(code=-4, message='El viaje ' + str(trip_id) +
+                                       ' no fue comenzado.')
+                    response.status_code = 400
+                    return response
+                else:
+                    #Termino el viaje
+                    response_mongo = MODEL_MANAGER.end_trip(trip_id)
+            else:
+                response = jsonify(code=-4, message='El viaje ' + str(trip_id) +
+                                   ' no le pertenece al usuario ' + client_id + '.')
+                response.status_code = 400
+                return response
+        if response_mongo:
+            #Se pudo finalizar el viaje asi que enviamos la informacion a SharedServer
+            #VER SI HAY QUE MANDARLE MENOS INFORMACION!!!!!
+            SHARED_SERVER.post_trip(info_trip)
+            response = jsonify(code=0, message='El viaje ' + str(trip_id) +
+                               ' ha finalizado.')
+            response.status_code = 201
+            return response
+        else:
+            response = jsonify(code=-1, message='El viaje ' + str(trip_id) +
+                               ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
+            response.status_code = 400
+            return response
+
     def post_new_estimate(self, data):
         """ Este metodo permite devuelve la estimacion de un viaje
             @param car_json informacion del auto

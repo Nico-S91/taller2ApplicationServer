@@ -408,6 +408,19 @@ def get_trips_client(client_id):
     response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
+@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/finish', methods=['PUT'])
+def get_trips_client_finish(client_id, trip_id):
+    """El cliente confirma que termino el viaje
+    @param client_id es el identificador del cliente
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/client/' + str(client_id) + '/trips/'
+                            + str(trip_id) + '/finish')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.finish_trip(client_id, trip_id)
+    return response
+
 @application.route('/api/v1/trips/estimate', methods=['POST'])
 def post_estimate():
     """Devuelve la estimacion de un viaje
