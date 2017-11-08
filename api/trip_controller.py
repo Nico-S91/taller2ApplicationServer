@@ -151,3 +151,30 @@ class TripController:
         })
         response.status_code = 401
         return response
+
+    def _validate_user_with_type(self, user_id, user_type):
+        """ Valida la existencia de un usuario del tipo pedido, primero con Mongo,
+            si no lo encuentra, en el shared, si esta lo crea en mongo, y si no existe
+            devuelve invalido
+            @param user_type
+        """
+        #Primero verifico si el usuario existe en Mongo y tiene el tipo correcto
+        model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
+        if model_manager_response.get('typeClient') == user_type:
+            return True
+        else:
+            #si no esta en mongo, hay que buscar en la base de martin
+            response_shared_server = SHARED_SERVER.get_client(user_id)
+            json_data = json.loads(response_shared_server.text)
+            if response_shared_server.status_code == 200:
+                user_data = json_data['user']
+                client_type = user_data['type']
+                username = user_data['username']
+                if client_type == user_type:
+                    #Creo el usuario en mongo para tenerlo
+                    MODEL_MANAGER.add_usuario(user_id, user_type, username)
+                    return True
+                else:
+                    return False
+            else:
+                return False

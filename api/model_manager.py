@@ -21,7 +21,7 @@ class ModelManager:
         user_info = usuarios.find_one({'idUsuario': user_id})
 
         if user_info is None:
-            return {}
+            return None
         else:
             response = {
                 'username': str(user_info.get('username')),
@@ -118,7 +118,7 @@ class ModelManager:
             }
             locations.append(new_location)
             result = viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'route': locations}}, upsert=False).acknowledged
-        
+
         return result
 
     def get_trip(self, trip_id):
