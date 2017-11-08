@@ -64,7 +64,7 @@ class TripController:
 
     def post_new_trip(self, data):
         """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
-        json_data = json.loads(data)
+        json_data = data
 
         check_driver = self._validate_user_with_type(json_data['idDriver'], "driver")
         check_passenger = self._validate_user_with_type(json_data['idPassenger'], "passenger")

@@ -62,11 +62,12 @@ class ModelManager:
         viajes = self.db_manager.get_table('viajes')
 
         new_viaje = {
-            "idViaje": info_viaje.get("trip_id"),
-            "idDriver": info_viaje.get("driver"),
-            "idPassenger": info_viaje.get("passenger"),
-            "trip": info_viaje.get("trip"),
-            "paymethod": info_viaje.get("paymethod"),
+            "idViaje": info_viaje["idViaje"],
+            "idDriver": info_viaje["idDriver"],
+            "idPassenger": info_viaje["idPassenger"],
+            "trip": info_viaje["trip"],
+            "paymethod": info_viaje["paymethod"],
+            "acceptedRoute": info_viaje["acceptedroute"],
             "route": [],
             "aceptoViaje": False
         }
