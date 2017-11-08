@@ -465,10 +465,10 @@ def post_trip():
     """Crea un viaje"""
     application.logger.info('[POST] /api/v1/trip')
     #check de login
-    # if not is_logged():
-    #     return response_invalid_login()
-    # if not request.json:
-    #     abort(400)
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
     response = TRIP_CONTROLLER.post_new_trip(request.json)
     return response
 

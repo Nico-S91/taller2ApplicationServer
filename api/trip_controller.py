@@ -282,7 +282,7 @@ class TripController:
 
         if not check_driver or not check_passenger or not check_valid_trip or not check_valid_accepted_route:
             json_data = json.loads("""{
-                    "mensaje": "JSON invalido"
+                    "mensaje": "Invalid request"
                 }""")
             response = jsonify(json_data)
             response.status_code = 400
@@ -383,8 +383,14 @@ class TripController:
         """
         #Primero verifico si el usuario existe en Mongo y tiene el tipo correcto
         model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
-        if model_manager_response.get('typeClient') == user_type:
-            return True
+
+        if model_manager_response is not None:
+            if model_manager_response['typeClient'] == user_type:
+                #Existe y tiene tipo valido
+                return True
+            else:
+                #El cliente existe, pero no tiene el tipo correcto
+                return False
         else:
             #si no esta en mongo, hay que buscar en la base de martin
             response_shared_server = SHARED_SERVER.get_client(user_id)
@@ -401,6 +407,7 @@ class TripController:
                     return False
             else:
                 return False
+                
 
     def _validate_trip_data(self, trip_info):
         """ Este metodo valida que los contenidos dentro de trip, en particular el
