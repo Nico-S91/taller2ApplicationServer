@@ -271,6 +271,39 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def post_new_trip(self, data):
+        """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
+        json_data = data
+
+        check_driver = self._validate_user_with_type(json_data['idDriver'], "driver")
+        check_passenger = self._validate_user_with_type(json_data['idPassenger'], "passenger")
+        check_valid_trip = self._validate_trip_data(json_data['trip'])
+        check_valid_accepted_route = self._validate_accepted_route(json_data['acceptedroute'])
+
+        if not check_driver or not check_passenger or not check_valid_trip or not check_valid_accepted_route:
+            json_data = json.loads("""{
+                    "mensaje": "JSON invalido"
+                }""")
+            response = jsonify(json_data)
+            response.status_code = 400
+            return response
+
+        operation_result = MODEL_MANAGER.add_trip(json_data)
+        if operation_result:
+            json_data = json.loads("""{
+                    "mensaje": "Se creo el viaje Correctamente"
+                }""")
+            response = jsonify(json_data)
+            response.status_code = 201
+            return response
+        else:
+            json_data = json.loads("""{
+                    "mensaje": "Error de carga de viaje"
+                }""")
+            response = jsonify(json_data)
+            response.status_code = 500
+            return response
+
     def get_last_location(self, user_id):
         """ Devuelve response de ultima ubicacion
             @param user_id un id de usuario
@@ -341,3 +374,53 @@ class TripController:
         })
         response.status_code = 401
         return response
+
+    def _validate_user_with_type(self, user_id, user_type):
+        """ Valida la existencia de un usuario del tipo pedido, primero con Mongo,
+            si no lo encuentra, en el shared, si esta lo crea en mongo, y si no existe
+            devuelve invalido
+            @param user_type
+        """
+        #Primero verifico si el usuario existe en Mongo y tiene el tipo correcto
+        model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
+        if model_manager_response.get('typeClient') == user_type:
+            return True
+        else:
+            #si no esta en mongo, hay que buscar en la base de martin
+            response_shared_server = SHARED_SERVER.get_client(user_id)
+            json_data = json.loads(response_shared_server.text)
+            if response_shared_server.status_code == 200:
+                user_data = json_data['user']
+                client_type = user_data['type']
+                username = user_data['username']
+                if client_type == user_type:
+                    #Creo el usuario en mongo para tenerlo
+                    MODEL_MANAGER.add_usuario(user_id, user_type, username)
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+    def _validate_trip_data(self, trip_info):
+        """ Este metodo valida que los contenidos dentro de trip, en particular el
+            start y end no esten vacios
+            @param trip_info el diccionario de trip
+        """
+        flag_start = False
+        flag_end = False
+
+        if trip_info['start'] != None:
+            flag_start = True
+
+        if trip_info['end'] != None:
+            flag_end = True
+
+        return (flag_start and flag_end)
+
+    def _validate_accepted_route(self, route):
+        """ Este metodo valida la ruta acordada con el conductor
+            @param route una ruta de google directions api
+        """
+
+        return route != None
