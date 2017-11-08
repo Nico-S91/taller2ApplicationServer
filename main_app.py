@@ -421,6 +421,18 @@ def post_estimate():
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
     return response
 
+@application.route('/api/v1/trip', methods=['POST'])
+def post_trip():
+    """Crea un viaje"""
+    application.logger.info('[POST] /api/v1/trip')
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRIP_CONTROLLER.post_new_trip(request.json)
+    return response
+
 #Endpoints test de mongo!
 @application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
 def get_last_location(client_id):

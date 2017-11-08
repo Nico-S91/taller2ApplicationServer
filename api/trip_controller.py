@@ -62,6 +62,25 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def post_new_trip(self, data):
+        """ Este metodo crea un nuevo viaje y lo alamcena en la base de datos de MongoDB"""
+        json_data = json.loads(data)
+        operation_result = MODEL_MANAGER.add_trip(json_data)
+        if operation_result:
+            json_data = json.loads("""{
+                    "mensaje": "Se creo el viaje Correctamente"
+                }""")
+            response = jsonify(json_data)
+            response.status_code = 201
+            return response
+        else:
+            json_data = json.loads("""{
+                    "mensaje": "Error de carga de viaje"
+                }""")
+            response = jsonify(json_data)
+            response.status_code = 500
+            return response
+
     def get_last_location(self, user_id):
         """ Devuelve response de ultima ubicacion
             @param user_id un id de usuario
