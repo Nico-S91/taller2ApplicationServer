@@ -63,8 +63,14 @@ class TripController:
         return response
 
     def post_new_trip(self, data):
-        """ Este metodo crea un nuevo viaje y lo alamcena en la base de datos de MongoDB"""
+        """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
         json_data = json.loads(data)
+
+        checkDriver = self._validate_user_with_type(json_data['idDriver'], "driver")
+        checkPassenger = self._validate_user_with_type(json_data['idPassenger'], "passenger")
+        check_valid_trip = self._validate_trip_data(json_data['trip'])
+        check_valid_accepted_route = self._validate_accepted_route(json_data['acceptedroute'])
+
         operation_result = MODEL_MANAGER.add_trip(json_data)
         if operation_result:
             json_data = json.loads("""{
@@ -178,3 +184,26 @@ class TripController:
                     return False
             else:
                 return False
+
+    def _validate_trip_data(self, trip_info):
+        """ Este metodo valida que los contenidos dentro de trip, en particular el
+            start y end no esten vacios
+            @param trip_info el diccionario de trip
+        """
+        flag_start = False
+        flag_end = False
+
+        if trip_info['start'] != None:
+            flag_start = True
+
+        if trip_info['end'] != None:
+            flag_end = True
+
+        return (flag_start and flag_end)
+
+    def _validate_accepted_route(self, route):
+        """ Este metodo valida la ruta acordada con el conductor
+            @param route una ruta de google directions api
+        """
+
+        return route != None

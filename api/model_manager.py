@@ -68,7 +68,7 @@ class ModelManager:
             "trip": info_viaje.get("trip"),
             "paymethod": info_viaje.get("paymethod"),
             "route": [],
-            "aceptoViaje": info_viaje.get("accepted")
+            "aceptoViaje": False
         }
 
         return viajes.insert_one(new_viaje).acknowledged
