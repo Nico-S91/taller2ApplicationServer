@@ -225,7 +225,7 @@ class TripController:
             response.status_code = 404
             return response
         if info_trip.get('passenger_id') is None:
-            response = jsonify(code=-4, message='El viaje ' + str(trip_id) +
+            response = jsonify(code=-7, message='El viaje ' + str(trip_id) +
                                ' no le pertenece al usuario ' + client_id + '.')
             response.status_code = 400
             return response
@@ -233,7 +233,7 @@ class TripController:
             if info_trip.get('passenger_id') == client_id:
                 #Veo si el viaje fue comenzado
                 if info_trip.get('startStamp') is None:
-                    response = jsonify(code=-4, message='El viaje ' + str(trip_id) +
+                    response = jsonify(code=-8, message='El viaje ' + str(trip_id) +
                                        ' no fue comenzado.')
                     response.status_code = 400
                     return response
@@ -241,7 +241,7 @@ class TripController:
                     #Termino el viaje
                     response_mongo = MODEL_MANAGER.end_trip(trip_id)
             else:
-                response = jsonify(code=-4, message='El viaje ' + str(trip_id) +
+                response = jsonify(code=-7, message='El viaje ' + str(trip_id) +
                                    ' no le pertenece al usuario ' + client_id + '.')
                 response.status_code = 400
                 return response
