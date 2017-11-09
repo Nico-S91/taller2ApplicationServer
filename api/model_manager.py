@@ -261,3 +261,14 @@ class ModelManager:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged
         else:
             return False
+
+    def get_trip_without_drivers(self):
+        """ Este metodo devuelve los viajes que no tienen idDriver asignado"""
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_sin_driver = viajes.find({'idDriver': None})
+
+        if viajes_sin_driver is None:
+            return []
+        else:
+            return viajes_sin_driver

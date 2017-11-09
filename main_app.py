@@ -472,6 +472,19 @@ def post_trip():
     response = TRIP_CONTROLLER.post_new_trip(request.json)
     return response
 
+@application.route('/api/v1/availabletrips/<user_id>', methods=['GET'])
+def get_available_trips(user_id):
+    """Obtiene los viajes disponibles dado un id de un driver"""
+    application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
+
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRIP_CONTROLLER.get_available_trips(user_id)
+    return response
+
 #Endpoints test de mongo!
 @application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
 def get_last_location(client_id):
