@@ -3,6 +3,7 @@
 from datetime import datetime
 from flask import jsonify
 import model.db_manager
+from bson.objectid import ObjectId
 
 class ModelManager:
     """Esta clase contiene los metodos para operar con las tablas
@@ -24,8 +25,8 @@ class ModelManager:
             return None
         else:
             response = {
-                'username': str(user_info.get('username')),
-                'typeClient': str(user_info.get('typeClient'))
+                'username': str(user_info['username']),
+                'typeClient': str(user_info['typeClient'])
             }
             return response
 
@@ -62,7 +63,6 @@ class ModelManager:
         viajes = self.db_manager.get_table('viajes')
 
         new_viaje = {
-            "idViaje": info_viaje["idViaje"],
             "idDriver": info_viaje["idDriver"],
             "idPassenger": info_viaje["idPassenger"],
             "trip": info_viaje["trip"],
@@ -106,7 +106,7 @@ class ModelManager:
 
         result = False
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'idViaje': ObjectId(trip_id)})
 
         if viaje is not None:
             locations = viaje.get('route')
@@ -128,11 +128,11 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             response = {
-                "trip_id": viaje.get('idViaje'),
+                "trip_id": viaje.get('_id'),
                 "driver_id": viaje.get('idDriver'),
                 "passenger_id": viaje.get('idPassenger'),
                 "trip": viaje.get('trip'),
@@ -150,7 +150,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        return viajes.delete_one({'idViaje': trip_id}).acknowledged
+        return viajes.delete_one({'_id': trip_id}).acknowledged
 
     def start_trip(self, trip_id):
         """ Este metodo inicia el timestamp del atributo start de un viaje
@@ -158,7 +158,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
@@ -171,7 +171,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.datetime.now()}}, upsert=False).acknowledged
@@ -242,7 +242,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'idDriver': driver_id}}, upsert=False).acknowledged
@@ -255,9 +255,39 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged
         else:
             return False
+
+    def get_trip_without_drivers(self):
+        """Este metodo devuelve los viajes que no tienen idDriver asignado"""
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_sin_driver = viajes.find({'idDriver': None}, {"_id": 0})
+
+        if viajes_sin_driver is None:
+            return []
+        else:
+            result = []
+            for trip in viajes_sin_driver:
+                result.append(trip)
+            return result
+
+    def get_trips_with_driver_id(self, driver_id):
+        """ Este metodo devuelve todos los viajes con el id del driver pedido
+            @param driver_id el id de driver
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_con_id_driver = viajes.find({'idDriver': driver_id}, {"_id": 0})
+
+        if viajes_con_id_driver is None:
+            return []
+        else:
+            result = []
+            for trip in viajes_con_id_driver:
+                result.append(trip)
+            return result
