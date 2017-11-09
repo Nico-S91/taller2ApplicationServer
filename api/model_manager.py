@@ -271,8 +271,8 @@ class ModelManager:
         if viajes_sin_driver is None:
             return []
         else:
+            result = []
             for trip in viajes_sin_driver:
-                result = []
                 result.append(trip)
             return result
 
@@ -287,7 +287,7 @@ class ModelManager:
         if viajes_con_id_driver is None:
             return []
         else:
+            result = []
             for trip in viajes_con_id_driver:
-                result = []
                 result.append(trip)
             return result
