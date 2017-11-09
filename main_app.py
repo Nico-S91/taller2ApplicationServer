@@ -525,6 +525,14 @@ def add_last_location():
     response = TRIP_CONTROLLER.post_new_last_location(request.json)
     return response
 
+@application.route('/api/v1/mongoclient', methods=['POST'])
+def add_mongo_user():
+    """ Agrega un nuevo usuario a mongo"""
+    application.logger.info('[POST] /api/v1/mongoclient')
+
+    response = TRIP_CONTROLLER.post_new_app_user(request.json)
+    return response
+
 #Para pruebas
 
 @swag_from('swagger/helloWord.yml')

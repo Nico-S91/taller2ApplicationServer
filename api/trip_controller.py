@@ -352,6 +352,22 @@ class TripController:
         response.status_code = 200
         return response
 
+    def post_new_app_user(self, data):
+        """ Guarda en mongo los datos de un nuevo usuario
+            @param data el json de request para dar de alta el usuario
+        """
+        user_id = data.get('user_id')
+        username = data.get('username')
+        user_type = data.get('user_type')
+
+        operation_result = MODEL_MANAGER.add_usuario(user_id, user_type, username)
+        response = jsonify({
+            'operation_result': operation_result
+        })
+        response.status_code = 200
+        return response
+
+
     def get_closest_clients(self, type_client, lat, lon, radio):
         """ Este metodo devuelve los ids de los clientes que se encontraron en el radio de busqueda
             @param type_user es el tipo de usuario del viaje
