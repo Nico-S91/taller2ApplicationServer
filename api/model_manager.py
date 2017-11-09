@@ -62,7 +62,6 @@ class ModelManager:
         viajes = self.db_manager.get_table('viajes')
 
         new_viaje = {
-            "idViaje": info_viaje["idViaje"],
             "idDriver": info_viaje["idDriver"],
             "idPassenger": info_viaje["idPassenger"],
             "trip": info_viaje["trip"],
@@ -128,11 +127,11 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': trip_id})
 
         if viaje is not None:
             response = {
-                "trip_id": viaje.get('idViaje'),
+                "trip_id": viaje.get('_id'),
                 "driver_id": viaje.get('idDriver'),
                 "passenger_id": viaje.get('idPassenger'),
                 "trip": viaje.get('trip'),
@@ -150,7 +149,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        return viajes.delete_one({'idViaje': trip_id}).acknowledged
+        return viajes.delete_one({'_id': trip_id}).acknowledged
 
     def start_trip(self, trip_id):
         """ Este metodo inicia el timestamp del atributo start de un viaje
@@ -158,7 +157,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': trip_id})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
@@ -171,7 +170,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': trip_id})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.datetime.now()}}, upsert=False).acknowledged
@@ -242,7 +241,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': trip_id})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'idDriver': driver_id}}, upsert=False).acknowledged
@@ -255,7 +254,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'_id': trip_id})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged
