@@ -336,6 +336,12 @@ class TripController:
         response.status_code = 200
         return response
 
+    def get_mongo_users(self):
+        """ Devuelve los usuarios de mongo"""
+        response = jsonify(MODEL_MANAGER.get_usuarios())
+        response.status_code = 200
+        return response
+
     def post_new_last_location(self, data):
         """ guarda la nueva ultima ubicacion de un usuario
             si no habia una anterior, la crea, sino la modifica

@@ -533,6 +533,14 @@ def add_mongo_user():
     response = TRIP_CONTROLLER.post_new_app_user(request.json)
     return response
 
+@application.route('/api/v1/mongoclients', methods=['GET'])
+def get_mongo_users():
+    """ Obtiene los usuarios de mongo"""
+    application.logger.info('[GET] /api/v1/mongoclients')
+
+    response = TRIP_CONTROLLER.get_mongo_users()
+    return response
+
 #Para pruebas
 
 @swag_from('swagger/helloWord.yml')

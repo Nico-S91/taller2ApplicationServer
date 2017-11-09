@@ -55,6 +55,20 @@ class ModelManager:
         usuarios = self.db_manager.get_table('usuarios')
         return usuarios.delete_one({'idUsuario': user_id}).acknowledged
 
+    def get_usuarios(self):
+        """ Estemetodo obtiene todos los usuarios de mongo"""
+
+        usuarios = self.db_manager.get_table('usuarios')
+        lista_usuarios = usuarios.find({}, {"_id": 0})
+
+        if lista_usuarios is None:
+            return []
+        else:
+            result = []
+            for usuario in lista_usuarios:
+                result.append(usuario)
+            return result
+
     def add_trip(self, info_viaje):
         """Este metodo guarda la informacion de un nuevo viaje publicado
             @param info_viaje un dictionary con la info del viaje
