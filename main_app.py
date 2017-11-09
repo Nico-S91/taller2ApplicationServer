@@ -460,7 +460,7 @@ def post_estimate():
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
     return response
 
-@application.route('/api/v1/client/<int:client_id>/trips', methods=['POST'])
+@application.route('/api/v1/client/<string:client_id>/trips', methods=['POST'])
 def post_trip(client_id):
     """Crea un viaje"""
     application.logger.info('[POST] /api/v1/trip')
@@ -473,7 +473,7 @@ def post_trip(client_id):
     response = TRIP_CONTROLLER.post_new_trip(request.json)
     return response
 
-@application.route('/api/v1/availabletrips/<int:user_id>', methods=['GET'])
+@application.route('/api/v1/availabletrips/<string:user_id>', methods=['GET'])
 def get_available_trips(user_id):
     """Obtiene los viajes disponibles dado un id de un driver"""
     application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
@@ -486,14 +486,14 @@ def get_available_trips(user_id):
     response = TRIP_CONTROLLER.get_available_trips(user_id)
     return response
 
-@application.route('/api/v1/client/<int:client_id>/newtrips', methods=['GET'])
+@application.route('/api/v1/client/<string:client_id>/newtrips', methods=['GET'])
 def get_new_trips_by_client(client_id):
     """Devuelve los viajes pedidos un cliente"""
 
     response = TRIP_CONTROLLER.get_trips_by_client(client_id)
     return response
 
-@application.route('/api/v1/driver/<int:driver_id>/newtrips', methods=['GET'])
+@application.route('/api/v1/driver/<string:driver_id>/newtrips', methods=['GET'])
 def get_new_trips_by_driver(driver_id):
     """Devuelve los viajes pedidos de un driver"""
 
@@ -508,7 +508,7 @@ def get_ongoing_trips():
     return response
 
 #Endpoints test de mongo!
-@application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
+@application.route('/api/v1/lastlocation/<string:client_id>', methods=['GET'])
 def get_last_location(client_id):
     """Devuelve la ultima ubicacion conocida de un usuario
     """
