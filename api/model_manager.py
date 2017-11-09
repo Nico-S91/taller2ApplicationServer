@@ -292,6 +292,20 @@ class ModelManager:
                 result.append(trip)
             return result
 
+    def get_unfinished_trips(self):
+        """ Este metodo devuelve los viajes en mongo sin stamp de end"""
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_sin_terminar = viajes.find({'idDriver':{"$exists": True}, 'startStamp': None}, {"_id": 0})
+
+        if viajes_sin_terminar is None:
+            return []
+        else:
+            result = []
+            for trip in viajes_sin_terminar:
+                result.append(trip)
+            return result
+
     def trips_by_client(self, client_id):
         """ Este metodo devuelve los viajes asociados con el id de un cliente
             @param client_id el id del cliente

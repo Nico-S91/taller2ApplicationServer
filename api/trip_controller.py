@@ -400,6 +400,15 @@ class TripController:
 
         return jsonify(response)
 
+    def get_ongoing_trips(self):
+        """ Este metodo devuelve los viajes que aun no han finalizado"""
+        trips = MODEL_MANAGER.get_unfinished_trips()
+        response = {
+            "trips": trips
+        }
+
+        return jsonify(response)
+
     #Metodos privados
 
     def _is_your_trip(self, type_user, user_id, json_response):

@@ -500,6 +500,13 @@ def get_new_trips_by_driver(driver_id):
     response = TRIP_CONTROLLER.get_trips_by_driver(driver_id)
     return response
 
+@application.route('/api/v1/ongoingtrips', methods=['GET'])
+def get_ongoing_trips():
+    """Devuelve los viajes que no finalizaron (sin stamp de trip end)"""
+
+    response = TRIP_CONTROLLER.get_ongoing_trips()
+    return response
+
 #Endpoints test de mongo!
 @application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
 def get_last_location(client_id):
