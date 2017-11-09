@@ -291,3 +291,19 @@ class ModelManager:
             for trip in viajes_con_id_driver:
                 result.append(trip)
             return result
+
+    def trips_by_client(self, client_id):
+        """ Este metodo devuelve los viajes asociados con el id de un cliente
+            @param client_id el id del cliente
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_con_id_client = viajes.find({'idPassenger': client_id}, {"_id": 0})
+
+        if viajes_con_id_client is None:
+            return []
+        else:
+            result = []
+            for trip in viajes_con_id_client:
+                result.append(trip)
+            return result
