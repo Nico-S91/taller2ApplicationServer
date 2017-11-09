@@ -3,6 +3,7 @@
 from datetime import datetime
 from flask import jsonify
 import model.db_manager
+from bson.objectid import ObjectId
 
 class ModelManager:
     """Esta clase contiene los metodos para operar con las tablas
@@ -105,7 +106,7 @@ class ModelManager:
 
         result = False
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': trip_id})
+        viaje = viajes.find_one({'idViaje': ObjectId(trip_id)})
 
         if viaje is not None:
             locations = viaje.get('route')
@@ -127,7 +128,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'_id': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             response = {
@@ -157,7 +158,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'_id': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
@@ -170,7 +171,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'_id': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.datetime.now()}}, upsert=False).acknowledged
@@ -241,7 +242,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'_id': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'idDriver': driver_id}}, upsert=False).acknowledged
@@ -254,7 +255,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'_id': trip_id})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged

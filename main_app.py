@@ -465,10 +465,10 @@ def post_trip(client_id):
     """Crea un viaje"""
     application.logger.info('[POST] /api/v1/trip')
     #check de login
-    if not is_logged():
-        return response_invalid_login()
-    if not request.json:
-        abort(400)
+    # if not is_logged():
+    #     return response_invalid_login()
+    # if not request.json:
+    #     abort(400)
 
     response = TRIP_CONTROLLER.post_new_trip(request.json)
     return response
@@ -479,10 +479,10 @@ def get_available_trips(user_id):
     application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
 
     #check de login
-    if not is_logged():
-        return response_invalid_login()
-    if not request.json:
-        abort(400)
+    # if not is_logged():
+    #     return response_invalid_login()
+    # if not request.json:
+    #     abort(400)
     response = TRIP_CONTROLLER.get_available_trips(user_id)
     return response
 
