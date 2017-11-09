@@ -55,6 +55,20 @@ class ModelManager:
         usuarios = self.db_manager.get_table('usuarios')
         return usuarios.delete_one({'idUsuario': user_id}).acknowledged
 
+    def get_usuarios(self):
+        """ Estemetodo obtiene todos los usuarios de mongo"""
+
+        usuarios = self.db_manager.get_table('usuarios')
+        lista_usuarios = usuarios.find({}, {"_id": 0})
+
+        if lista_usuarios is None:
+            return []
+        else:
+            result = []
+            for usuario in lista_usuarios:
+                result.append(usuario)
+            return result
+
     def add_trip(self, info_viaje):
         """Este metodo guarda la informacion de un nuevo viaje publicado
             @param info_viaje un dictionary con la info del viaje
@@ -289,6 +303,20 @@ class ModelManager:
         else:
             result = []
             for trip in viajes_con_id_driver:
+                result.append(trip)
+            return result
+
+    def get_unfinished_trips(self):
+        """ Este metodo devuelve los viajes en mongo sin stamp de end"""
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_sin_terminar = viajes.find({'idDriver':{"$exists": True}, 'startStamp': None}, {"_id": 0})
+
+        if viajes_sin_terminar is None:
+            return []
+        else:
+            result = []
+            for trip in viajes_sin_terminar:
                 result.append(trip)
             return result
 

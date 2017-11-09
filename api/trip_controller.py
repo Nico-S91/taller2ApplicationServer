@@ -336,6 +336,12 @@ class TripController:
         response.status_code = 200
         return response
 
+    def get_mongo_users(self):
+        """ Devuelve los usuarios de mongo"""
+        response = jsonify(MODEL_MANAGER.get_usuarios())
+        response.status_code = 200
+        return response
+
     def post_new_last_location(self, data):
         """ guarda la nueva ultima ubicacion de un usuario
             si no habia una anterior, la crea, sino la modifica
@@ -351,6 +357,22 @@ class TripController:
         })
         response.status_code = 200
         return response
+
+    def post_new_app_user(self, data):
+        """ Guarda en mongo los datos de un nuevo usuario
+            @param data el json de request para dar de alta el usuario
+        """
+        user_id = data.get('user_id')
+        username = data.get('username')
+        user_type = data.get('user_type')
+
+        operation_result = MODEL_MANAGER.add_usuario(user_id, user_type, username)
+        response = jsonify({
+            'operation_result': operation_result
+        })
+        response.status_code = 200
+        return response
+
 
     def get_closest_clients(self, type_client, lat, lon, radio):
         """ Este metodo devuelve los ids de los clientes que se encontraron en el radio de busqueda
@@ -394,6 +416,15 @@ class TripController:
             @param driver_id el id del chofer
         """
         trips = MODEL_MANAGER.get_trips_with_driver_id(driver_id)
+        response = {
+            "trips": trips
+        }
+
+        return jsonify(response)
+
+    def get_ongoing_trips(self):
+        """ Este metodo devuelve los viajes que aun no han finalizado"""
+        trips = MODEL_MANAGER.get_unfinished_trips()
         response = {
             "trips": trips
         }
