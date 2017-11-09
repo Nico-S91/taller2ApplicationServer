@@ -263,7 +263,7 @@ class ModelManager:
             return False
 
     def get_trip_without_drivers(self):
-        """ Este metodo devuelve los viajes que no tienen idDriver asignado"""
+        """Este metodo devuelve los viajes que no tienen idDriver asignado"""
 
         viajes = self.db_manager.get_table('viajes')
         viajes_sin_driver = viajes.find({'idDriver': None})
@@ -272,3 +272,16 @@ class ModelManager:
             return []
         else:
             return viajes_sin_driver
+
+    def get_trips_with_driver_id(self, driver_id):
+        """ Este metodo devuelve todos los viajes con el id del driver pedido
+            @param driver_id el id de driver
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        viajes_con_id_driver = viajes.find({'idDriver': driver_id})
+
+        if viajes_con_id_driver is None:
+            return []
+        else:
+            return viajes_con_id_driver
