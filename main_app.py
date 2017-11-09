@@ -486,6 +486,20 @@ def get_available_trips(user_id):
     response = TRIP_CONTROLLER.get_available_trips(user_id)
     return response
 
+@application.route('/api/v1/client/<int:client_id>/newtrips', methods=['GET'])
+def get_new_trips_by_client(client_id):
+    """Devuelve los viajes pedidos un cliente"""
+
+    response = TRIP_CONTROLLER.get_trips_by_client(client_id)
+    return response
+
+@application.route('/api/v1/driver/<int:driver_id>/newtrips', methods=['GET'])
+def get_new_trips_by_driver(driver_id):
+    """Devuelve los viajes pedidos de un driver"""
+
+    response = TRIP_CONTROLLER.get_trips_by_driver(driver_id)
+    return response
+
 #Endpoints test de mongo!
 @application.route('/api/v1/lastlocation/<int:client_id>', methods=['GET'])
 def get_last_location(client_id):

@@ -378,6 +378,28 @@ class TripController:
                     ids.append(client.get("id"))
         return ids
 
+    def get_trips_by_client(self, client_id):
+        """ Este metodo devuelve los viajes asociados con un cliente
+            @param client_id el id del pasajero
+        """
+        trips = MODEL_MANAGER.trips_by_client(client_id)
+        response = {
+            "trips": trips
+        }
+
+        return jsonify(response)
+
+    def get_trips_by_driver(self, driver_id):
+        """ Este metodo devuelve los viajes asociados con un driver
+            @param driver_id el id del chofer
+        """
+        trips = MODEL_MANAGER.get_trips_with_driver_id(driver_id)
+        response = {
+            "trips": trips
+        }
+
+        return jsonify(response)
+
     #Metodos privados
 
     def _is_your_trip(self, type_user, user_id, json_response):
