@@ -284,6 +284,16 @@ class TripController:
             response = jsonify(json_response)
             response.status_code = 400
             return response
+        else:
+            #el driver existe, devuelvo los trips SIN idDriver y los que tienen el mismo idDriver
+            trips_sin_driver = MODEL_MANAGER.get_trip_without_drivers()
+            trips_con_este_driver = MODEL_MANAGER.get_trips_with_driver_id(user_id)
+            trips_merge = trips_sin_driver + trips_con_este_driver
+            response = {
+                "trips": trips_merge
+            }
+            
+            return jsonify(response)
 
     def post_new_trip(self, data):
         """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
