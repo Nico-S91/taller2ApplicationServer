@@ -408,6 +408,45 @@ def get_trips_client(client_id):
     response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>/accept', methods=['PUT'])
+def get_trips_driver_accept(driver_id, trip_id):
+    """El chofer acepta realizar un viaje
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/'
+                            + str(trip_id) + '/accept')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/start', methods=['PUT'])
+def get_trips_client_start(client_id, trip_id):
+    """El cliente confirma que comenzo el viaje
+    @param client_id es el identificador del cliente
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(client_id) + '/trips/'
+                            + str(trip_id) + '/start')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.start_trip(client_id, trip_id)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/finish', methods=['PUT'])
+def get_trips_client_finish(client_id, trip_id):
+    """El cliente confirma que termino el viaje
+    @param client_id es el identificador del cliente
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/client/' + str(client_id) + '/trips/'
+                            + str(trip_id) + '/finish')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.finish_trip(client_id, trip_id)
+    return response
+
 @application.route('/api/v1/trips/estimate', methods=['POST'])
 def post_estimate():
     """Devuelve la estimacion de un viaje
@@ -419,6 +458,18 @@ def post_estimate():
     if not request.json:
         abort(400)
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
+    return response
+
+@application.route('/api/v1/trip', methods=['POST'])
+def post_trip():
+    """Crea un viaje"""
+    application.logger.info('[POST] /api/v1/trip')
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRIP_CONTROLLER.post_new_trip(request.json)
     return response
 
 #Endpoints test de mongo!

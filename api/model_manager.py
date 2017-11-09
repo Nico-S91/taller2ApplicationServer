@@ -21,7 +21,7 @@ class ModelManager:
         user_info = usuarios.find_one({'idUsuario': user_id})
 
         if user_info is None:
-            return {}
+            return None
         else:
             response = {
                 'username': str(user_info.get('username')),
@@ -62,13 +62,14 @@ class ModelManager:
         viajes = self.db_manager.get_table('viajes')
 
         new_viaje = {
-            "idViaje": info_viaje.get("trip_id"),
-            "idDriver": info_viaje.get("driver"),
-            "idPassenger": info_viaje.get("passenger"),
-            "trip": info_viaje.get("trip"),
-            "paymethod": info_viaje.get("paymethod"),
+            "idViaje": info_viaje["idViaje"],
+            "idDriver": info_viaje["idDriver"],
+            "idPassenger": info_viaje["idPassenger"],
+            "trip": info_viaje["trip"],
+            "paymethod": info_viaje["paymethod"],
+            "acceptedRoute": info_viaje["acceptedroute"],
             "route": [],
-            "aceptoViaje": info_viaje.get("accepted")
+            "aceptoViaje": False
         }
 
         return viajes.insert_one(new_viaje).acknowledged
@@ -118,7 +119,7 @@ class ModelManager:
             }
             locations.append(new_location)
             result = viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'route': locations}}, upsert=False).acknowledged
-        
+
         return result
 
     def get_trip(self, trip_id):
