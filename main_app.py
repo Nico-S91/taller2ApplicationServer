@@ -460,8 +460,8 @@ def post_estimate():
     response = TRIP_CONTROLLER.post_new_estimate(request.json)
     return response
 
-@application.route('/api/v1/trip', methods=['POST'])
-def post_trip():
+@application.route('/api/v1/client/<int:client_id>/trips', methods=['POST'])
+def post_trip(client_id):
     """Crea un viaje"""
     application.logger.info('[POST] /api/v1/trip')
     #check de login
@@ -469,7 +469,21 @@ def post_trip():
         return response_invalid_login()
     if not request.json:
         abort(400)
+
     response = TRIP_CONTROLLER.post_new_trip(request.json)
+    return response
+
+@application.route('/api/v1/availabletrips/<int:user_id>', methods=['GET'])
+def get_available_trips(user_id):
+    """Obtiene los viajes disponibles dado un id de un driver"""
+    application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
+
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = TRIP_CONTROLLER.get_available_trips(user_id)
     return response
 
 #Endpoints test de mongo!

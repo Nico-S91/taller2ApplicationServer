@@ -271,6 +271,30 @@ class TripController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def get_available_trips(self, user_id):
+        """ Este metodo valida el id del usuario, y si es un driver valido, devuelve los 
+            viajes disponibles al driver, junto con los ya aceptados por este
+        """
+        check_valid_driver = self._validate_user_with_type(user_id, "driver")
+
+        if not check_valid_driver:
+            json_response = json.loads("""{
+                    "mensaje": "Driver no existente"
+                }""")
+            response = jsonify(json_response)
+            response.status_code = 400
+            return response
+        else:
+            #el driver existe, devuelvo los trips SIN idDriver y los que tienen el mismo idDriver
+            trips_sin_driver = MODEL_MANAGER.get_trip_without_drivers()
+            trips_con_este_driver = MODEL_MANAGER.get_trips_with_driver_id(user_id)
+            trips_merge = trips_sin_driver + trips_con_este_driver
+            response = {
+                "trips": trips_merge
+            }
+            
+            return jsonify(response)
+
     def post_new_trip(self, data):
         """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
         json_data = data
