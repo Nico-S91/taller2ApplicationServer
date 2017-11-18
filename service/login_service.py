@@ -18,7 +18,7 @@ class LoginService:
     def login(self, username, password, session):
         """Logueamos al usuario
         @param username es el nombre del usuario que guardo en el sistema
-        @param password es la contraseña del usuario
+        @param password es la contrasenia del usuario
         @param session es la sesion del usuario"""
         response = SHARED_SERVER.get_validate_client(username, password)
         if response.status_code == 200:

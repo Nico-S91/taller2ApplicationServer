@@ -93,7 +93,7 @@ def login_facebook(facebook_auth_token):
 def login(username, password):
     """Logueamos al usuario
     @param username es el nombre del usuario que guardo en el sistema
-    @param password es la contraseña del usuario"""
+    @param password es la contrasenia del usuario"""
     if request.method == 'POST':
         application.logger.info('[POST] /login/username/' + str(username) + '/password/' + str(password))
         if not (username and password):
@@ -408,7 +408,7 @@ def get_trips_client(client_id):
     response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
-@application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>/accept', methods=['PUT'])
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/accept', methods=['PUT'])
 def get_trips_driver_accept(driver_id, trip_id):
     """El chofer acepta realizar un viaje
     @param driver_id es el identificador del chofer
@@ -421,7 +421,7 @@ def get_trips_driver_accept(driver_id, trip_id):
     response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/start', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/start', methods=['PUT'])
 def get_trips_client_start(client_id, trip_id):
     """El cliente confirma que comenzo el viaje
     @param client_id es el identificador del cliente
@@ -434,7 +434,7 @@ def get_trips_client_start(client_id, trip_id):
     response = TRIP_CONTROLLER.start_trip(client_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/finish', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/finish', methods=['PUT'])
 def get_trips_client_finish(client_id, trip_id):
     """El cliente confirma que termino el viaje
     @param client_id es el identificador del cliente

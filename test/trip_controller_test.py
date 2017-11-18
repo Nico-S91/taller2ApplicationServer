@@ -1,3 +1,4 @@
+# coding=utf-8
 """ @package test.trip_controller_test
 """
 import unittest

@@ -3,10 +3,12 @@
 import json
 from service.shared_server import SharedServer
 from api.trip_controller import TripController
+from api.model_manager import ModelManager
 from flask import jsonify
 
 SHARED_SERVER = SharedServer()
 TRIP_CONTROLLER = TripController()
+MODEL_MANAGER = ModelManager()
 CODIGO_OK = 0
 CAMPO_COLISIONES = '_ref'
 JSON_CAR = 'car'
@@ -27,6 +29,7 @@ class ClientController:
         if response_shared_server.status_code == 200:
             client = json_data[JSON_CLIENT]
             self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            self._add_client_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -60,6 +63,7 @@ class ClientController:
         if response_shared_server.status_code == 201:
             client = json_data[JSON_CLIENT]
             self._save_ref(client.get('id'), client.get(CAMPO_COLISIONES))
+            self._add_client_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -80,6 +84,7 @@ class ClientController:
         if response_shared_server.status_code == 201:
             client = json_data[JSON_CLIENT]
             self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            self._update_client_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -238,3 +243,14 @@ class ClientController:
             if user.get('type') == type_client:
                 clients.append(user)
         return clients
+
+    def _add_client_mongo(self, client_id, client):
+        if MODEL_MANAGER.get_info_usuario(client_id) == None:
+            MODEL_MANAGER.add_usuario(client_id, client.get('type'), client.get('username'))
+
+    def _update_client_mongo(self, client_id, client):
+        if MODEL_MANAGER.get_info_usuario(client_id) == None:
+            MODEL_MANAGER.add_usuario(client_id, client.get('type'), client.get('username'))
+        else:
+            #Hay que ver si necesitamos otro metodo!!!!!!!!!!!!!!!!!!
+            MODEL_MANAGER.add_usuario(client_id, client.get('type'), client.get('username'))
