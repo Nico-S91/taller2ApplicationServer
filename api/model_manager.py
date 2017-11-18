@@ -19,14 +19,14 @@ class ModelManager:
         """
 
         usuarios = self.db_manager.get_table('usuarios')
-        user_info = usuarios.find_one({'idUsuario': user_id})
+        user_info = usuarios.find_one({'user_id': user_id})
 
         if user_info is None:
             return None
         else:
             response = {
                 'username': str(user_info['username']),
-                'typeClient': str(user_info['typeClient'])
+                'typeClient': str(user_info['client_type'])
             }
             return response
 
@@ -40,8 +40,8 @@ class ModelManager:
         #creo el nuevo user
         new_user = {
             "username": username,
-            "idUsuario": user_id,
-            "typeClient": user_type
+            "user_id": user_id,
+            "client_type": user_type
         }
 
         usuarios = self.db_manager.get_table('usuarios')
@@ -53,7 +53,7 @@ class ModelManager:
         """
 
         usuarios = self.db_manager.get_table('usuarios')
-        return usuarios.delete_one({'idUsuario': user_id}).acknowledged
+        return usuarios.delete_one({'user_id': user_id}).acknowledged
 
     def get_usuarios(self):
         """ Estemetodo obtiene todos los usuarios de mongo"""
@@ -77,13 +77,13 @@ class ModelManager:
         viajes = self.db_manager.get_table('viajes')
 
         new_viaje = {
-            "idDriver": info_viaje["idDriver"],
-            "idPassenger": info_viaje["idPassenger"],
+            "driver_id": info_viaje["driver_id"],
+            "passenger_id": info_viaje["passenger_id"],
             "trip": info_viaje["trip"],
             "paymethod": info_viaje["paymethod"],
-            "acceptedRoute": info_viaje["acceptedroute"],
+            "accepted_route": info_viaje["accepted_route"],
             "route": [],
-            "aceptoViaje": False
+            "is_accepted": False
         }
 
         return viajes.insert_one(new_viaje).acknowledged
@@ -97,17 +97,18 @@ class ModelManager:
 
         #Obtengo todos los usuarios del tipo client_type
         usuarios = self.db_manager.get_table('usuarios')
-        usuarios_by_tipo = usuarios.find({'typeClient': client_type}, {"_id": 0, "idUsuario": 1})
+        usuarios_by_tipo = usuarios.find({'client_type': client_type}, {"_id": 0, "user_id": 1})
 
         ubicaciones = self.db_manager.get_table('ubicaciones')
 
         for user_id in usuarios_by_tipo:
-            last_location = ubicaciones.find_one({'idUsuario': user_id})
+            last_location = ubicaciones.find_one({'user_id': user_id})
             if last_location is not None:
                 new_last_location = {
-                    "client_id": user_id,
+                    "user_id": user_id,
                     "lat": last_location.get('lat'),
-                    "long": last_location.get('long')
+                    "long": last_location.get('long'),
+                    "accuracy": last_location.get('accuracy')
                 }
                 result.append(new_last_location)
         return result
@@ -120,7 +121,7 @@ class ModelManager:
 
         result = False
         viajes = self.db_manager.get_table('viajes')
-        viaje = viajes.find_one({'idViaje': ObjectId(trip_id)})
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             locations = viaje.get('route')
@@ -147,15 +148,14 @@ class ModelManager:
         if viaje is not None:
             response = {
                 "trip_id": viaje.get('_id'),
-                "driver_id": viaje.get('idDriver'),
-                "passenger_id": viaje.get('idPassenger'),
+                "driver_id": viaje.get('driver_id'),
+                "passenger_id": viaje.get('passenger_id'),
                 "trip": viaje.get('trip'),
                 "paymethod": viaje.get('paymethod'),
                 "route": viaje.get('route'),
-                "aceptoViaje": viaje.get('aceptoViaje')
+                "is_accepted": viaje.get('is_accepted')
             }
             return response
-
         return None
 
     def delete_trip(self, trip_id):
@@ -175,7 +175,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'start_stamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
 
@@ -204,12 +204,12 @@ class ModelManager:
         ubicaciones = self.db_manager.get_table('ubicaciones')
 
         #busco si ya hay una posicion registrada para el usuario con esta id
-        ultima_ubicacion = ubicaciones.find_one({'idUsuario': user_id})
+        ultima_ubicacion = ubicaciones.find_one({'user_id': user_id})
 
         if ultima_ubicacion is None:
             #no hay ultima posicion, entonces creo una nueva entrada
             nueva_posicion = {
-                "idUsuario": user_id,
+                "user_id": user_id,
                 "timestamp": str(datetime.now()),
                 "lat": latitud,
                 "long": longitud,
@@ -238,13 +238,13 @@ class ModelManager:
         #obtengo la coleccion
         ubicaciones = self.db_manager.get_table('ubicaciones')
 
-        ultima_ubicacion = ubicaciones.find_one({'idUsuario': client_id})
+        ultima_ubicacion = ubicaciones.find_one({'user_id': client_id})
 
         response = {
             "lat": str(ultima_ubicacion.get('lat')),
             "long": str(ultima_ubicacion.get('long')),
             "accuracy": str(ultima_ubicacion.get('accuracy')),
-            "stamp": str(ultima_ubicacion.get('stamp'))
+            "timestamp": str(ultima_ubicacion.get('timestamp'))
         }
 
         return jsonify(response)
@@ -259,7 +259,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'idDriver': driver_id}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver_id': driver_id}}, upsert=False).acknowledged
         else:
             return False
     
@@ -272,7 +272,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'aceptoViaje': True}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'is_accepted': True}}, upsert=False).acknowledged
         else:
             return False
 
@@ -280,7 +280,7 @@ class ModelManager:
         """Este metodo devuelve los viajes que no tienen idDriver asignado"""
 
         viajes = self.db_manager.get_table('viajes')
-        viajes_sin_driver = viajes.find({'idDriver': None}, {"_id": 0})
+        viajes_sin_driver = viajes.find({'driver_id': None}, {"_id": 0})
 
         if viajes_sin_driver is None:
             return []
@@ -296,7 +296,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viajes_con_id_driver = viajes.find({'idDriver': driver_id}, {"_id": 0})
+        viajes_con_id_driver = viajes.find({'driver_id': driver_id}, {"_id": 0})
 
         if viajes_con_id_driver is None:
             return []
@@ -310,7 +310,7 @@ class ModelManager:
         """ Este metodo devuelve los viajes en mongo sin stamp de end"""
 
         viajes = self.db_manager.get_table('viajes')
-        viajes_sin_terminar = viajes.find({'idDriver':{"$exists": True}, 'startStamp': None}, {"_id": 0})
+        viajes_sin_terminar = viajes.find({'driver_id':{"$exists": True}, 'start_stamp': None}, {"_id": 0})
 
         if viajes_sin_terminar is None:
             return []
@@ -326,7 +326,7 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
-        viajes_con_id_client = viajes.find({'idPassenger': client_id}, {"_id": 0})
+        viajes_con_id_client = viajes.find({'passenger_id': client_id}, {"_id": 0})
 
         if viajes_con_id_client is None:
             return []
