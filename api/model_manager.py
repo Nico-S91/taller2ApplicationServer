@@ -129,7 +129,7 @@ class ModelManager:
                     "lat": location.get('lat'),
                     "long": location.get('long')
                 },
-                "timestamp": datetime.datetime.now().date()
+                "timestamp": datetime.now().date()
             }
             locations.append(new_location)
             result = viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'route': locations}}, upsert=False).acknowledged
@@ -175,7 +175,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.datetime.now()}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'startStamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
 
@@ -188,7 +188,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.datetime.now()}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
 
