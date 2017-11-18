@@ -90,6 +90,16 @@ class ModelManager:
                 result.append(usuario)
             return result
 
+    def user_is_available(self, user_id):
+        """ Este metodo devuelve verdadero si el usuario esta disponible o falso sino
+            @param user_id id del usuario
+        """
+
+        usuarios = self.db_manager.get_table('usuarios')
+        user_data = usuarios.find_one({'user_id': user_id})
+
+        return user_data.get('available')
+
     def add_trip(self, info_viaje):
         """Este metodo guarda la informacion de un nuevo viaje publicado
             @param info_viaje un dictionary con la info del viaje
@@ -154,7 +164,8 @@ class ModelManager:
                 "timestamp": datetime.datetime.now().date()
             }
             locations.append(new_location)
-            result = viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'route': locations}}, upsert=False).acknowledged
+            result = viajes.update_one({'_id': viaje.get('_id')},
+                                       {'$set': {'route': locations}}, upsert=False).acknowledged
 
         return result
 
