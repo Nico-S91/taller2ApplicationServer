@@ -30,22 +30,43 @@ class ModelManager:
             }
             return response
 
-    def add_usuario(self, user_id, user_type, username):
+    def add_usuario(self, user_id, user_type, username, available):
         """Este metodo agrega un usuario a la coleccion de usuarios en Mongo
             @param user_id el id del nuevo usuario
             @param user_type el tipo de usuario (chofer o pasajero)
             @param username su nickname
+            @param available si el usuario esta disponible
         """
+
+        if available is None:
+            available = True
 
         #creo el nuevo user
         new_user = {
             "username": username,
             "user_id": user_id,
-            "client_type": user_type
+            "client_type": user_type,
+            "available": available
         }
 
         usuarios = self.db_manager.get_table('usuarios')
         return usuarios.insert_one(new_user).acknowledged
+
+    def update_usuario(self, user_id, user_type, username, available):
+        """ Este metodo actualiza a un usuario con la informacion ingresada
+            @param user_id el id del usuario
+            @param user_type el tipo de usuario
+            @param username nombre de usuario
+            @param available si el usuario esta disponible
+        """
+
+        usuarios = self.db_manager.get_table('usuarios')
+        user_to_update = usuarios.find_one({'user_id': user_id})
+
+        return usuarios.update_one({'_id': user_to_update.get('_id')},
+                                   {'$set': {'user_type': user_type,
+                                             'username': username, 'available': available}},
+                                   upsert=False).acknowledged
 
     def delete_usuario(self, user_id):
         """ Este metodo elimina un usuario de la coleccion de usuarios en Mongo
