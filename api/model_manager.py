@@ -26,7 +26,7 @@ class ModelManager:
         else:
             response = {
                 'username': str(user_info['username']),
-                'typeClient': str(user_info['client_type'])
+                'client_type': str(user_info['client_type'])
             }
             return response
 

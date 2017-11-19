@@ -24,57 +24,95 @@ CODE_ERROR_NOT_EXIST_TRIP = -20
 CODE_ERROR_TRIP_OTHER_USER = -21
 CODE_ERROR_TRIP_NOT_ACCEPTED = -22
 CODE_ERROR_TRIP_FINISH = -23
+CODE_ERROR_TRIP_WITHOUT_DRIVER = -24
+CODE_ERROR_TRIP_WITHOUT_PASSENGER = -25
+CODE_ERROR_TRIP_ROUTE_INVALID = -26
+CODE_ERROR_TRIP_INVALID = -27
 
 STATUS_ERROR_MONGO = 400
 
 def _get_response_not_passenger(client_id):
+    """ Devuelve el response que indica que el usuario no es un pasajero"""
     response = jsonify(code=CODE_ERROR_NOT_PASSENGER, message='El usuario ' + str(client_id) +
                        ' no es un pasajero.')
     response.status_code = 400
     return response
 
 def _get_response_not_driver(driver_id):
+    """ Devuelve el response que indica que el usuario no es un chofer"""
     response = jsonify(code=CODE_ERROR_NOT_DRIVER, message='El usuario ' + str(driver_id) +
                        ' no es un chofer.')
     response.status_code = 400
     return response
 
 def _get_response_trip_not_accepted(driver_id):
+    """ Devuelve el response que indica que el viaje no fue aceptado por el chofer"""
     response = jsonify(code=CODE_ERROR_TRIP_NOT_ACCEPTED, message='El viaje ' + str(driver_id) +
                        ' no fue aceptado por el chofer.')
     response.status_code = 400
     return response
 
 def _get_response_trip_other_user(trip_id, user_id):
+    """ Devuelve el response que indica que el viaje no le pertence al usuario"""
     response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' + str(trip_id) +
                        ' no le pertenece al usuario ' + str(user_id) + '.')
     response.status_code = 400
     return response
 
 def _get_response_not_exist_trip(trip_id):
+    """ Devuelve el response que indica que el viaje no existe"""
     response = jsonify(code=CODE_ERROR_NOT_EXIST_TRIP, message='El viaje ' + str(trip_id) +
                        ' no existe.')
     response.status_code = 404
     return response
 
 def _get_response_not_exist_user(trip_id):
+    """ Devuelve el response que indica que el usuario no existe"""
     response = jsonify(code=CODE_ERROR_NOT_EXIST_USER, message='El usuario ' + str(trip_id) +
                        ' no existe.')
     response.status_code = 404
     return response
 
 def _get_response_trip_not_start(trip_id):
+    """ Devuelve el response que indica que el viaje no fue comenzado"""
     response = jsonify(code=-8, message='El viaje ' + str(trip_id) +
                        ' no fue comenzado.')
     response.status_code = 400
     return response
 
-
 def _get_response_trip_unauthorized(trip_id):
     """ Devuelve el response que indica que el viaje no pertenece al usuario"""
     response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' + str(trip_id) +
-                       ' no pertenece al usuario')
+                       ' no pertenece al usuario.')
     response.status_code = 401
+    return response
+
+def _get_response_trip_without_driver():
+    """ Devuelve el response que indica que el viaje no tiene un chofer valido"""
+    response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' +
+                       ' no tiene asignado un chofer valido.')
+    response.status_code = 400
+    return response
+
+def _get_response_trip_without_passenger():
+    """ Devuelve el response que indica que el viaje no tiene un pasajero valido"""
+    response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' +
+                       ' no tiene asignado un pasajero valido.')
+    response.status_code = 400
+    return response
+
+def _get_response_trip_route_invalid():
+    """ Devuelve el response que indica que el viaje no tiene una ruta valida"""
+    response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' +
+                       ' no tiene una ruta valido.')
+    response.status_code = 400
+    return response
+
+def _get_response_trip_invalid():
+    """ Devuelve el response que indica que la informacion del viaje no es valido"""
+    response = jsonify(code=CODE_ERROR_TRIP_INVALID, message='La informacion del viaje ' +
+                       ' es invalida.')
+    response.status_code = 400
     return response
 
 class TripController:
@@ -138,9 +176,9 @@ class TripController:
                     is_driver = False
                 #Agrego la info a la base
                 MODEL_MANAGER.add_usuario(driver_id, info_user.get('type'),
-                                          info_user.get('username'))
+                                          info_user.get('username'), True)
         else:
-            if info_user.get('typeClient') != TIPO_CHOFER:
+            if info_user.get('client_type') != TIPO_CHOFER:
                 is_driver = False
         if is_driver is False:
             # response = jsonify(code=CODE_ERROR_NOT_DRIVER, message='El usuario ' + str(driver_id) +
@@ -208,9 +246,9 @@ class TripController:
                     is_client = False
                 #Agrego la info a la base
                 MODEL_MANAGER.add_usuario(client_id, info_user.get('type'),
-                                          info_user.get('username'))
+                                          info_user.get('username'), True)
         else:
-            if info_user.get('typeClient') != TIPO_CLIENTE:
+            if info_user.get('client_type') != TIPO_CLIENTE:
                 is_client = False
         if is_client is False:
             # response = jsonify(code=CODE_ERROR_NOT_PASSENGER, message='El usuario ' + str(client_id) +
@@ -237,7 +275,7 @@ class TripController:
         else:
             if info_trip.get('passenger_id') == client_id:
                 #Veo si el viaje fue aceptado
-                if info_trip.get('aceptoViaje'):
+                if info_trip.get('is_accepted'):
                     #Comienzo el viaje
                     response_mongo = MODEL_MANAGER.start_trip(trip_id)
                 else:
@@ -287,9 +325,9 @@ class TripController:
                     is_client = False
                 #Agrego la info a la base
                 MODEL_MANAGER.add_usuario(client_id, info_user.get('type'),
-                                          info_user.get('username'))
+                                          info_user.get('username'), True)
         else:
-            if info_user.get('typeClient') != TIPO_CLIENTE:
+            if info_user.get('client_type') != TIPO_CLIENTE:
                 is_client = False
         if is_client is False:
             # response = jsonify(code=CODE_ERROR_NOT_PASSENGER, message='El usuario ' + str(client_id) +
@@ -315,7 +353,7 @@ class TripController:
         else:
             if info_trip.get('passenger_id') == client_id:
                 #Veo si el viaje fue comenzado
-                if info_trip.get('startStamp') is None:
+                if info_trip.get('start_stamp') is None:
                     # response = jsonify(code=-8, message='El viaje ' + str(trip_id) +
                     #                    ' no fue comenzado.')
                     # response.status_code = 400
@@ -379,20 +417,21 @@ class TripController:
         """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
         json_data = data
 
-        check_driver = self._validate_user_with_type(json_data['idDriver'], "driver")
-        check_passenger = self._validate_user_with_type(json_data['idPassenger'], "passenger")
+        check_driver = self._validate_user_with_type(json_data['driver_id'], "driver")
+        check_passenger = self._validate_user_with_type(json_data['passenger_id'], "passenger")
         check_valid_trip = self._validate_trip_data(json_data['trip'])
-        check_valid_accepted_route = self._validate_accepted_route(json_data['acceptedroute'])
+        check_valid_accepted_route = self._validate_accepted_route(json_data['accepted_route'])
 
         #USAR LAS RESPUESTAS DE ARRIBA
         if not check_driver:
-            #NO TIENE UN CHOFER
+            return _get_response_trip_without_driver()
         if not check_passenger:
-            #NO TIENE UN PASAJERO
+            return _get_response_trip_without_passenger()
         if not check_valid_trip:
+            return _get_response_trip_invalid()
             #EL VIAJE NO ES VALIDO
         if not check_valid_accepted_route:
-            #NO TIENE UNA RUTA DE VIAJE VALIDA
+            return _get_response_trip_route_invalid()
 
         # if not check_driver or not check_passenger or not check_valid_trip or not check_valid_accepted_route:
         #     json_data = json.loads("""{
@@ -541,7 +580,7 @@ class TripController:
         model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
 
         if model_manager_response is not None:
-            if model_manager_response['typeClient'] == user_type:
+            if model_manager_response['client_type'] == user_type:
                 #Existe y tiene tipo valido
                 return True
             else:
@@ -555,7 +594,7 @@ class TripController:
                 user_data = json_data['user']
                 client_type = user_data['type']
                 username = user_data['username']
-                MODEL_MANAGER.add_usuario(user_id, client_type, username)
+                MODEL_MANAGER.add_usuario(user_id, client_type, username, True)
                 if client_type == user_type:
                     #Creo el usuario en mongo para tenerlo
                     return True

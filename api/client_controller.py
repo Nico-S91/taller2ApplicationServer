@@ -29,7 +29,7 @@ class ClientController:
         if response_shared_server.status_code == 200:
             client = json_data[JSON_CLIENT]
             self._save_ref(client_id, client.get(CAMPO_COLISIONES))
-            self._add_client_mongo(client_id, client)
+            self._add_user_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -62,8 +62,9 @@ class ClientController:
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
             client = json_data[JSON_CLIENT]
-            self._save_ref(client.get('id'), client.get(CAMPO_COLISIONES))
-            self._add_client_mongo(client_id, client)
+            client_id = client.get('id')
+            self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            self._add_user_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -100,6 +101,7 @@ class ClientController:
             json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 204:
             self._delete_ref(client_id)
+            MODEL_MANAGER.delete_usuario(client_id)
             json_data = json.loads("""{
                     "mensaje": "Se elimino correctamente el usuario"
                 }""")
@@ -244,13 +246,18 @@ class ClientController:
                 clients.append(user)
         return clients
 
-    def _add_client_mongo(self, client_id, client):
-        if MODEL_MANAGER.get_info_usuario(client_id) == None:
-            MODEL_MANAGER.add_usuario(client_id, client.get('type'), client.get('username'))
+    def _add_user_mongo(self, user_id, user):
+        """ Este metodo agrega la informacion de un usuario a nuestra base de datosS
+            @param user_id es el identificador del usuario
+            @param user es la informacion del usuario"""
+        if MODEL_MANAGER.get_info_usuario(user_id) is None:
+            MODEL_MANAGER.add_usuario(user_id, user.get('type'), user.get('username'), True)
 
-    def _update_client_mongo(self, client_id, client):
-        if MODEL_MANAGER.get_info_usuario(client_id) == None:
-            MODEL_MANAGER.add_usuario(client_id, client.get('type'), client.get('username'))
+    def _update_client_mongo(self, user_id, user):
+        """ Este metodo modifica la informacion de un usuario en nuestra base de datosS
+            @param user_id es el identificador del usuario
+            @param user es la informacion del usuario"""
+        if MODEL_MANAGER.get_info_usuario(user_id) is None:
+            MODEL_MANAGER.add_usuario(user_id, user.get('type'), user.get('username'), True)
         else:
-            #Hay que ver si necesitamos otro metodo!!!!!!!!!!!!!!!!!!
-            MODEL_MANAGER.add_usuario(client_id, client.get('type'), client.get('username'))
+            MODEL_MANAGER.update_usuario(user_id, user.get('type'), user.get('username'), True)
