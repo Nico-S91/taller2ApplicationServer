@@ -34,3 +34,6 @@ Para correr los tests de la aplicación, correr el comando **pytest test/**
 
 ##Levantar MongoDB en UBUNTU
 Para levantar la instancia de MongoDB correr el comando **sudo service mongod start**
+
+##Nombre de google api Key
+llevame-grupo6: AIzaSyC0Ro5dttq9RUlR78Lta4_exF8fIK1qgxM
