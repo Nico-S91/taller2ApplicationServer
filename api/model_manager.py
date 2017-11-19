@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import jsonify
 import model.db_manager
 from bson.objectid import ObjectId
+import json
 
 class ModelManager:
     """Esta clase contiene los metodos para operar con las tablas
@@ -107,9 +108,14 @@ class ModelManager:
 
         viajes = self.db_manager.get_table('viajes')
 
+        trip_info = json.loads(info_viaje["trip"])
+
+        driver_id = trip_info["driver"]
+        passenger_id = trip_info["passenger"]
+
         new_viaje = {
-            "driver_id": info_viaje["driver_id"],
-            "passenger_id": info_viaje["passenger_id"],
+            "driver_id": driver_id,
+            "passenger_id": passenger_id,
             "trip": info_viaje["trip"],
             "paymethod": info_viaje["paymethod"],
             "accepted_route": info_viaje["accepted_route"],
