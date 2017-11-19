@@ -71,7 +71,7 @@ class TripController:
                     is_driver = False
                 #Agrego la info a la base
                 MODEL_MANAGER.add_usuario(driver_id, info_user.get('type'),
-                                          info_user.get('username'))
+                                          info_user.get('username'), True)
         else:
             if info_user.get('typeClient') != TIPO_CHOFER:
                 is_driver = False
@@ -136,7 +136,7 @@ class TripController:
                     is_client = False
                 #Agrego la info a la base
                 MODEL_MANAGER.add_usuario(client_id, info_user.get('type'),
-                                          info_user.get('username'))
+                                          info_user.get('username'), True)
         else:
             if info_user.get('typeClient') != TIPO_CLIENTE:
                 is_client = False
@@ -207,7 +207,7 @@ class TripController:
                     is_client = False
                 #Agrego la info a la base
                 MODEL_MANAGER.add_usuario(client_id, info_user.get('type'),
-                                          info_user.get('username'))
+                                          info_user.get('username'), True)
         else:
             if info_user.get('typeClient') != TIPO_CLIENTE:
                 is_client = False
@@ -366,7 +366,7 @@ class TripController:
         username = data.get('username')
         user_type = data.get('user_type')
 
-        operation_result = MODEL_MANAGER.add_usuario(user_id, user_type, username)
+        operation_result = MODEL_MANAGER.add_usuario(user_id, user_type, username, True)
         response = jsonify({
             'operation_result': operation_result
         })
@@ -478,7 +478,7 @@ class TripController:
                 username = user_data['username']
                 if client_type == user_type:
                     #Creo el usuario en mongo para tenerlo
-                    MODEL_MANAGER.add_usuario(user_id, user_type, username)
+                    MODEL_MANAGER.add_usuario(user_id, user_type, username, True)
                     return True
                 else:
                     return False
