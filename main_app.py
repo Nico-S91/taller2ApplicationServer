@@ -7,6 +7,7 @@ from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.trip_controller import TripController
 from api.transaction_controller import TransactionController
+from api.google_directions_controller import DirectionsController
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
 from service.login_service import LoginService
@@ -19,6 +20,7 @@ TRANSACTION_CONTROLLER = TransactionController()
 TRIP_CONTROLLER = TripController()
 CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
+GOOGLE_SERVICE = DirectionsController()
 
 FALTA_LOGUEARSE = 'Falta loguearse'
 
@@ -505,6 +507,15 @@ def get_ongoing_trips():
     """Devuelve los viajes que no finalizaron (sin stamp de trip end)"""
 
     response = TRIP_CONTROLLER.get_ongoing_trips()
+    return response
+
+#Endpoints de Google API
+@application.route('/api/v1/trajectories', methods=['POST'])
+def get_directions():
+    """Devuelve las posibles rutas de un punto a otro"""
+    application.logger.info('[POST] /api/v1/trajectories')
+
+    response = GOOGLE_SERVICE.get_google_directions(request.json)
     return response
 
 #Endpoints test de mongo!
