@@ -510,11 +510,10 @@ def get_ongoing_trips():
     return response
 
 #Endpoints de Google API
-@application.route('/api/v1/directions', methods=['POST'])
+@application.route('/api/v1/trajectories', methods=['POST'])
 def get_directions():
-    """Devuelve las posibles rutas de un putno a otro"""
-
-    print(request.json)
+    """Devuelve las posibles rutas de un punto a otro"""
+    application.logger.info('[POST] /api/v1/trajectories')
 
     response = GOOGLE_SERVICE.get_google_directions(request.json)
     return response
