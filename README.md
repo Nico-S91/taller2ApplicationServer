@@ -43,3 +43,6 @@ i. correr **coverage run main_app.py**
 ii. correr **coverage report**
 iii. correr **coverage html**
 iv. se va a haber creado la carpeta "htmlcov" con el reporte en formato html
+
+##Nombre de google api Key
+llevame-grupo6: AIzaSyC0Ro5dttq9RUlR78Lta4_exF8fIK1qgxM

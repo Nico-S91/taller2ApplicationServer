@@ -417,8 +417,12 @@ class TripController:
         """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
         json_data = data
 
-        check_driver = self._validate_user_with_type(json_data['driver_id'], "driver")
-        check_passenger = self._validate_user_with_type(json_data['passenger_id'], "passenger")
+        trip_info = json_data["trip"]
+        driver_id = trip_info["driver"]
+        passenger_id = trip_info["passenger"]
+
+        check_driver = self._validate_user_with_type(driver_id, "driver")
+        check_passenger = self._validate_user_with_type(passenger_id, "passenger")
         check_valid_trip = self._validate_trip_data(json_data['trip'])
         check_valid_accepted_route = self._validate_accepted_route(json_data['accepted_route'])
 
@@ -493,12 +497,12 @@ class TripController:
     #     username = data.get('username')
     #     user_type = data.get('user_type')
 
-    #     operation_result = MODEL_MANAGER.add_usuario(user_id, user_type, username)
-    #     response = jsonify({
-    #         'operation_result': operation_result
-    #     })
-    #     response.status_code = 200
-    #     return response
+        # operation_result = MODEL_MANAGER.add_usuario(user_id, user_type, username, True)
+        # response = jsonify({
+        #     'operation_result': operation_result
+        # })
+        # response.status_code = 200
+        # return response
 
 
     def get_closest_clients(self, type_client, lat, lon, radio):
