@@ -1767,7 +1767,7 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
-        ModelManager.get_trip = MagicMock(return_value= {
+        ModelManager.get_trip = MagicMock(return_value={
             'passenger_id' : '23',
             'start_stamp' : '01/05/2017 1:05'
         })
