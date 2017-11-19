@@ -108,7 +108,7 @@ class ModelManager:
 
         viajes = self.db_manager.get_table('viajes')
 
-        trip_info = json.loads(info_viaje["trip"])
+        trip_info = info_viaje["trip"]
 
         driver_id = trip_info["driver"]
         passenger_id = trip_info["passenger"]
