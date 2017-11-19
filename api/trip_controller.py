@@ -299,10 +299,14 @@ class TripController:
         """ Este metodo crea un nuevo viaje y lo almacena en la base de datos de MongoDB"""
         json_data = data
 
-        check_driver = self._validate_user_with_type(json_data['idDriver'], "driver")
-        check_passenger = self._validate_user_with_type(json_data['idPassenger'], "passenger")
+        trip_info = json_data["trip"]
+        driver_id = trip_info["driver"]
+        passenger_id = trip_info["passenger"]
+
+        check_driver = self._validate_user_with_type(driver_id, "driver")
+        check_passenger = self._validate_user_with_type(passenger_id, "passenger")
         check_valid_trip = self._validate_trip_data(json_data['trip'])
-        check_valid_accepted_route = self._validate_accepted_route(json_data['acceptedroute'])
+        check_valid_accepted_route = self._validate_accepted_route(json_data['accepted_route'])
 
         if not check_driver or not check_passenger or not check_valid_trip or not check_valid_accepted_route:
             json_data = json.loads("""{
