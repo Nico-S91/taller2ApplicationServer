@@ -457,7 +457,7 @@ class TripController:
         return response
 
     def get_closest_clients(self, type_client, lat, lon, radio):
-        """ Este metodo devuelve los ids de los clientes que se encontraron en el radio de busqueda
+        """ Este metodo devuelve las ubicaciones de los clientes que se encontraron en el radio de busqueda
             @param type_user es el tipo de usuario del viaje
             @param lat es la latitud de la ubicacion
             @param lon es la longitud de la ubicacion
@@ -473,14 +473,14 @@ class TripController:
         if clients == []:
             return []
         #Filtro los clientes que cumplen con la latitud y longitud buscada
-        ids = []
+        locations = []
         for client in clients:
             lat_client = float(client.get("lat"))
             lon_client = float(client.get("long"))
             if min_lat <= lat_client <= max_lat:
                 if min_lon <= lon_client <= max_lon:
-                    ids.append(client.get("user_id"))
-        return ids
+                    locations.append(client)
+        return locations
 
     def get_trips_by_client(self, client_id):
         """ Este metodo devuelve los viajes asociados con un cliente
