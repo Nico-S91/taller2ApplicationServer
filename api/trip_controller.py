@@ -157,7 +157,8 @@ class TripController:
         return response
 
     def get_trips(self, user_id):
-        """ Este metodo devuelve la informacion de todos los viaje de un usuario
+        """ Este metodo devuelve la informacion de todos los viaje de un usuario que
+            fueron realizados
             @param type_user es el tipo de usuario del viaje
             @param user_id es el identificador del usuario"""
         response_shared_server = SHARED_SERVER.get_trips(user_id)
@@ -177,7 +178,7 @@ class TripController:
         is_driver = True
         info_user = MODEL_MANAGER.get_info_usuario(driver_id)
         #Verificamos que el usuario sea un chofer
-        if info_user == {}:
+        if info_user is None:
             response_shared_server = SHARED_SERVER.get_client(driver_id)
             if response_shared_server.status_code != 200:
                 return _get_response_not_exist_user(driver_id)
@@ -230,7 +231,7 @@ class TripController:
         is_client = True
         info_user = MODEL_MANAGER.get_info_usuario(client_id)
         #Verificamos que el usuario sea un cliente
-        if info_user == {}:
+        if info_user is None:
             response_shared_server = SHARED_SERVER.get_client(client_id)
             if response_shared_server.status_code != 200:
                 return _get_response_not_exist_user(client_id)
@@ -330,12 +331,12 @@ class TripController:
             if response_shared.status_code == 201:
                 MODEL_MANAGER.delete_trip(trip_id)
                 response = jsonify(code=CODE_OK, message='El viaje ' + str(trip_id) +
-                                ' ha finalizado.')
+                                   ' ha finalizado.')
                 response.status_code = 201
                 return response
             else:
                 response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
-                               ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
+                                   ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
                 response.status_code = STATUS_ERROR_MONGO
                 return response
         else:

@@ -1577,7 +1577,7 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'metadata': {
@@ -1621,7 +1621,9 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
-        ModelManager.get_trip = MagicMock(return_value={})
+        ModelManager.get_trip = MagicMock(return_value={
+            'driver_id': '23'
+        })
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.accept_trip = MagicMock(return_value=True)
@@ -1647,8 +1649,8 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
-        ModelManager.get_trip = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.accept_trip = MagicMock(return_value=True)
@@ -1805,7 +1807,7 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'metadata': {
@@ -1876,8 +1878,8 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
-        ModelManager.get_trip = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.start_trip = MagicMock(return_value=True)
