@@ -34,3 +34,15 @@ Para correr los tests de la aplicación, correr el comando **pytest test/**
 
 ##Levantar MongoDB en UBUNTU
 Para levantar la instancia de MongoDB correr el comando **sudo service mongod start**
+
+#REPORTEEEES
+correr **pydoc -w <url_de_archivo>**
+
+#Coverage reports
+i. correr **coverage run main_app.py**
+ii. correr **coverage report**
+iii. correr **coverage html**
+iv. se va a haber creado la carpeta "htmlcov" con el reporte en formato html
+
+##Nombre de google api Key
+llevame-grupo6: AIzaSyC0Ro5dttq9RUlR78Lta4_exF8fIK1qgxM

@@ -7,6 +7,7 @@ from flasgger.utils import swag_from
 from api.client_controller import ClientController
 from api.trip_controller import TripController
 from api.transaction_controller import TransactionController
+from api.google_directions_controller import DirectionsController
 from service.shared_server import TIPO_CLIENTE
 from service.shared_server import TIPO_CHOFER
 from service.login_service import LoginService
@@ -19,6 +20,7 @@ TRANSACTION_CONTROLLER = TransactionController()
 TRIP_CONTROLLER = TripController()
 CLIENT_CONTROLLER = ClientController()
 LOGIN_SERVICE = LoginService()
+GOOGLE_SERVICE = DirectionsController()
 
 FALTA_LOGUEARSE = 'Falta loguearse'
 
@@ -93,7 +95,7 @@ def login_facebook(facebook_auth_token):
 def login(username, password):
     """Logueamos al usuario
     @param username es el nombre del usuario que guardo en el sistema
-    @param password es la contraseña del usuario"""
+    @param password es la contrasenia del usuario"""
     if request.method == 'POST':
         application.logger.info('[POST] /login/username/' + str(username) + '/password/' + str(password))
         if not (username and password):
@@ -408,7 +410,7 @@ def get_trips_client(client_id):
     response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
-@application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>/accept', methods=['PUT'])
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/accept', methods=['PUT'])
 def get_trips_driver_accept(driver_id, trip_id):
     """El chofer acepta realizar un viaje
     @param driver_id es el identificador del chofer
@@ -421,7 +423,7 @@ def get_trips_driver_accept(driver_id, trip_id):
     response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/start', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/start', methods=['PUT'])
 def get_trips_client_start(client_id, trip_id):
     """El cliente confirma que comenzo el viaje
     @param client_id es el identificador del cliente
@@ -434,7 +436,7 @@ def get_trips_client_start(client_id, trip_id):
     response = TRIP_CONTROLLER.start_trip(client_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>/finish', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/finish', methods=['PUT'])
 def get_trips_client_finish(client_id, trip_id):
     """El cliente confirma que termino el viaje
     @param client_id es el identificador del cliente
@@ -469,7 +471,6 @@ def post_trip(client_id):
         return response_invalid_login()
     if not request.json:
         abort(400)
-
     response = TRIP_CONTROLLER.post_new_trip(request.json)
     return response
 
@@ -477,34 +478,48 @@ def post_trip(client_id):
 def get_available_trips(user_id):
     """Obtiene los viajes disponibles dado un id de un driver"""
     application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
-
     #check de login
     if not is_logged():
         return response_invalid_login()
-    if not request.json:
-        abort(400)
     response = TRIP_CONTROLLER.get_available_trips(user_id)
     return response
 
 @application.route('/api/v1/client/<string:client_id>/newtrips', methods=['GET'])
 def get_new_trips_by_client(client_id):
     """Devuelve los viajes pedidos un cliente"""
-
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
     response = TRIP_CONTROLLER.get_trips_by_client(client_id)
     return response
 
 @application.route('/api/v1/driver/<string:driver_id>/newtrips', methods=['GET'])
 def get_new_trips_by_driver(driver_id):
     """Devuelve los viajes pedidos de un driver"""
-
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
     response = TRIP_CONTROLLER.get_trips_by_driver(driver_id)
     return response
 
-@application.route('/api/v1/ongoingtrips', methods=['GET'])
-def get_ongoing_trips():
-    """Devuelve los viajes que no finalizaron (sin stamp de trip end)"""
+# @application.route('/api/v1/ongoingtrips', methods=['GET'])
+# def get_ongoing_trips():
+#     """Devuelve los viajes que no finalizaron (sin stamp de trip end)"""
 
-    response = TRIP_CONTROLLER.get_ongoing_trips()
+#     response = TRIP_CONTROLLER.get_ongoing_trips()
+#     return response
+
+#Endpoints de Google API
+@application.route('/api/v1/trajectories', methods=['POST'])
+def get_directions():
+    """Devuelve las posibles rutas de un punto a otro"""
+    application.logger.info('[POST] /api/v1/trajectories')
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = GOOGLE_SERVICE.get_google_directions(request.json)
     return response
 
 #Endpoints test de mongo!
@@ -513,6 +528,8 @@ def get_last_location(client_id):
     """Devuelve la ultima ubicacion conocida de un usuario
     """
     application.logger.info('[GET] /api/v1/lastlocation')
+    if not is_logged():
+        return response_invalid_login()
     response = TRIP_CONTROLLER.get_last_location(client_id)
     return response
 
@@ -521,25 +538,32 @@ def add_last_location():
     """ Agrega la ultima ubicacion asociada a un usuario
     """
     application.logger.info('[POST] /api/v1/lastlocation')
-    #falta agregar el logueo?
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
     response = TRIP_CONTROLLER.post_new_last_location(request.json)
     return response
 
-@application.route('/api/v1/mongoclient', methods=['POST'])
-def add_mongo_user():
-    """ Agrega un nuevo usuario a mongo"""
-    application.logger.info('[POST] /api/v1/mongoclient')
+# @application.route('/api/v1/mongoclient', methods=['POST'])
+# def add_mongo_user():
+#     """ Agrega un nuevo usuario a mongo"""
+#     application.logger.info('[POST] /api/v1/mongoclient')
+#     if not is_logged():
+#         return response_invalid_login()
+#     if not request.json:
+#         abort(400)
+#     response = TRIP_CONTROLLER.post_new_app_user(request.json)
+#     return response
 
-    response = TRIP_CONTROLLER.post_new_app_user(request.json)
-    return response
-
-@application.route('/api/v1/mongoclients', methods=['GET'])
-def get_mongo_users():
-    """ Obtiene los usuarios de mongo"""
-    application.logger.info('[GET] /api/v1/mongoclients')
-
-    response = TRIP_CONTROLLER.get_mongo_users()
-    return response
+# @application.route('/api/v1/mongoclients', methods=['GET'])
+# def get_mongo_users():
+#     """ Obtiene los usuarios de mongo"""
+#     application.logger.info('[GET] /api/v1/mongoclients')
+#     if not is_logged():
+#         return response_invalid_login()
+#     response = TRIP_CONTROLLER.get_mongo_users()
+#     return response
 
 #Para pruebas
 

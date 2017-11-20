@@ -139,6 +139,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
@@ -457,19 +459,23 @@ class TestClientController(unittest.TestCase):
                 '_ref': '2werwerfw',
                 'applicationOwner': 'string',
                 'type': 'driver',
-                'cars': [{
-                    'id': '1',
-                    '_ref': 'erge',
-                    'owner': 'c1',
-                    'properties': [{
-                        'name': 'color',
-                        'value': 'negro'
-                    },
+                'cars': [
                     {
-                        'name': 'marca',
-                        'value': 'fiat'
-                    }]
-                }],
+                        'id': '1',
+                        '_ref': 'erge',
+                        'owner': 'c1',
+                        'properties': [
+                            {
+                                'name': 'color',
+                                'value': 'negro'
+                            },
+                            {
+                                'name': 'marca',
+                                'value': 'fiat'
+                            }
+                        ]
+                    }
+                ],
                 'username': 'mz',
                 'name': 'martin',
                 'surname': 'tincho',
@@ -488,6 +494,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -546,6 +554,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(400)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -577,6 +587,8 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.update_usuario = mock.MagicMock(return_value=True)
         #Mock del response
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -631,6 +643,8 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.update_usuario = MagicMock(return_value=True)
         response = self.app.put(
             '/api/v1/driver/88', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -821,6 +835,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -1164,6 +1180,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -1222,6 +1240,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(400)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -1254,6 +1274,8 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.update_usuario = mock.MagicMock(return_value=True)
         #Mock del response
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -1301,6 +1323,8 @@ class TestClientController(unittest.TestCase):
         })
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.update_usuario = MagicMock(return_value=True)
         SharedServer.put_client = MagicMock(return_value=response_mock)
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
@@ -1456,6 +1480,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(204)
         SharedServer.delete_client = MagicMock(return_value=response_mock)
+        ModelManager.delete_usuario = MagicMock(return_value=True)
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
@@ -1873,40 +1898,49 @@ class TestClientController(unittest.TestCase):
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""
-        [{
-            "id": "23",
-            "_ref": "string",
-            "applicationOwner": "string",
-            "type": "chofer",
-            "cars": [
+        [
             {
-                "id": "string",
-                "_ref": "string",
-                "owner": "string",
-                "properties": [
-                {
-                    "name": "string",
-                    "value": "string"
+                "info": {
+                    "id": "23",
+                    "_ref": "string",
+                    "applicationOwner": "string",
+                    "type": "chofer",
+                    "cars": [
+                        {
+                            "id": "string",
+                            "_ref": "string",
+                            "owner": "string",
+                            "properties": [
+                                {
+                                    "name": "string",
+                                    "value": "string"
+                                }
+                            ]
+                        }
+                    ],
+                    "username": "Khaleesi",
+                    "name": "Daenerys",
+                    "surname": "Targaryen",
+                    "country": "Valyria",
+                    "email": "madre_dragones@got.com",
+                    "birthdate": "01/01/1990",
+                    "images": [
+                        "string"
+                    ],
+                    "balance": [
+                        {
+                            "currency": "string",
+                            "value": 0
+                        }
+                    ]
+                },
+                "location": {
+                    "client_id": "1",
+                    "lat": "-34.619996",
+                    "long": "-58.686680"
                 }
-                ]
             }
-            ],
-            "username": "Khaleesi",
-            "name": "Daenerys",
-            "surname": "Targaryen",
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "birthdate": "01/01/1990",
-            "images": [
-            "string"
-            ],
-            "balance": [
-            {
-                "currency": "string",
-                "value": 0
-            }
-            ]
-        }]""")
+        ]""")
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
@@ -1929,6 +1963,7 @@ class TestClientController(unittest.TestCase):
             }
         ]
         ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -1976,40 +2011,49 @@ class TestClientController(unittest.TestCase):
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""
-        [{
-            "id": "23",
-            "_ref": "string",
-            "applicationOwner": "string",
-            "type": "chofer",
-            "cars": [
+        [
             {
-                "id": "string",
-                "_ref": "string",
-                "owner": "string",
-                "properties": [
-                {
-                    "name": "string",
-                    "value": "string"
+                "info": {
+                    "id": "23",
+                    "_ref": "string",
+                    "applicationOwner": "string",
+                    "type": "chofer",
+                    "cars": [
+                        {
+                            "id": "string",
+                            "_ref": "string",
+                            "owner": "string",
+                            "properties": [
+                                {
+                                    "name": "string",
+                                    "value": "string"
+                                }
+                            ]
+                        }
+                    ],
+                    "username": "Khaleesi",
+                    "name": "Daenerys",
+                    "surname": "Targaryen",
+                    "country": "Valyria",
+                    "email": "madre_dragones@got.com",
+                    "birthdate": "01/01/1990",
+                    "images": [
+                        "string"
+                    ],
+                    "balance": [
+                        {
+                            "currency": "string",
+                            "value": 0
+                        }
+                    ]
+                },
+                "location": {
+                    "client_id": "1",
+                    "lat": "-34.619996",
+                    "long": "-58.686680"
                 }
-                ]
             }
-            ],
-            "username": "Khaleesi",
-            "name": "Daenerys",
-            "surname": "Targaryen",
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "birthdate": "01/01/1990",
-            "images": [
-            "string"
-            ],
-            "balance": [
-            {
-                "currency": "string",
-                "value": 0
-            }
-            ]
-        }]""")
+        ]""")
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
@@ -2084,74 +2128,90 @@ class TestClientController(unittest.TestCase):
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""
-        [{
-            "id": "23",
-            "_ref": "string",
-            "applicationOwner": "string",
-            "type": "chofer",
-            "cars": [
-            {
-                "id": "string",
-                "_ref": "string",
-                "owner": "string",
-                "properties": [
+            [
                 {
-                    "name": "string",
-                    "value": "string"
+                    "info": {
+                        "id": "23",
+                        "_ref": "string",
+                        "applicationOwner": "string",
+                        "type": "chofer",
+                        "cars": [
+                        {
+                            "id": "string",
+                            "_ref": "string",
+                            "owner": "string",
+                            "properties": [
+                            {
+                                "name": "string",
+                                "value": "string"
+                            }
+                            ]
+                        }
+                        ],
+                        "username": "Khaleesi",
+                        "name": "Daenerys",
+                        "surname": "Targaryen",
+                        "country": "Valyria",
+                        "email": "madre_dragones@got.com",
+                        "birthdate": "01/01/1990",
+                        "images": [
+                        "string"
+                        ],
+                        "balance": [
+                        {
+                            "currency": "string",
+                            "value": 0
+                        }
+                        ]
+                    },
+                "location" : {
+                    "client_id": "1",
+                    "lat": "-34.619996",
+                    "long": "-58.686680"
                 }
-                ]
-            }
-            ],
-            "username": "Khaleesi",
-            "name": "Daenerys",
-            "surname": "Targaryen",
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "birthdate": "01/01/1990",
-            "images": [
-            "string"
-            ],
-            "balance": [
+            },
             {
-                "currency": "string",
-                "value": 0
-            }
-            ]
-        },
-        {
-            "id": "23",
-            "_ref": "string",
-            "applicationOwner": "string",
-            "type": "chofer",
-            "cars": [
-            {
-                "id": "string",
-                "_ref": "string",
-                "owner": "string",
-                "properties": [
-                {
-                    "name": "string",
-                    "value": "string"
+                "info": {
+                    "id": "23",
+                    "_ref": "string",
+                    "applicationOwner": "string",
+                    "type": "chofer",
+                    "cars": [
+                        {
+                            "id": "string",
+                            "_ref": "string",
+                            "owner": "string",
+                            "properties": [
+                            {
+                                "name": "string",
+                                "value": "string"
+                            }
+                            ]
+                        }
+                    ],
+                    "username": "Khaleesi",
+                    "name": "Daenerys",
+                    "surname": "Targaryen",
+                    "country": "Valyria",
+                    "email": "madre_dragones@got.com",
+                    "birthdate": "01/01/1990",
+                    "images": [
+                        "string"
+                    ],
+                    "balance": [
+                        {
+                            "currency": "string",
+                            "value": 0
+                        }
+                    ]
+                },
+                "location": {
+                    "client_id": "2",
+                    "lat": "-34.619996",
+                    "long": "-58.686680"
                 }
-                ]
             }
-            ],
-            "username": "Khaleesi",
-            "name": "Daenerys",
-            "surname": "Targaryen",
-            "country": "Valyria",
-            "email": "madre_dragones@got.com",
-            "birthdate": "01/01/1990",
-            "images": [
-            "string"
-            ],
-            "balance": [
-            {
-                "currency": "string",
-                "value": 0
-            }
-            ]
-        }]""")
+        ]""")
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
