@@ -494,6 +494,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -553,6 +554,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(400)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/driver', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -1177,6 +1180,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -1236,6 +1240,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(400)
         SharedServer.post_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         response = self.app.post('/api/v1/client', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
