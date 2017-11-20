@@ -3,10 +3,12 @@
 import json
 from service.shared_server import SharedServer
 from api.trip_controller import TripController
+from api.model_manager import ModelManager
 from flask import jsonify
 
 SHARED_SERVER = SharedServer()
 TRIP_CONTROLLER = TripController()
+MODEL_MANAGER = ModelManager()
 CODIGO_OK = 0
 CAMPO_COLISIONES = '_ref'
 JSON_CAR = 'car'
@@ -27,6 +29,7 @@ class ClientController:
         if response_shared_server.status_code == 200:
             client = json_data[JSON_CLIENT]
             self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            self._add_user_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -59,7 +62,9 @@ class ClientController:
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
             client = json_data[JSON_CLIENT]
-            self._save_ref(client.get('id'), client.get(CAMPO_COLISIONES))
+            client_id = client.get('id')
+            self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            self._add_user_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -80,6 +85,7 @@ class ClientController:
         if response_shared_server.status_code == 201:
             client = json_data[JSON_CLIENT]
             self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+            self._update_client_mongo(client_id, client)
             response = jsonify(client)
         else:
             response = jsonify(json_data)
@@ -95,6 +101,7 @@ class ClientController:
             json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 204:
             self._delete_ref(client_id)
+            MODEL_MANAGER.delete_usuario(client_id)
             json_data = json.loads("""{
                     "mensaje": "Se elimino correctamente el usuario"
                 }""")
@@ -111,6 +118,8 @@ class ClientController:
         #Primero busco los ids de los choferes
         ids = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
         clients = []
+        if ids == []:
+            return jsonify(clients)
         for id_client in ids:
             response_client = self.get_client(id_client)
             if response_client.status_code == 200:
@@ -238,3 +247,19 @@ class ClientController:
             if user.get('type') == type_client:
                 clients.append(user)
         return clients
+
+    def _add_user_mongo(self, user_id, user):
+        """ Este metodo agrega la informacion de un usuario a nuestra base de datosS
+            @param user_id es el identificador del usuario
+            @param user es la informacion del usuario"""
+        if MODEL_MANAGER.get_info_usuario(user_id) is None:
+            MODEL_MANAGER.add_usuario(user_id, user.get('type'), user.get('username'), True)
+
+    def _update_client_mongo(self, user_id, user):
+        """ Este metodo modifica la informacion de un usuario en nuestra base de datosS
+            @param user_id es el identificador del usuario
+            @param user es la informacion del usuario"""
+        if MODEL_MANAGER.get_info_usuario(user_id) is None:
+            MODEL_MANAGER.add_usuario(user_id, user.get('type'), user.get('username'), True)
+        else:
+            MODEL_MANAGER.update_usuario(user_id, user.get('type'), user.get('username'), True)

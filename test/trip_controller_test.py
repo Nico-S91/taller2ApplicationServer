@@ -1,3 +1,4 @@
+# coding=utf-8
 """ @package test.trip_controller_test
 """
 import unittest
@@ -83,6 +84,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23/trips/1')
         print(response)
@@ -134,11 +141,211 @@ class TestTripController(unittest.TestCase):
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
+    def test_informacion_viaje_cliente_mongo(self):
+        """Prueba que al obtener la informacion de un viaje que se encuentra en
+        mongo"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = {
+            'id': 1,
+            'passenger_id': '23',
+            'trip': 'Aca estaria toda la info...'
+        }
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "id": 1,
+            "passenger_id": "23",
+            "trip": "Aca estaria toda la info..."
+        }""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_informacion_viaje_cliente_mongo2(self):
+        """Prueba que al obtener la informacion de un viaje que se encuentra en
+        mongo y el usuario no estaba en mongo"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response_info_user = None
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = {
+            'id': 1,
+            'passenger_id': '23',
+            'trip': 'Aca estaria toda la info...'
+        }
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "id": 1,
+            "passenger_id": "23",
+            "trip": "Aca estaria toda la info..."
+        }""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_informacion_viaje_chofer_mongo(self):
+        """Prueba que al obtener la informacion de un viaje que se encuentra en
+        mongo"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = {
+            'id': 1,
+            'passenger_id': '23',
+            'trip': 'Aca estaria toda la info...'
+        }
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/client/23/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "id": 1,
+            "passenger_id": "23",
+            "trip": "Aca estaria toda la info..."
+        }""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_informacion_viaje_chofer_mongo2(self):
+        """Prueba que al obtener la informacion de un viaje que se encuentra en
+        mongo y el usuario no estaba en mongo"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'driver',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response_info_user = None
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = {
+            'id': 1,
+            'driver_id': '23',
+            'trip': 'Aca estaria toda la info...'
+        }
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/23/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "id": 1,
+            "driver_id": "23",
+            "trip": "Aca estaria toda la info..."
+        }""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
     def test_obtener_informacion_viaje_cliente_sin_autorizacion(self):
         """Prueba que al obtener la informacion de un viaje de un cliente sin autorizacion"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_mock = ResponseMock()
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         response_shared = json.dumps({
             'code': '0',
             'message': 'Ups...no tiene autorizacion'
@@ -170,6 +377,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(404)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/2/trips/888')
         print(response)
@@ -238,15 +451,89 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/2/trips/1')
         print(response)
         assert_res = json.loads("""
         {
-            "code": -1,
-            "message": "El viaje no pertenece al usuario"
+            "code": -21,
+            "message": "El viaje 1 no pertenece al usuario."
         }""")
         self.assertEqual(response.status_code, 401)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_obtener_informacion_cliente_viaje_de_otro_cliente_mongo(self):
+        """Prueba que al obtener la informacion de un viaje que se encuentra en
+        mongo y el usuario no era de este cliente"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'driver',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response_info_user = None
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = {
+            'id': 1,
+            'driver_id': '55',
+            'trip': 'Aca estaria toda la info...'
+        }
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/driver/23/trips/1')
+        print(response)
+        assert_res = json.loads("""
+        {
+            "code": -21,
+            "message": "El viaje 1 no le pertenece al usuario 23."
+        }""")
+        self.assertEqual(response.status_code, 400)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
@@ -308,6 +595,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/2/trips/1')
         print(response)
@@ -364,6 +657,12 @@ class TestTripController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_mock = ResponseMock()
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         response_shared = json.dumps({
             'code': '0',
             'message': 'Ups...no tiene autorizacion'
@@ -379,9 +678,9 @@ class TestTripController(unittest.TestCase):
             "code": "0",
             "message": "Ups...no tiene autorizacion"
         }""")
-        self.assertEqual(response.status_code, 401)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 401)
 
     def test_obtener_informacion_viaje_chofer_que_no_existe(self):
         """Prueba que al obtener la informacion de un viaje de un chofer que no existe"""
@@ -395,6 +694,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(404)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/2/trips/888')
         print(response)
@@ -463,13 +768,19 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/2/trips/1')
         print(response)
         assert_res = json.loads("""
         {
-            "code": -1,
-            "message": "El viaje no pertenece al usuario"
+            "code": -21,
+            "message": "El viaje 1 no pertenece al usuario."
         }""")
         self.assertEqual(response.status_code, 401)
         cmp_response = json.loads(response.data.decode('utf-8'))
@@ -1059,7 +1370,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'driver'
+            'client_type': 'driver'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {}
@@ -1090,7 +1401,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            'typeClient': 'driver'
+            'client_type': 'driver'
         })
         ModelManager.get_trip = MagicMock(return_value={})
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -1118,7 +1429,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'driver'
+            'client_type': 'driver'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
@@ -1150,7 +1461,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'driver'
+            'client_type': 'driver'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
@@ -1182,13 +1493,13 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'client'
+            'client_type': 'client'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response = self.app.put('/api/v1/driver/2/trips/13/accept', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -2,
+            "code": -11,
             "message": "El usuario 2 no es un chofer."
         }""")
         self.assertEqual(response.status_code, 400)
@@ -1206,7 +1517,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            'typeClient': 'driver'
+            'client_type': 'driver'
         })
         ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -1216,7 +1527,7 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/driver/2/trips/0/accept', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -4,
+            "code": -20,
             "message": "El viaje 0 no existe."
         }""")
         self.assertEqual(response.status_code, 404)
@@ -1235,7 +1546,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'driver'
+            'client_type': 'driver'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
@@ -1247,8 +1558,8 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/driver/25/trips/13/accept', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -3,
-            "message": "El viaje 13 esta asignado a otro chofer."
+            "code": -21,
+            "message": "El viaje 13 no le pertenece al usuario 25."
         }""")
         self.assertEqual(response.status_code, 400)
         cmp_response = json.loads(response.data.decode('utf-8'))
@@ -1266,7 +1577,7 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'metadata': {
@@ -1310,7 +1621,9 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
-        ModelManager.get_trip = MagicMock(return_value={})
+        ModelManager.get_trip = MagicMock(return_value={
+            'driver_id': '23'
+        })
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.accept_trip = MagicMock(return_value=True)
@@ -1336,8 +1649,8 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
-        ModelManager.get_trip = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.accept_trip = MagicMock(return_value=True)
@@ -1354,7 +1667,7 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/driver/44/trips/12/accept', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -5,
+            "code": -10,
             "message": "El usuario 44 no existe."
         }""")
         self.assertEqual(response.status_code, 404)
@@ -1374,12 +1687,12 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
             'passenger_id' : '23',
-            'aceptoViaje' : True
+            'is_accepted' : True
         }
         ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -1407,12 +1720,12 @@ class TestTripController(unittest.TestCase):
         self.mockeamos_login_correcto()
         response_info_user = {
             'passenger_id' : '23',
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
             'passenger_id' : '23',
-            'aceptoViaje': False
+            'is_accepted': False
         }
         ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -1420,7 +1733,7 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/client/23/trips/12/start', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -5,
+            "code": -22,
             "message": "El viaje 12 no fue aceptado por el chofer."
         }""")
         self.assertEqual(response.status_code, 400)
@@ -1438,18 +1751,18 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
             'passenger_id' : '23',
-            'aceptoViaje' : True
+            'is_accepted' : True
         }
         ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         response = self.app.put('/api/v1/client/2/trips/13/start', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -7,
+            "code": -21,
             "message": "El viaje 13 no le pertenece al usuario 2."
         }""")
         self.assertEqual(response.status_code, 400)
@@ -1467,7 +1780,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         })
         ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -1476,7 +1789,7 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/client/2/trips/0/start', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -4,
+            "code": -20,
             "message": "El viaje 0 no existe."
         }""")
         self.assertEqual(response.status_code, 404)
@@ -1494,7 +1807,7 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'metadata': {
@@ -1540,7 +1853,7 @@ class TestTripController(unittest.TestCase):
         SharedServer.get_client = MagicMock(return_value=response_mock)
         ModelManager.get_trip = MagicMock(return_value= {
             'passenger_id' : '23',
-            'aceptoViaje' : True
+            'is_accepted' : True
         })
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.start_trip = MagicMock(return_value=True)
@@ -1565,8 +1878,8 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
-        ModelManager.get_trip = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.start_trip = MagicMock(return_value=True)
@@ -1582,7 +1895,7 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/client/44/trips/12/start', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -5,
+            "code": -10,
             "message": "El usuario 44 no existe."
         }""")
         self.assertEqual(response.status_code, 404)
@@ -1602,18 +1915,26 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
             'passenger_id' : '23',
-            'startStamp' : '01/05/2017 1:05'
+            'start_stamp' : '01/05/2017 1:05'
         }
         ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.end_trip = MagicMock(return_value=True)
-        SharedServer.post_trip =  MagicMock(return_value=True)
+        ModelManager.delete_trip = MagicMock(return_value=True)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 0,
+            'message': 'Se guardo correctamente el viaje.'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.post_trip =  MagicMock(return_value=response_mock)
         response = self.app.put('/api/v1/client/23/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -1636,7 +1957,7 @@ class TestTripController(unittest.TestCase):
         self.mockeamos_login_correcto()
         response_info_user = {
             'passenger_id' : '23',
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
@@ -1666,18 +1987,18 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
             'passenger_id' : '23',
-            'startStamp' : '01/05/2017 1:05'
+            'start_stamp' : '01/05/2017 1:05'
         }
         ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         response = self.app.put('/api/v1/client/2/trips/13/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -7,
+            "code": -21,
             "message": "El viaje 13 no le pertenece al usuario 2."
         }""")
         self.assertEqual(response.status_code, 400)
@@ -1695,7 +2016,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            'typeClient': 'passenger'
+            'client_type': 'passenger'
         })
         ModelManager.get_trip = MagicMock(return_value=None)
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -1704,7 +2025,7 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/client/2/trips/0/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -4,
+            "code": -20,
             "message": "El viaje 0 no existe."
         }""")
         self.assertEqual(response.status_code, 404)
@@ -1722,7 +2043,6 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'metadata': {
@@ -1766,21 +2086,23 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
-        ModelManager.get_trip = MagicMock(return_value= {
+        ModelManager.get_trip = MagicMock(return_value={
             'passenger_id' : '23',
-            'startStamp' : '01/05/2017 1:05'
+            'start_stamp' : '01/05/2017 1:05'
         })
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.finish_trip = MagicMock(return_value=True)
+        response_info_user = None
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response = self.app.put('/api/v1/client/23/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
             "code": 0,
             "message": "El viaje 12 ha finalizado."
         }""")
-        self.assertEqual(response.status_code, 201)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
 
     def test_finalizar_viaje_libre_sin_info_cliente_mongo_error(self):
         """Probar que un cliente no puede finalizar un viaje si no se tiene la informacion del cliente,
@@ -1793,12 +2115,11 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         ModelManager.get_trip = MagicMock(return_value={})
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.start_trip = MagicMock(return_value=True)
-
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'code': 9,
@@ -1810,9 +2131,232 @@ class TestTripController(unittest.TestCase):
         response = self.app.put('/api/v1/client/44/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": -5,
+            "code": -10,
             "message": "El usuario 44 no existe."
         }""")
-        self.assertEqual(response.status_code, 404)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)
+
+    #Post ultima ubicacion de un usuario
+    def test_ultima_ubicacion_valida(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_error_mongo(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla 
+           pero fallo al guardar la ubicacion"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -1,
+            "message": "No se pudo guardar la ubicacion del usuario llevame-oscar, intentelo mas tarde."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_ultima_ubicacion_valida_buscar_usuario(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla y como
+           el usuario no se encuentra en la base de datos se tuvo que buscar en shared server"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_buscar_usuario_error_mongo(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla y como
+           el usuario no se encuentra en la base de datos se tuvo que buscar en shared server
+           pero falla al guardar la informacion de la ubicacion en mongo"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -1,
+            "message": "No se pudo guardar la ubicacion del usuario llevame-oscar, intentelo mas tarde."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_ultima_ubicacion_valida_usuario_inexistente(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla pero
+           el mismo no existe ni en mongo ni el shared"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 8,
+            'menssage': 'Ups... no existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -10,
+            "message": "El usuario llevame-oscar no existe."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)

@@ -27,7 +27,7 @@ class ModelManager:
         else:
             response = {
                 'username': str(user_info['username']),
-                'typeClient': str(user_info['client_type'])
+                'client_type': str(user_info['client_type'])
             }
             return response
 
@@ -138,7 +138,8 @@ class ModelManager:
 
         ubicaciones = self.db_manager.get_table('ubicaciones')
 
-        for user_id in usuarios_by_tipo:
+        for user in usuarios_by_tipo:
+            user_id = user.get('user_id')
             last_location = ubicaciones.find_one({'user_id': user_id})
             if last_location is not None:
                 new_last_location = {
@@ -167,7 +168,7 @@ class ModelManager:
                     "lat": location.get('lat'),
                     "long": location.get('long')
                 },
-                "timestamp": datetime.datetime.now().date()
+                "timestamp": datetime.now().date()
             }
             locations.append(new_location)
             result = viajes.update_one({'_id': viaje.get('_id')},
@@ -226,7 +227,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.datetime.now()}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
 
