@@ -127,12 +127,6 @@ class TripController:
             @param user_id es el identificador del usuario
             @param trip_id es el identificador del viaje"""
         #Primero veo si el usuario existe
-        # check_user = self._validate_user_with_type(user_id, type_user)
-        # if not check_user:
-        #     if type_user == TIPO_CHOFER:
-        #         return _get_response_not_driver(user_id)
-        #     if type_user == TIPO_CLIENTE:
-        #         return _get_response_not_passenger(user_id)
         response = self._validate_user(user_id, type_user)
         if response is not None:
             return response
@@ -150,10 +144,7 @@ class TripController:
             else:
                 json_response = json_data
         else:
-            #Tenemos el viaje en la base de datos
-            info_trip = MODEL_MANAGER.get_trip(trip_id)
-            if info_trip is None:
-                return _get_response_not_exist_trip(trip_id)
+            #El viaje estaba en la base de datos
             if self._is_your_trip(type_user, user_id, info_trip):
                 response = jsonify(info_trip)
                 response.status_code = 200
