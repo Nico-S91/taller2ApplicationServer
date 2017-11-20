@@ -139,6 +139,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/23')
         assert_res = json.loads("""
@@ -577,6 +579,7 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        ModelManager.update_usuario = mock.MagicMock(return_value=True)
         #Mock del response
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -821,6 +824,8 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23')
         assert_res = json.loads("""{
@@ -1254,6 +1259,7 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ClientController._get_ref_client = mock.MagicMock(return_value='ref')
+        ModelManager.update_usuario = mock.MagicMock(return_value=True)
         #Mock del response
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -1456,6 +1462,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(204)
         SharedServer.delete_client = MagicMock(return_value=response_mock)
+        ModelManager.delete_usuario = MagicMock(return_value=True)
         response = self.app.delete('/api/v1/client/23')
         self.assertEqual(response.status_code, 204)
 
@@ -1929,6 +1936,7 @@ class TestClientController(unittest.TestCase):
             }
         ]
         ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
+        ModelManager.get_info_usuario =  MagicMock(return_value=None)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({

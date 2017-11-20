@@ -127,7 +127,7 @@ class TripController:
             @param user_id es el identificador del usuario
             @param trip_id es el identificador del viaje"""
         #Primero veo si el usuario existe
-        response = self._validate_user(user_id, type_user)
+        response = self._validate_type_user(user_id, type_user)
         if response is not None:
             return response
         #Busco el viaje
@@ -416,8 +416,19 @@ class TripController:
             @param user_id un id de usuario
         """
         # VERIFICAR QUE EXISTA EL USUARIO SI NO ESTA LA POSICION
-        response = MODEL_MANAGER.get_last_known_position(user_id)
-        response.status_code = 200
+        response_model = MODEL_MANAGER.get_last_known_position(user_id)
+        if response_model is None:
+            #Valido que exista el usuario
+            response_error = self._validate_user(user_id)
+            if response_error is not None:
+                return response_error
+            #Existe el usuario, eso significa que no tenemos la ubicacion
+            response = jsonify(code=CODE_ERROR, message='La ubicacion del usuario con id '
+                               + str(user_id) + ' no existe.')
+            response.status_code = STATUS_ERROR_MONGO
+        else:
+            response = jsonify(response_model)
+            response.status_code = 200
         return response
 
     def post_new_last_location(self, data):
@@ -430,18 +441,9 @@ class TripController:
         lon = data.get('long')
         accuracy = data.get('accuracy')
         #Vemos si existe el usuario
-        model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
-        if model_manager_response is None:
-            #si no esta en mongo, hay que buscar en la base de martin
-            response_shared_server = SHARED_SERVER.get_client(user_id)
-            json_data = json.loads(response_shared_server.text)
-            if response_shared_server.status_code == 200:
-                user_data = json_data['user']
-                client_type = user_data['type']
-                username = user_data['username']
-                MODEL_MANAGER.add_usuario(user_id, client_type, username, True)
-            else:
-                return _get_response_not_exist_user(user_id)
+        response_error = self._validate_user(user_id)
+        if response_error is not None:
+            return response_error
         #Guardo la ultima posicion
         operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
         if operation_result:
@@ -585,13 +587,28 @@ class TripController:
         """
         return route != None
 
-    def _validate_user(self, user_id, type_user):
+    def _validate_type_user(self, user_id, type_user):
         check_user = self._validate_user_with_type(user_id, type_user)
         if not check_user:
             if type_user == TIPO_CHOFER:
                 return _get_response_not_driver(user_id)
             if type_user == TIPO_CLIENTE:
                 return _get_response_not_passenger(user_id)
+        return None
+
+    def _validate_user(self, user_id):
+        model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
+        if model_manager_response is None:
+            #si no esta en mongo, hay que buscar en la base de martin
+            response_shared_server = SHARED_SERVER.get_client(user_id)
+            json_data = json.loads(response_shared_server.text)
+            if response_shared_server.status_code == 200:
+                user_data = json_data['user']
+                client_type = user_data['type']
+                username = user_data['username']
+                MODEL_MANAGER.add_usuario(user_id, client_type, username, True)
+            else:
+                return _get_response_not_exist_user(user_id)
         return None
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
