@@ -126,15 +126,41 @@ class TripController:
             @param type_user es el tipo de usuario del viaje
             @param user_id es el identificador del usuario
             @param trip_id es el identificador del viaje"""
-        response_shared_server = SHARED_SERVER.get_trip(trip_id)
-        json_data = json.loads(response_shared_server.text)
-        if response_shared_server.status_code == 200:
-            json_response = json_data['trip']
-            # Si el viaje no pertenece al usuario entonces no le podemos pasar la informacion
-            if not self._is_your_trip(type_user, user_id, json_response):
-                return _get_response_trip_unauthorized(trip_id)
+        #Primero veo si el usuario existe
+        # check_user = self._validate_user_with_type(user_id, type_user)
+        # if not check_user:
+        #     if type_user == TIPO_CHOFER:
+        #         return _get_response_not_driver(user_id)
+        #     if type_user == TIPO_CLIENTE:
+        #         return _get_response_not_passenger(user_id)
+        response = self._validate_user(user_id, type_user)
+        if response is not None:
+            return response
+        #Busco el viaje
+        info_trip = MODEL_MANAGER.get_trip(trip_id)
+        if info_trip is None:
+            #Como no lo tenemos en nuestra base de datos vemos si lo tiene el sharedserver
+            response_shared_server = SHARED_SERVER.get_trip(trip_id)
+            json_data = json.loads(response_shared_server.text)
+            if response_shared_server.status_code == 200:
+                json_response = json_data['trip']
+                # Si el viaje no pertenece al usuario entonces no le podemos pasar la informacion
+                if not self._is_your_trip_shared(type_user, user_id, json_response):
+                    return _get_response_trip_unauthorized(trip_id)
+            else:
+                json_response = json_data
         else:
-            json_response = json_data
+            #Tenemos el viaje en la base de datos
+            info_trip = MODEL_MANAGER.get_trip(trip_id)
+            if info_trip is None:
+                return _get_response_not_exist_trip(trip_id)
+            if self._is_your_trip(type_user, user_id, info_trip):
+                response = jsonify(info_trip)
+                response.status_code = 200
+                return response
+            else:
+                if type_user == TIPO_CHOFER:
+                    return _get_response_trip_other_user(trip_id, user_id)
         response = jsonify(json_response)
         response.status_code = response_shared_server.status_code
         return response
@@ -266,7 +292,7 @@ class TripController:
         is_client = True
         info_user = MODEL_MANAGER.get_info_usuario(client_id)
         #Verificamos que el usuario sea un cliente
-        if info_user == {}:
+        if info_user is None:
             response_shared_server = SHARED_SERVER.get_client(client_id)
             if response_shared_server.status_code != 200:
                 response = response = _get_response_not_exist_user(client_id)
@@ -309,11 +335,18 @@ class TripController:
         if response_mongo:
             #Se pudo finalizar el viaje asi que enviamos la informacion a SharedServer
             #VER SI HAY QUE MANDARLE MENOS INFORMACION!!!!!
-            SHARED_SERVER.post_trip(info_trip)
-            response = jsonify(code=CODE_OK, message='El viaje ' + str(trip_id) +
-                               ' ha finalizado.')
-            response.status_code = 201
-            return response
+            response_shared = SHARED_SERVER.post_trip(info_trip)
+            if response_shared.status_code == 201:
+                MODEL_MANAGER.delete_trip(trip_id)
+                response = jsonify(code=CODE_OK, message='El viaje ' + str(trip_id) +
+                                ' ha finalizado.')
+                response.status_code = 201
+                return response
+            else:
+                response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
+                               ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
+                response.status_code = STATUS_ERROR_MONGO
+                return response
         else:
             response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
                                ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
@@ -461,8 +494,8 @@ class TripController:
 
     #Metodos privados
 
-    def _is_your_trip(self, type_user, user_id, json_response):
-        """ Este metodo devuelve la informacion de un viaje
+    def _is_your_trip_shared(self, type_user, user_id, json_response):
+        """ Este metodo devuelve True si el viaje pertence al usuario
             @param type_user es el tipo de usuario del viaje
             @param user_id es el identificador del usuario
             @param json_response es la informacion del viaje"""
@@ -472,6 +505,20 @@ class TripController:
         else:
             if type_user == TIPO_CLIENTE:
                 if json_response['passenger'] == user_id:
+                    return True
+        return False
+
+    def _is_your_trip(self, type_user, user_id, json_response):
+        """ Este metodo devuelve True si el viaje pertence al usuario
+            @param type_user es el tipo de usuario del viaje
+            @param user_id es el identificador del usuario
+            @param json_response es la informacion del viaje"""
+        if type_user == TIPO_CHOFER:
+            if json_response['driver_id'] == user_id:
+                return True
+        else:
+            if type_user == TIPO_CLIENTE:
+                if json_response['passenger_id'] == user_id:
                     return True
         return False
 
@@ -529,6 +576,15 @@ class TripController:
             @param route una ruta de google directions api
         """
         return route != None
+
+    def _validate_user(self, user_id, type_user):
+        check_user = self._validate_user_with_type(user_id, type_user)
+        if not check_user:
+            if type_user == TIPO_CHOFER:
+                return _get_response_not_driver(user_id)
+            if type_user == TIPO_CLIENTE:
+                return _get_response_not_passenger(user_id)
+        return None
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
 

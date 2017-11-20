@@ -84,6 +84,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/23/trips/1')
         print(response)
@@ -140,6 +146,12 @@ class TestTripController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_mock = ResponseMock()
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         response_shared = json.dumps({
             'code': '0',
             'message': 'Ups...no tiene autorizacion'
@@ -171,6 +183,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(404)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/2/trips/888')
         print(response)
@@ -239,6 +257,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'passenger'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/client/2/trips/1')
         print(response)
@@ -309,6 +333,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/2/trips/1')
         print(response)
@@ -365,6 +395,12 @@ class TestTripController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_mock = ResponseMock()
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         response_shared = json.dumps({
             'code': '0',
             'message': 'Ups...no tiene autorizacion'
@@ -380,9 +416,9 @@ class TestTripController(unittest.TestCase):
             "code": "0",
             "message": "Ups...no tiene autorizacion"
         }""")
-        self.assertEqual(response.status_code, 401)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 401)
 
     def test_obtener_informacion_viaje_chofer_que_no_existe(self):
         """Prueba que al obtener la informacion de un viaje de un chofer que no existe"""
@@ -396,6 +432,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(404)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/2/trips/888')
         print(response)
@@ -464,6 +506,12 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_trip = MagicMock(return_value=response_mock)
+        response_info_user = {
+            'client_type': 'driver'
+        }
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_info_trip = None
+        ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/driver/2/trips/1')
         print(response)
@@ -1614,7 +1662,15 @@ class TestTripController(unittest.TestCase):
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.end_trip = MagicMock(return_value=True)
-        SharedServer.post_trip =  MagicMock(return_value=True)
+        ModelManager.delete_trip = MagicMock(return_value=True)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 0,
+            'message': 'Se guardo correctamente el viaje.'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.post_trip =  MagicMock(return_value=response_mock)
         response = self.app.put('/api/v1/client/23/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -1723,7 +1779,6 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'metadata': {
@@ -1773,6 +1828,8 @@ class TestTripController(unittest.TestCase):
         })
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.finish_trip = MagicMock(return_value=True)
+        response_info_user = None
+        ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response = self.app.put('/api/v1/client/23/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
@@ -1794,12 +1851,11 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
         ModelManager.get_trip = MagicMock(return_value={})
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.add_driver_to_trip = MagicMock(return_value=True)
         ModelManager.start_trip = MagicMock(return_value=True)
-
         response_mock = ResponseMock()
         response_shared = json.dumps({
             'code': 9,
@@ -1814,6 +1870,6 @@ class TestTripController(unittest.TestCase):
             "code": -10,
             "message": "El usuario 44 no existe."
         }""")
-        self.assertEqual(response.status_code, 404)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)
