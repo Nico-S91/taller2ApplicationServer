@@ -2137,3 +2137,226 @@ class TestTripController(unittest.TestCase):
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
         self.assertEqual(response.status_code, 404)
+
+    #Post ultima ubicacion de un usuario
+    def test_ultima_ubicacion_valida(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_error_mongo(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla 
+           pero fallo al guardar la ubicacion"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -1,
+            "message": "No se pudo guardar la ubicacion del usuario llevame-oscar, intentelo mas tarde."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_ultima_ubicacion_valida_buscar_usuario(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla y como
+           el usuario no se encuentra en la base de datos se tuvo que buscar en shared server"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_buscar_usuario_error_mongo(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla y como
+           el usuario no se encuentra en la base de datos se tuvo que buscar en shared server
+           pero falla al guardar la informacion de la ubicacion en mongo"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -1,
+            "message": "No se pudo guardar la ubicacion del usuario llevame-oscar, intentelo mas tarde."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_ultima_ubicacion_valida_usuario_inexistente(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla pero
+           el mismo no existe ni en mongo ni el shared"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 8,
+            'menssage': 'Ups... no existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -10,
+            "message": "El usuario llevame-oscar no existe."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)

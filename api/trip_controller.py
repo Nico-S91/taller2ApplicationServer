@@ -429,13 +429,29 @@ class TripController:
         lat = data.get('lat')
         lon = data.get('long')
         accuracy = data.get('accuracy')
-        #VERIFICAR QUE EXISTE EL USUARIO
+        #Vemos si existe el usuario
+        model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
+        if model_manager_response is None:
+            #si no esta en mongo, hay que buscar en la base de martin
+            response_shared_server = SHARED_SERVER.get_client(user_id)
+            json_data = json.loads(response_shared_server.text)
+            if response_shared_server.status_code == 200:
+                user_data = json_data['user']
+                client_type = user_data['type']
+                username = user_data['username']
+                MODEL_MANAGER.add_usuario(user_id, client_type, username, True)
+            else:
+                return _get_response_not_exist_user(user_id)
+        #Guardo la ultima posicion
         operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
-        #DEVOLVER UN RESPONSE ACORDE A LOS OTROS ENDPOINTS
-        response = jsonify({
-            'operation_result': operation_result
-        })
-        response.status_code = 200
+        if operation_result:
+            response = jsonify(code=CODE_OK, message='Se actualizo la ubicacion' +
+                               ' del usuario ' + str(user_id) + '.')
+            response.status_code = 201
+        else:
+            response = jsonify(code=CODE_ERROR, message='No se pudo guardar la ' +
+                               'ubicacion del usuario ' + str(user_id) + ', intentelo mas tarde.')
+            response.status_code = 400
         return response
 
     def get_closest_clients(self, type_client, lat, lon, radio):
@@ -461,7 +477,7 @@ class TripController:
             lon_client = float(client.get("long"))
             if min_lat <= lat_client <= max_lat:
                 if min_lon <= lon_client <= max_lon:
-                    ids.append(client.get("id"))
+                    ids.append(client.get("user_id"))
         return ids
 
     def get_trips_by_client(self, client_id):

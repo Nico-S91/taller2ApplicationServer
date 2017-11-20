@@ -138,7 +138,8 @@ class ModelManager:
 
         ubicaciones = self.db_manager.get_table('ubicaciones')
 
-        for user_id in usuarios_by_tipo:
+        for user in usuarios_by_tipo:
+            user_id = user.get('user_id')
             last_location = ubicaciones.find_one({'user_id': user_id})
             if last_location is not None:
                 new_last_location = {

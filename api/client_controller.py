@@ -118,6 +118,8 @@ class ClientController:
         #Primero busco los ids de los choferes
         ids = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
         clients = []
+        if ids == []:
+            return jsonify(clients)
         for id_client in ids:
             response_client = self.get_client(id_client)
             if response_client.status_code == 200:
