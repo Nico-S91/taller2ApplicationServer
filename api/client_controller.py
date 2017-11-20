@@ -115,15 +115,21 @@ class ClientController:
             @param lat es la latitud del lugar donde se busca
             @param lon es la longitud del lugar donde se busca
             @param ratio es el radio que se busca a los clientes"""
-        #Primero busco los ids de los choferes
-        ids = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
+        #Primero busco las ubicaciones de los choferes
+        locations = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
         clients = []
-        if ids == []:
+        if locations == []:
             return jsonify(clients)
-        for id_client in ids:
+        for location in locations:
+            id_client = location.get('user_id')
             response_client = self.get_client(id_client)
             if response_client.status_code == 200:
-                json_data = json.loads(response_client.data)
+                json_data = {
+                    'info' : json.loads(response_client.data),
+                    'location' : location
+                }
+                # response = response_client.data
+                # json_data = json.loads(response)
                 clients.append(json_data)
         return jsonify(clients)
 
