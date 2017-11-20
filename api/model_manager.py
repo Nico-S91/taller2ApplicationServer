@@ -259,7 +259,7 @@ class ModelManager:
             return ubicaciones.insert_one(nueva_posicion).acknowledged
         else:
             return ubicaciones.update_one({
-                '_id': str(ultima_ubicacion.get('_id'))
+                '_id': ultima_ubicacion.get('_id')
             }, {
                 '$set': {
                     'lat': latitud,
