@@ -2139,6 +2139,7 @@ class TestTripController(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     #Post ultima ubicacion de un usuario
+
     def test_ultima_ubicacion_valida(self):
         """Probar que un cliente puede enviar una ubicacion valida para guardarla"""
         data = {
@@ -2355,6 +2356,138 @@ class TestTripController(unittest.TestCase):
         assert_res = json.loads("""{
             "code": -10,
             "message": "El usuario llevame-oscar no existe."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)
+
+    #Get ultima ubicacion de un usuario
+
+    def test_get_ultima_ubicacion_valida(self):
+        """Probar que un cliente puede obtener una ubicacion valida para guardarla"""
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_last_known_position = MagicMock(return_value={
+            'lat': '-54.627277',
+            'long': '-58.681433',
+            'accuracy': '1',
+            'timestamp': '01/05/2017 1:05'
+        })
+        response = self.app.get('/api/v1/lastlocation/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "lat": "-54.627277",
+            "long": "-58.681433",
+            "accuracy": "1",
+            "timestamp": "01/05/2017 1:05"
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_ultima_ubicacion_valida_error_mongo(self):
+        """Probar que un cliente no puede obtener una ubicacion que no existe.
+           El usuario existe """
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_last_known_position = MagicMock(return_value=None)
+        response = self.app.get('/api/v1/lastlocation/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -1,
+            "message": "La ubicacion del usuario con id 23 no existe."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_ultima_ubicacion_no_existente_buscar_usuario(self):
+        """Probar que un cliente no puede obtener una ubicacion valida porque no existe
+           la ubicacion y el usuario existe en el shared pero no en mongo"""
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.get_last_known_position = MagicMock(return_value=None)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.get('/api/v1/lastlocation/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -1,
+            "message": "La ubicacion del usuario con id 23 no existe."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_get_ultima_ubicacion_valida_usuario_inexistente(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla pero
+           el mismo no existe ni en mongo ni el shared"""
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_last_known_position = MagicMock(return_value=False)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 8,
+            'menssage': 'Ups... no existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(401)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.get('/api/v1/lastlocation/23')
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -10,
+            "message": "El usuario 23 no existe."
         }""")
         print(response.data)
         cmp_response = json.loads(response.data.decode('utf-8'))

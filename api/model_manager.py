@@ -279,6 +279,9 @@ class ModelManager:
 
         ultima_ubicacion = ubicaciones.find_one({'user_id': client_id})
 
+        if ultima_ubicacion is None:
+            return None
+
         response = {
             "lat": str(ultima_ubicacion.get('lat')),
             "long": str(ultima_ubicacion.get('long')),
@@ -286,7 +289,7 @@ class ModelManager:
             "timestamp": str(ultima_ubicacion.get('timestamp'))
         }
 
-        return jsonify(response)
+        return response
 
     def add_driver_to_trip(self, trip_id,  driver_id):
         """ Este metodo agrega el chofer asignado a un viaje.
