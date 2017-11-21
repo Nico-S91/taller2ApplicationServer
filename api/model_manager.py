@@ -225,7 +225,9 @@ class ModelManager:
                 "trip": viaje.get('trip'),
                 "paymethod": viaje.get('paymethod'),
                 "route": viaje.get('route'),
-                "is_accepted": viaje.get('is_accepted')
+                "is_accepted": viaje.get('is_accepted'),
+                "start_stamp": str(viaje.get('start_stamp')),
+                "end_stamp": str(viaje.get('end_stamp'))
             }
             return response
         return None
@@ -269,7 +271,7 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'endStamp': datetime.now()}}, upsert=False).acknowledged
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'end_stamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
 
