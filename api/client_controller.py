@@ -19,7 +19,8 @@ class ClientController:
 
     def __init__(self):
         """The constructor."""
-        self.refs = {}
+        self.client_refs = {}
+        self.car_refs = {}
 
     def get_client(self, client_id):
         """ Este metodo devuelve la informacion del cliente buscado
@@ -128,22 +129,20 @@ class ClientController:
                     'info' : json.loads(response_client.data),
                     'location' : location
                 }
-                # response = response_client.data
-                # json_data = json.loads(response)
                 clients.append(json_data)
         return jsonify(clients)
 
     # Metodos para manipular la informacion de los autos
 
-    def get_car(self, id_car, client_id):
+    def get_car(self, car_id, client_id):
         """ Este metodo devuelve la informacion del auto de un cliente
-            @param id_car es el id del auto del cliente
+            @param car_id es el id del auto del cliente
             @param client_id es el id del cliente que se esta buscando la informacion"""
-        response_shared_server = SHARED_SERVER.get_car(id_car, client_id)
+        response_shared_server = SHARED_SERVER.get_car(car_id, client_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
             car = json_data[JSON_CAR]
-            self._save_ref(self._key_car(client_id, id_car), car.get(CAMPO_COLISIONES))
+            self._save_car_ref(client_id, car_id, car.get(CAMPO_COLISIONES))
             response = jsonify(car)
         else:
             response = jsonify(json_data)
@@ -169,9 +168,9 @@ class ClientController:
             @param driver_id identificador del cliente"""
         response_shared_server = SHARED_SERVER.post_car(car_json, driver_id)
         json_data = json.loads(response_shared_server.text)
-        if response_shared_server.status_code == 201:
+        if response_shared_server.status_code == 200:
             car = json_data[JSON_CAR]
-            self._save_ref(self._key_car(driver_id, car.get('id')), car.get(CAMPO_COLISIONES))
+            self._save_car_ref(driver_id, car.get('id'), car.get(CAMPO_COLISIONES))
             response = jsonify(car)
         else:
             response = jsonify(json_data)
@@ -183,11 +182,14 @@ class ClientController:
             @param car_json informacion del auto
             @param car_id identificadore del auto
             @param driver_id identificador del conductor"""
+        #Le agregamos el campo de las colisiones para que todo funciones
+        car_json[CAMPO_COLISIONES] = self._get_ref_car(driver_id, car_id)
+
         response_shared_server = SHARED_SERVER.put_car(car_json, car_id, driver_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
             car = json_data[JSON_CAR]
-            self._save_ref(self._key_car(driver_id, car_id), car.get(CAMPO_COLISIONES))
+            self._save_car_ref(driver_id, car_id, car.get(CAMPO_COLISIONES))
             response = jsonify(car)
         else:
             response = jsonify(json_data)
@@ -205,7 +207,7 @@ class ClientController:
         response = jsonify(json_data)
         response.status_code = response_shared_server.status_code
         if response_shared_server.status_code == 204:
-            self._delete_ref(self._key_car(driver_id, car_id))
+            self._delete_car_ref(driver_id, car_id)
         return response
 
     ### Metodos privados ###
@@ -213,7 +215,7 @@ class ClientController:
     def _get_ref_client(self, client_id):
         """ Este metodo devuelve el ref para manejar las colisiones de clientes
             @param client_id identificador del cliente"""
-        ref = self.refs.get(client_id)
+        ref = self.client_refs.get(client_id)
         if ref:
             return ref
         #Si no tenemos el ref lo buscamos
@@ -231,18 +233,53 @@ class ClientController:
         """ Este metodo guarda el ref para manejar las colisiones con el sharedServer
             @param ref_id identificador del objeto que maneja el sharedServer
             @param ref es el dato que necesita el sharedServer para identificar colisiones"""
-        self.refs[ref_id] = ref
+        self.client_refs[ref_id] = ref
 
     def _delete_ref(self, ref_id):
         """ Este metodo elimina el ref
             @param ref_id identificador del objeto que maneja el sharedServer"""
-        if self.refs.get(ref_id):
-            self.refs.pop(ref_id)
+        if self.client_refs.get(ref_id):
+            self.client_refs.pop(ref_id)
 
     def _key_car(self, client_id, id_car):
         """ Devuelve la key de un auto para manejar los colisiones
         """
         return str(client_id) + '&' + str(id_car)
+
+    def _get_ref_car(self, client_id, car_id):
+        """ Este metodo devuelve el ref para manejar las colisiones de clientes
+            @param client_id identificador del cliente
+            @param car_id identificador del auto"""
+        key = self._key_car(client_id, car_id)
+        ref = self.car_refs.get(key)
+        if ref:
+            return ref
+        #Si no tenemos el ref lo buscamos
+        response_shared_server = SHARED_SERVER.get_car(client_id, car_id)
+        json_data = json.loads(response_shared_server.text)
+        if response_shared_server.status_code == 200:
+            data_car = json_data[JSON_CAR]
+            self._save_car_ref(client_id, car_id, data_car.get(CAMPO_COLISIONES))
+            return data_car.get(CAMPO_COLISIONES)
+        else:
+            #Hubo un problema al buscar el get asi que no conseguimos el ref
+            return ''
+
+    def _save_car_ref(self, driver_id, car_id, ref):
+        """ Este metodo guarda el ref para manejar las colisiones con el sharedServer
+            @param driver_id identificador del cliente
+            @param car_id identificador del auto
+            @param ref es el dato que necesita el sharedServer para identificar colisiones"""
+        key = self._key_car(driver_id, car_id)
+        self.car_refs[key] = ref
+
+    def _delete_car_ref(self, driver_id, car_id):
+        """ Este metodo elimina el ref
+           @param driver_id identificador del cliente
+            @param car_id identificador del auto"""
+        key = self._key_car(driver_id, car_id)
+        if self.car_refs.get(key):
+            self.car_refs.pop(key)
 
     def _filter_user(self, users, type_client):
         """ Este metodo filtra los usuarios segun su tipo
