@@ -1560,6 +1560,9 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_car = MagicMock(return_value=response_mock)
+        ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+        ClientController._save_car_ref = mock.MagicMock(return_value=True)
+        ClientController._delete_car_ref = mock.MagicMock(return_value=True)
         #Llamar a la API
         response = self.app.get('api/v1/driver/23/cars/1')
         self.assertEqual(response.status_code, 200)
@@ -1581,25 +1584,56 @@ class TestClientController(unittest.TestCase):
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(cmp_test, cmp_response)
 
-#    def test_obtener_auto_cliente_inexistente(self):
- #       """Prueba obtener un auto de un cliente inexistente"""
-  #      self.mockeamos_login_correcto()
-   #     response = self.app.get('/api/v1/driver/0/cars/1')
-    #    self.assertEqual(response.status_code, 404)
-     #   cmp_test = json.loads("""
-      #  """)
-       # cmp_response = json.loads(response.data)
-        #self.assertEqual(cmp_test, cmp_response)
+    # def test_obtener_auto_cliente_inexistente(self):
+    #     """Prueba obtener un auto de un cliente inexistente"""
+    #     self.mockeamos_login_correcto()
+    #     ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+    #     ClientController._save_car_ref = mock.MagicMock(return_value=True)
+    #     ClientController._delete_car_ref = mock.MagicMock(return_value=True)
+    #     #Mock del response
+    #     response_mock = ResponseMock()
+    #     response_shared = json.dumps({
+    #         'code': 1,
+    #         'message': 'No existe el usuario'
+    #     })
+    #     response_mock.set_response(response_shared)
+    #     response_mock.set_code(404)
+    #     response = self.app.get('/api/v1/driver/0/cars/1')
+    #     self.assertEqual(response.status_code, 404)
+    #     cmp_test = json.loads("""
+    #     {
+    #         "code": 1,
+    #         "message": "No existe el usuario"
+    #     }
+    #     """)
+    #     cmp_response = json.loads(response.data)
+    #     self.assertEqual(cmp_test, cmp_response)
 
-#    def test_obtener_auto_inexistente(self):
- #       """Prueba obtener un auto que no tiene el cliente"""
-  #      self.mockeamos_login_correcto()
-   #     response = self.app.get('/api/v1/driver/23/cars/99')
-    #    self.assertEqual(response.status_code, 404)
-     #   cmp_test = json.loads("""
-      #  """)
-       # cmp_response = json.loads(response.data)
-        #self.assertEqual(cmp_test, cmp_response)
+    def test_obtener_auto_inexistente(self):
+        """Prueba obtener un auto que no tiene el cliente"""
+        self.mockeamos_login_correcto()
+        ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+        ClientController._save_car_ref = mock.MagicMock(return_value=True)
+        ClientController._delete_car_ref = mock.MagicMock(return_value=True)
+        #Mock del response
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 1,
+            'message': 'No existe el auto'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_car = mock.MagicMock(return_value=response_mock)
+        response = self.app.get('/api/v1/driver/23/cars/99')
+        self.assertEqual(response.status_code, 404)
+        cmp_test = json.loads("""
+        {
+            "code": 1,
+            "message": "No existe el auto"
+        }
+        """)
+        cmp_response = json.loads(response.data)
+        self.assertEqual(cmp_test, cmp_response)
 
     def test_crear_auto_cliente(self):
         """Prueba crear un auto correctamente"""
@@ -1629,6 +1663,9 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
         SharedServer.post_car = MagicMock(return_value=response_mock)
+        ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+        ClientController._save_car_ref = mock.MagicMock(return_value=True)
+        ClientController._delete_car_ref = mock.MagicMock(return_value=True)
         #Llamar a la API
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
@@ -1666,6 +1703,9 @@ class TestClientController(unittest.TestCase):
             'cache-control': "no-cache",
             'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
         }
+        ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+        ClientController._save_car_ref = mock.MagicMock(return_value=True)
+        ClientController._delete_car_ref = mock.MagicMock(return_value=True)
         response = self.app.post(
             '/api/v1/driver/23/cars', data=payload, headers=headers)
         self.assertEqual(response.status_code, 400)
@@ -1699,6 +1739,9 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
         SharedServer.put_car = MagicMock(return_value=response_mock)
+        ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+        ClientController._save_car_ref = mock.MagicMock(return_value=True)
+        ClientController._delete_car_ref = mock.MagicMock(return_value=True)
         #Llamo a la API
         payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
         headers = {
@@ -1750,6 +1793,9 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(204)
         SharedServer.delete_car = MagicMock(return_value=response_mock)
+        ClientController._get_ref_car = mock.MagicMock(return_value='ref')
+        ClientController._save_car_ref = mock.MagicMock(return_value=True)
+        ClientController._delete_car_ref = mock.MagicMock(return_value=True)
         response = self.app.delete('/api/v1/driver/23/cars/45')
         self.assertEqual(response.status_code, 204)
 
