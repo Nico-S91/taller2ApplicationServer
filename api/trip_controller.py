@@ -400,9 +400,11 @@ class TripController:
         if not check_valid_accepted_route:
             return _get_response_trip_route_invalid()
 
-        operation_result = MODEL_MANAGER.add_trip(json_data)
-        if operation_result:
-            response = jsonify(code=CODE_OK, message='Se creo el viaje correctamente')
+        trip_id = MODEL_MANAGER.add_trip(json_data)
+        print('El trip_id me dio ' + str(trip_id))
+        if trip_id is not None:
+            response = jsonify(code=CODE_OK, message='Se creo el viaje '+ str(trip_id)
+                               +' correctamente')
             response.status_code = 201
             return response
         else:

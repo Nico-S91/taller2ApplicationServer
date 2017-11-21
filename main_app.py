@@ -363,7 +363,7 @@ def post_info_transaction_client(client_id):
 
 #Endpoints de viajes
 
-@application.route('/api/v1/driver/<string:driver_id>/trips/<int:trip_id>', methods=['GET'])
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>', methods=['GET'])
 def get_trip_driver(driver_id, trip_id):
     """Obtiene la informacion del viaje de un chofer
     @param driver_id es el identificador del chofer
@@ -375,7 +375,7 @@ def get_trip_driver(driver_id, trip_id):
     response = TRIP_CONTROLLER.get_trip(TIPO_CHOFER, driver_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<int:trip_id>', methods=['GET'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>', methods=['GET'])
 def get_trip_client(client_id, trip_id):
     """Obtiene la informacion del viaje de un cliente
     @param client_id es el identificador del cliente

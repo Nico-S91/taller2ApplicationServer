@@ -1661,7 +1661,7 @@ class TestClientController(unittest.TestCase):
             }
         })
         response_mock.set_response(response_shared)
-        response_mock.set_code(201)
+        response_mock.set_code(200)
         SharedServer.post_car = MagicMock(return_value=response_mock)
         ClientController._get_ref_car = mock.MagicMock(return_value='ref')
         ClientController._save_car_ref = mock.MagicMock(return_value=True)
@@ -1675,7 +1675,7 @@ class TestClientController(unittest.TestCase):
         }
         response = self.app.post(
             '/api/v1/driver/23/cars', data=payload, headers=headers)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         cmp_test = json.loads("""{
             "id": "2",

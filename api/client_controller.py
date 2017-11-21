@@ -168,7 +168,7 @@ class ClientController:
             @param driver_id identificador del cliente"""
         response_shared_server = SHARED_SERVER.post_car(car_json, driver_id)
         json_data = json.loads(response_shared_server.text)
-        if response_shared_server.status_code == 201:
+        if response_shared_server.status_code == 200:
             car = json_data[JSON_CAR]
             self._save_car_ref(driver_id, car.get('id'), car.get(CAMPO_COLISIONES))
             response = jsonify(car)

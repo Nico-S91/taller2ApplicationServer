@@ -5,6 +5,7 @@ from flask import jsonify
 import model.db_manager
 from bson.objectid import ObjectId
 import json
+import bson
 
 class ModelManager:
     """Esta clase contiene los metodos para operar con las tablas
@@ -18,8 +19,10 @@ class ModelManager:
         """Este metodo obtiene la informacion de un usuario en base de datos de Mongo
             @param user_id id del usuario
         """
-
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return None
+
         user_info = usuarios.find_one({'user_id': user_id})
 
         if user_info is None:
@@ -38,7 +41,6 @@ class ModelManager:
             @param username su nickname
             @param available si el usuario esta disponible
         """
-
         if available is None:
             available = True
 
@@ -51,6 +53,9 @@ class ModelManager:
         }
 
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return False
+
         return usuarios.insert_one(new_user).acknowledged
 
     def update_usuario(self, user_id, user_type, username, available):
@@ -60,8 +65,10 @@ class ModelManager:
             @param username nombre de usuario
             @param available si el usuario esta disponible
         """
-
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return False
+
         user_to_update = usuarios.find_one({'user_id': user_id})
 
         return usuarios.update_one({'_id': user_to_update.get('_id')},
@@ -73,14 +80,18 @@ class ModelManager:
         """ Este metodo elimina un usuario de la coleccion de usuarios en Mongo
             @param user_id un id de usuario
         """
-
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return True
+
         return usuarios.delete_one({'user_id': user_id}).acknowledged
 
     def get_usuarios(self):
-        """ Estemetodo obtiene todos los usuarios de mongo"""
-
+        """ Este metodo obtiene todos los usuarios de mongo"""
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return []
+
         lista_usuarios = usuarios.find({}, {"_id": 0})
 
         if lista_usuarios is None:
@@ -95,8 +106,10 @@ class ModelManager:
         """ Este metodo devuelve verdadero si el usuario esta disponible o falso sino
             @param user_id id del usuario
         """
-
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return None
+
         user_data = usuarios.find_one({'user_id': user_id})
 
         return user_data.get('available')
@@ -107,9 +120,10 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return None
 
         trip_info = info_viaje["trip"]
-
         driver_id = trip_info["driver"]
         passenger_id = trip_info["passenger"]
 
@@ -123,7 +137,15 @@ class ModelManager:
             "is_accepted": False
         }
 
-        return viajes.insert_one(new_viaje).acknowledged
+        result = viajes.insert_one(new_viaje).acknowledged
+        if not result:
+            return None
+        print('Se creo el viaje...')
+        trip_data = viajes.find_one(new_viaje)
+        if trip_data is None:
+            return None
+        print('Obtuve el viaje y ahora pido el id!!!')
+        return trip_data.get('_id')
 
     def get_locations_by_type(self, client_type):
         """ Este metodo devuelve un array de ubicaciones de todos los clientes
@@ -134,9 +156,14 @@ class ModelManager:
 
         #Obtengo todos los usuarios del tipo client_type
         usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return result
+
         usuarios_by_tipo = usuarios.find({'client_type': client_type}, {"_id": 0, "user_id": 1})
 
         ubicaciones = self.db_manager.get_table('ubicaciones')
+        if ubicaciones is None:
+            return result
 
         for user in usuarios_by_tipo:
             user_id = user.get('user_id')
@@ -156,9 +183,11 @@ class ModelManager:
             @param location una ubicacion
             @param trip_id el id del viaje
         """
-
         result = False
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return result
+
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
@@ -180,13 +209,17 @@ class ModelManager:
         """ Este metodo obtiene el viaje dado su id
             @param trip_id el id del viaje
         """
-
+        if not bson.objectid.ObjectId.is_valid(trip_id):
+            return None
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return None
+
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
             response = {
-                "trip_id": viaje.get('_id'),
+                "trip_id": str(viaje.get('_id')),
                 "driver_id": viaje.get('driver_id'),
                 "passenger_id": viaje.get('passenger_id'),
                 "trip": viaje.get('trip'),
@@ -203,6 +236,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return True
+
         return viajes.delete_one({'_id': trip_id}).acknowledged
 
     def start_trip(self, trip_id):
@@ -211,6 +247,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return False
+
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
@@ -224,6 +263,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return False
+
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
@@ -241,6 +283,8 @@ class ModelManager:
         """
         #obtengo la tabla de ultimas posiciones
         ubicaciones = self.db_manager.get_table('ubicaciones')
+        if ubicaciones is None:
+            return False
 
         #busco si ya hay una posicion registrada para el usuario con esta id
         ultima_ubicacion = ubicaciones.find_one({'user_id': user_id})
@@ -276,6 +320,8 @@ class ModelManager:
 
         #obtengo la coleccion
         ubicaciones = self.db_manager.get_table('ubicaciones')
+        if ubicaciones is None:
+            return None
 
         ultima_ubicacion = ubicaciones.find_one({'user_id': client_id})
 
@@ -298,6 +344,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return False
+
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
@@ -311,6 +360,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return False
+
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
@@ -322,6 +374,9 @@ class ModelManager:
         """Este metodo devuelve los viajes que no tienen idDriver asignado"""
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return []
+
         viajes_sin_driver = viajes.find({'driver_id': None}, {"_id": 0})
 
         if viajes_sin_driver is None:
@@ -338,6 +393,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return []
+
         viajes_con_id_driver = viajes.find({'driver_id': driver_id}, {"_id": 0})
 
         if viajes_con_id_driver is None:
@@ -352,6 +410,9 @@ class ModelManager:
         """ Este metodo devuelve los viajes en mongo sin stamp de end"""
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return []
+
         viajes_sin_terminar = viajes.find({'driver_id':{"$exists": True}, 'start_stamp': None}, {"_id": 0})
 
         if viajes_sin_terminar is None:
@@ -368,6 +429,9 @@ class ModelManager:
         """
 
         viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return []
+
         viajes_con_id_client = viajes.find({'passenger_id': client_id}, {"_id": 0})
 
         if viajes_con_id_client is None:
