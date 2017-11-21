@@ -326,7 +326,11 @@ class TripController:
                 return response
         if response_mongo:
             #Se pudo finalizar el viaje asi que enviamos la informacion a SharedServer
-            #VER SI HAY QUE MANDARLE MENOS INFORMACION!!!!!
+            #HAY QUE ACTUALIZAR LOS HORARIOS DE SALIDA Y LLEGADA EN EL JSON DEL TRIP
+            #EL totalTime DEBE SER: HORALLEGADA-HORASALIDA
+            #travelTime ES: totalTime - waitTime
+            #distance ES LA SUMA DE LAS DISTANCIAS DE CADA TRAYECTITO
+            #HAY QUE ENVIARLE SOLO EL TRIP Y EL paymethod
             response_shared = SHARED_SERVER.post_trip(info_trip)
             if response_shared.status_code == 201:
                 MODEL_MANAGER.delete_trip(trip_id)
@@ -336,12 +340,12 @@ class TripController:
                 return response
             else:
                 response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
-                                   ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
+                                   ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
                 response.status_code = STATUS_ERROR_MONGO
                 return response
         else:
             response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
-                               ' no se pudo comenzar, vuelva a intentarlo mas tarde.')
+                               ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
             response.status_code = STATUS_ERROR_MONGO
             return response
 
@@ -400,9 +404,11 @@ class TripController:
         if not check_valid_accepted_route:
             return _get_response_trip_route_invalid()
 
-        operation_result = MODEL_MANAGER.add_trip(json_data)
-        if operation_result:
-            response = jsonify(code=CODE_OK, message='Se creo el viaje correctamente')
+        trip_id = MODEL_MANAGER.add_trip(json_data)
+        print('El trip_id me dio ' + str(trip_id))
+        if trip_id is not None:
+            response = jsonify(code=CODE_OK, message='Se creo el viaje '+ str(trip_id)
+                               +' correctamente')
             response.status_code = 201
             return response
         else:
@@ -446,6 +452,8 @@ class TripController:
             return response_error
         #Guardo la ultima posicion
         operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
+        #HAY QUE VER SI EL USUARIO ESTA EN UN VIAJE
+        #SI ESTA EN UN VIAJE HAY QUE GUARDAR LA LOCALIZACION EN EL VIAJE EN ROUTE
         if operation_result:
             response = jsonify(code=CODE_OK, message='Se actualizo la ubicacion' +
                                ' del usuario ' + str(user_id) + '.')
