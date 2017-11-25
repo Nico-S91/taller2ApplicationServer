@@ -411,7 +411,7 @@ def get_trips_client(client_id):
     return response
 
 @application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/accept', methods=['PUT'])
-def get_trips_driver_accept(driver_id, trip_id):
+def put_trips_driver_accept(driver_id, trip_id):
     """El chofer acepta realizar un viaje
     @param driver_id es el identificador del chofer
     @param trip_id es el identificador del viaje"""
@@ -423,8 +423,21 @@ def get_trips_driver_accept(driver_id, trip_id):
     response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/refuse', methods=['PUT'])
+def put_trips_driver_refuse(driver_id, trip_id):
+    """El chofer rechaza realizar un viaje
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/'
+                            + str(trip_id) + '/refuse')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.refuse_trip(driver_id, trip_id)
+    return response
+
 @application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/start', methods=['PUT'])
-def get_trips_client_start(client_id, trip_id):
+def put_trips_client_start(client_id, trip_id):
     """El cliente confirma que comenzo el viaje
     @param client_id es el identificador del cliente
     @param trip_id es el identificador del viaje"""
@@ -437,7 +450,7 @@ def get_trips_client_start(client_id, trip_id):
     return response
 
 @application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/finish', methods=['PUT'])
-def get_trips_client_finish(client_id, trip_id):
+def put_trips_client_finish(client_id, trip_id):
     """El cliente confirma que termino el viaje
     @param client_id es el identificador del cliente
     @param trip_id es el identificador del viaje"""
@@ -472,6 +485,18 @@ def post_trip(client_id):
     if not request.json:
         abort(400)
     response = TRIP_CONTROLLER.post_new_trip(request.json)
+    return response
+
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/driver/'
+                   + '<string:driver_id>', methods=['PUT'])
+def put_trip(client_id, trip_id, driver_id):
+    """Crea un viaje"""
+    application.logger.info('[PUT] /api/v1/client' + str(client_id) + '/trips/' +
+                            str(trip_id) + '/driver/' + str(driver_id))
+    #check de login
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.put_trip_new_driver(client_id, trip_id, driver_id)
     return response
 
 @application.route('/api/v1/availabletrips/<string:user_id>', methods=['GET'])
