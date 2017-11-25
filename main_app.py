@@ -491,8 +491,8 @@ def post_trip(client_id):
                    + '<string:driver_id>', methods=['PUT'])
 def put_trip(client_id, trip_id, driver_id):
     """Crea un viaje"""
-    application.logger.info('[PUT] /api/v1/client' + client_id + '/trips/' +
-                            trip_id + '/driver/' + driver_id)
+    application.logger.info('[PUT] /api/v1/client' + str(client_id) + '/trips/' +
+                            str(trip_id) + '/driver/' + str(driver_id))
     #check de login
     if not is_logged():
         return response_invalid_login()

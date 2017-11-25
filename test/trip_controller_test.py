@@ -2746,7 +2746,6 @@ class TestTripController(unittest.TestCase):
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
-
     def test_rechazar_viaje_sin_info_chofer_mongo_error(self):
         """Probar que un chofer puede rechazar un viaje, teniendo en cuenta que no hay informacion 
             en Mongo, sino hay que buscar en el shared server"""
@@ -2781,3 +2780,109 @@ class TestTripController(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+
+    # Modificar chofer de un viaje
+
+    def test_modificar_chofer_viaje_sin_info_chofer_mongo_error(self):
+        """Probar que un chofer no puede modificar el chofer de un viaje, teniendo en cuenta que no hay
+            informacion del cliente"""
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.get_trip = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_driver_to_trip = MagicMock(return_value=True)
+
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 9,
+            'message': 'No existe el cliente.'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        response = self.app.put('/api/v1/client/44/trips/12/driver/1', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -10,
+            "message": "El usuario 44 no existe."
+        }""")
+        self.assertEqual(response.status_code, 404)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
+    def test_modificar_chofer_viaje_sin_info_cliente_mongo(self):
+        """Probar que un cliente no puede modificar un viaje si el mismo no existe, teniendo en
+           cuenta que no hay informacion en Mongo, se tuvo que buscar en el shared server y el usuario
+           es un conductor"""
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'driver',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_trip = MagicMock(return_value=None)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.add_driver_to_trip = MagicMock(return_value=True)
+        ModelManager.refuse_trip = MagicMock(return_value=True)
+        response = self.app.put('/api/v1/client/23/trips/12/driver/1', data=payload, headers=headers)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": -12,
+            "message": "El usuario 23 no es un pasajero."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
