@@ -1493,7 +1493,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'client_type': 'client'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response = self.app.put('/api/v1/driver/2/trips/13/accept', data=payload, headers=headers)
@@ -2604,7 +2604,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         response_info_user = {
-            'client_type': 'client'
+            'client_type': 'passenger'
         }
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response = self.app.put('/api/v1/driver/2/trips/13/refuse', data=payload, headers=headers)

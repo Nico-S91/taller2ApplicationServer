@@ -264,7 +264,6 @@ class ModelManager:
         """ Este metodo termina, y marca con un timestamp del atributo end de un viaje
             @param trip_id el id del viaje
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return False
@@ -275,6 +274,24 @@ class ModelManager:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'end_stamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
+
+    # def put_trip_new_driver(self, trip_id, driver_id):
+    #     """ Este metodo modifica el chofer de un viaje
+    #         @param trip_id es el identificador del viaje
+    #         @param driver_id es el identificador del chofer
+    #     """
+    #     viajes = self.db_manager.get_table('viajes')
+    #     if viajes is None:
+    #         return False
+
+    #     viaje = viajes.find_one({'_id': ObjectId(trip_id)})
+
+    #     if viaje is not None:
+    #         trip = viaje.get('trip')
+    #         trip.driver_id = driver_id
+    #         return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver_id':driver_id, 'trip':trip}}, upsert=False).acknowledged
+
+    #     return False
 
     def add_last_known_position(self, user_id, latitud, longitud, accuracy):
         """ Este metodo graba en la base de datos 'UltimasPosiciones'
@@ -353,7 +370,9 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver_id': driver_id}}, upsert=False).acknowledged
+            trip = viaje.get('trip')
+            trip.driver_id = driver_id
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver_id':driver_id, 'trip':trip}}, upsert=False).acknowledged
         else:
             return False
     
@@ -384,7 +403,9 @@ class ModelManager:
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
 
         if viaje is not None:
-            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver':None ,'is_refused': True}}, upsert=False).acknowledged
+            trip = viaje.get('trip')
+            trip.driver_id = None
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver':None ,'is_refused': True, 'trip':trip}}, upsert=False).acknowledged
         else:
             return False
 
