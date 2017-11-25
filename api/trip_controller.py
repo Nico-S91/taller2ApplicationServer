@@ -100,6 +100,13 @@ def _get_response_trip_without_passenger():
     response.status_code = 400
     return response
 
+def _get_response_trip_not_belong(trip_id, driver_id):
+    """ Devuelve el response que indica que el viaje nole pertenece al chofer"""
+    response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' +
+                       trip_id + ' no le pertenece al chofer ' + driver_id + '.')
+    response.status_code = 400
+    return response
+
 def _get_response_trip_route_invalid():
     """ Devuelve el response que indica que el viaje no tiene una ruta valida"""
     response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' +
@@ -224,6 +231,56 @@ class TripController:
             response.status_code = STATUS_ERROR_MONGO
             return response
 
+    def refuse_trip(self, driver_id, trip_id):
+        """ Este metodo permite al conductor rechazar un viaje
+            @param driver_id identificador del chofer
+            @param trip_id identificador del viaje"""
+        is_driver = True
+        info_user = MODEL_MANAGER.get_info_usuario(driver_id)
+        #Verificamos que el usuario sea un chofer
+        if info_user is None:
+            response_shared_server = SHARED_SERVER.get_client(driver_id)
+            if response_shared_server.status_code != 200:
+                return _get_response_not_exist_user(driver_id)
+            else:
+                info_user = json.loads(response_shared_server.text).get('user')
+                if info_user.get('type') != TIPO_CHOFER:
+                    is_driver = False
+                #Agrego la info a la base
+                MODEL_MANAGER.add_usuario(driver_id, info_user.get('type'),
+                                          info_user.get('username'), True)
+        else:
+            if info_user.get('client_type') != TIPO_CHOFER:
+                is_driver = False
+        if is_driver is False:
+            return _get_response_not_driver(driver_id)
+
+        #Vamos a verificar que el conductor puede rechazar ese viaje
+        response_mongo = False
+        info_trip = MODEL_MANAGER.get_trip(trip_id)
+        if info_trip is None:
+            return _get_response_not_exist_trip(trip_id)
+        if info_trip.get('driver_id') is None:
+            return _get_response_trip_not_belong(trip_id, driver_id)
+        else:
+            if info_trip.get('driver_id') == driver_id:
+                #Rechazo el viaje
+                response_mongo = MODEL_MANAGER.refuse_trip(trip_id)
+            else:
+                return _get_response_trip_other_user(trip_id, driver_id)
+        if response_mongo:
+            #Se pudo aceptar el viaje
+            response = jsonify(code=CODE_OK, message='El chofer ' + str(driver_id) +
+                               ' rechazo el viaje ' + str(trip_id) + '.')
+            response.status_code = 201
+            return response
+        else:
+            response = jsonify(code=CODE_ERROR, message='El chofer ' + str(driver_id) +
+                               ' no pudo rechazar el viaje ' + str(trip_id) +
+                               ', vuelva a intentarlo mas tarde.')
+            response.status_code = STATUS_ERROR_MONGO
+            return response
+    
     def start_trip(self, client_id, trip_id):
         """ Este metodo indica que se comenzo un viaje
             @param client_id identificador del cliente

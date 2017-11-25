@@ -423,6 +423,19 @@ def get_trips_driver_accept(driver_id, trip_id):
     response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/refuse', methods=['PUT'])
+def get_trips_driver_refuse(driver_id, trip_id):
+    """El chofer rechaza realizar un viaje
+    @param driver_id es el identificador del chofer
+    @param trip_id es el identificador del viaje"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/'
+                            + str(trip_id) + '/refuse')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = TRIP_CONTROLLER.refuse_trip(driver_id, trip_id)
+    return response
+
 @application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/start', methods=['PUT'])
 def get_trips_client_start(client_id, trip_id):
     """El cliente confirma que comenzo el viaje

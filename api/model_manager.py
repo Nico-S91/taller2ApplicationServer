@@ -226,6 +226,7 @@ class ModelManager:
                 "paymethod": viaje.get('paymethod'),
                 "route": viaje.get('route'),
                 "is_accepted": viaje.get('is_accepted'),
+                "is_refused": viaje.get('is_refused'),
                 "start_stamp": str(viaje.get('start_stamp')),
                 "end_stamp": str(viaje.get('end_stamp'))
             }
@@ -258,7 +259,7 @@ class ModelManager:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'start_stamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
-
+    
     def end_trip(self, trip_id):
         """ Este metodo termina, y marca con un timestamp del atributo end de un viaje
             @param trip_id el id del viaje
@@ -369,6 +370,21 @@ class ModelManager:
 
         if viaje is not None:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'is_accepted': True}}, upsert=False).acknowledged
+        else:
+            return False
+
+    def refuse_trip(self, trip_id):
+        """ Este metodo tilda al viaje como rechazado
+            @param trip_id el id del viaje
+        """
+        viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return False
+
+        viaje = viajes.find_one({'_id': ObjectId(trip_id)})
+
+        if viaje is not None:
+            return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver':None ,'is_refused': True}}, upsert=False).acknowledged
         else:
             return False
 
