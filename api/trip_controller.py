@@ -1,6 +1,8 @@
 """ @package api.trip_controller
 """
 import json
+import math
+import datetime
 from flask import jsonify
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
@@ -10,7 +12,7 @@ from api.model_manager import ModelManager
 SHARED_SERVER = SharedServer()
 MODEL_MANAGER = ModelManager()
 
-KM_FACTOR = 97,89059117
+KM_FACTOR = 97.89059117
 
 CODE_OK = 0
 CODE_ERROR = -1
@@ -32,6 +34,8 @@ CODE_ERROR_TRIP_INVALID = -27
 CODE_ERROR_TRIP_PAYMETHOD = -28
 
 STATUS_ERROR_MONGO = 400
+
+FORMAT_DATATIME = "%Y-%m-%d %H:%M:%S.%f"
 
 def _get_response_not_passenger(client_id):
     """ Devuelve el response que indica que el usuario no es un pasajero"""
@@ -393,6 +397,11 @@ class TripController:
                 return response
         if response_mongo:
             trip = self._complete_trip(info_trip)
+            if trip is None:
+                response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
+                                   ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
+                response.status_code = STATUS_ERROR_MONGO
+                return response
             response_shared = SHARED_SERVER.post_trip(trip)
             if response_shared.status_code == 201:
                 MODEL_MANAGER.delete_trip(trip_id)
@@ -788,16 +797,33 @@ class TripController:
 
     def  _complete_trip(self, info_trip):
         #HAY QUE ACTUALIZAR LOS HORARIOS DE SALIDA Y LLEGADA EN EL JSON DEL TRIP
+        print (info_trip)
         start_time = info_trip.get('start_stamp')
+        if start_time is not None:
+            start_time = datetime.datetime.strptime(start_time, FORMAT_DATATIME)
         end_time = info_trip.get('end_stamp')
+        if end_time is not None:
+            end_time = datetime.datetime.strptime(end_time, FORMAT_DATATIME)
         start_wait_time = info_trip.get('start_wait_stamp')
+        if start_wait_time is not None:
+            start_wait_time = datetime.datetime.strptime(start_wait_time, FORMAT_DATATIME)
         end_wait_time = info_trip.get('end_wait_stamp')
+        if end_wait_time is not None:
+            end_wait_time = datetime.datetime.strptime(end_wait_time, FORMAT_DATATIME)
         #EL totalTime DEBE SER: HORALLEGADA-HORASALIDA
+        if end_time is None or start_time is None:
+            return None
         total_time = end_time - start_time
-        wait_time = end_wait_time - start_wait_time
-        travel_time = total_time - wait_time
+        wait_time = None
+        if start_wait_time is not None and end_wait_time is not None:
+            wait_time = end_wait_time - start_wait_time
+        travel_time = None
+        if wait_time is not None:
+            travel_time = total_time - wait_time
         #distance ES LA SUMA DE LAS DISTANCIAS DE CADA TRAYECTITO
         trip = info_trip.get('trip')
+        if trip is None:
+            return None
         route = trip.get('route')
         start_location = None
         end_location = None
@@ -805,50 +831,58 @@ class TripController:
             last_location = None
             distance = 0
             for location in route:
+                location = location.get('location')
                 if last_location is None:
                     start_location = location
                 else:
                     distance = distance + self._get_distance(last_location, location)
                 last_location = location
         end_location = last_location
+        
         #Armo el Json del viaje
+
         #Actualizamos la salida
-        start = trip.get('start').get('address').get('location')
-        if not (start.get('lat') == start_location.get('lat') and start.get('lat') == start_location.get('lat')):
-            new_address = {}
-            new_address.location = start_location
-            new_start = {}
-            new_start.address = new_address
-            new_start.timestamp = trip.get('start').get('timestamp')
-            trip.start = new_start
-        #Actualizamos la llegada
-        end = trip.get('end').get('address').get('location')
-        if not (end.get('lat') == end_location.get('lat') and end.get('lat') == end_location.get('lat')):
-            new_address = {}
-            new_address.location = end_location
-            new_end = {}
-            new_end.address = new_address
-            new_end.timestamp = trip.get('end').get('timestamp')
-            trip.end = new_end
-        #Le agregamos los otros campos calculados
-        trip.totalTime = total_time
-        trip.waitTime = wait_time
-        trip.travelTime = travel_time
-        trip.distance = distance
+        if start_location is not None and end_location is not None:
+            start = trip.get('start').get('address').get('location')
+            if not (start.get('lat') == start_location.get('lat') and
+                    start.get('lat') == start_location.get('lat')):
+                new_address = {}
+                new_address.location = start_location
+                new_start = {}
+                new_start.address = new_address
+                new_start.timestamp = trip.get('start').get('timestamp')
+                trip.start = new_start
+            #Actualizamos la llegada
+            end = trip.get('end').get('address').get('location')
+            if not (end.get('lat') == end_location.get('lat') and
+                    end.get('lat') == end_location.get('lat')):
+                new_address = {}
+                new_address.location = end_location
+                new_end = {}
+                new_end.address = new_address
+                new_end.timestamp = trip.get('end').get('timestamp')
+                trip.end = new_end
+        #Le agregamos los otros campos calculado
+        if total_time is not None:
+            trip['totalTime'] = total_time
+        if wait_time is not None:
+            trip['waitTime'] = wait_time
+        if travel_time is not None:
+            trip['travelTime'] = travel_time
+        if distance is not None:
+            trip['distance'] = distance
         new_trip = {}
-        new_trip.trip = trip
-        new_trip.paymethod = info_trip.get('paymethod')
+        new_trip['trip'] = trip
+        new_trip['paymethod'] = info_trip.get('paymethod')
         #HAY QUE ENVIARLE SOLO EL TRIP Y EL paymethod
         return new_trip
 
     def _get_distance(self, last_location, location):
         #Calculo la distancia en Km entre las ubicaciones
-        a = location.get('lat') - last_location.get('lat')
-        b = location.get('long') - last_location.get('long')
-        c = a * a + b * b
-        #La raiz cuadrada
-        #return Math.sqrt(c) * KM_FACTOR;
-        return c
+        dif_lat = location.get('lat') - last_location.get('lat')
+        dif_lon = location.get('lon') - last_location.get('lon')
+        dif = math.sqrt(dif_lat * dif_lat + dif_lon * dif_lon)
+        return math.sqrt(dif) * KM_FACTOR
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
 

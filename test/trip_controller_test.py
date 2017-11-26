@@ -3,6 +3,7 @@
 """
 import unittest
 import json
+import datetime
 from test.response_mock import ResponseMock
 from service.shared_server import SharedServer
 from api.model_manager import ModelManager
@@ -1920,7 +1921,49 @@ class TestTripController(unittest.TestCase):
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
         response_info_trip = {
             'passenger_id' : '23',
-            'start_stamp' : '01/05/2017 1:05'
+            'start_stamp' :  "2017-11-26 18:04:17.611000",
+            'end_stamp' :  "2017-11-26 18:14:17.611000",
+            'trip' : {
+                'start': {
+                    'address': {
+                        "location": {
+                            "lat": -34.627277,
+                            "lon": -58.681433
+                        },
+                        "street": "Pasteur 2014"
+                    },
+                    "timestamp": 0
+                },
+                "end": {
+                    "address": {
+                        "location": {
+                            "lat": -34.648215,
+                            "lon": -58.607695
+                        },
+                        "street": "Gral. Juan Martín de Pueyrredón 210"
+                    },
+                    "timestamp": 0
+                },
+                'route': [
+                    {
+                        "location": {
+                            "lat": -34.627277,
+                            "lon": -58.681433
+                        },
+                        "timestamp": 0
+                    },
+                    {
+                        "location": {
+                            "lat": -34.648215,
+                            "lon": -58.607695
+                        },
+                        "timestamp": 0
+                    }
+                ]
+            },
+            'route' : [
+
+            ]
         }
         ModelManager.get_trip = MagicMock(return_value=response_info_trip)
         ModelManager.add_usuario = MagicMock(return_value=True)
@@ -2088,7 +2131,49 @@ class TestTripController(unittest.TestCase):
         SharedServer.get_client = MagicMock(return_value=response_mock)
         ModelManager.get_trip = MagicMock(return_value={
             'passenger_id' : '23',
-            'start_stamp' : '01/05/2017 1:05'
+            'start_stamp' :  "2017-11-26 18:04:17.611000",
+            'end_stamp' :  "2017-11-26 18:14:17.611000",
+            'trip' : {
+                'start': {
+                    'address': {
+                        "location": {
+                            "lat": -34.627277,
+                            "lon": -58.681433
+                        },
+                        "street": "Pasteur 2014"
+                    },
+                    "timestamp": 0
+                },
+                "end": {
+                    "address": {
+                        "location": {
+                            "lat": -34.648215,
+                            "lon": -58.607695
+                        },
+                        "street": "Gral. Juan Martín de Pueyrredón 210"
+                    },
+                    "timestamp": 0
+                },
+                'route': [
+                    {
+                        "location": {
+                            "lat": -34.627277,
+                            "lon": -58.681433
+                        },
+                        "timestamp": 0
+                    },
+                    {
+                        "location": {
+                            "lat": -34.648215,
+                            "lon": -58.607695
+                        },
+                        "timestamp": 0
+                    }
+                ]
+            },
+            'route' : [
+
+            ]
         })
         ModelManager.add_usuario = MagicMock(return_value=True)
         ModelManager.finish_trip = MagicMock(return_value=True)
@@ -2151,7 +2236,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            "type": "driver"
+            "client_type": "driver"
         })
         ModelManager.add_last_known_position = MagicMock(return_value=True)
         response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
@@ -2178,7 +2263,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            "type": "passenger"
+            "client_type": "passenger"
         })
         ModelManager.add_last_known_position = MagicMock(return_value=True)
         ModelManager.trips_by_client = MagicMock(return_value=None)
@@ -2206,7 +2291,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            "type": "passenger"
+            "client_type": "passenger"
         })
         ModelManager.add_last_known_position = MagicMock(return_value=True)
         trips = [
@@ -2247,7 +2332,7 @@ class TestTripController(unittest.TestCase):
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
         ModelManager.get_info_usuario = MagicMock(return_value={
-            "type": "passenger"
+            "client_type": "passenger"
         })
         ModelManager.add_last_known_position = MagicMock(return_value=True)
         trips = [
