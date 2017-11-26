@@ -581,9 +581,8 @@ class TripController:
             return response_error
         #Guardo la ultima posicion
         operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
-        #HAY QUE VER SI EL USUARIO ESTA EN UN VIAJE
-        #SI ESTA EN UN VIAJE HAY QUE GUARDAR LA LOCALIZACION EN EL VIAJE EN ROUTE
         if operation_result:
+            self._add_location_route_trips(user_id, data)
             response = jsonify(code=CODE_OK, message='Se actualizo la ubicacion' +
                                ' del usuario ' + str(user_id) + '.')
             response.status_code = 201
@@ -747,6 +746,22 @@ class TripController:
             else:
                 return _get_response_not_exist_user(user_id)
         return None
+
+    def _add_location_route_trips(self, user_id, location):
+        is_client = self._validate_type_user(user_id, TIPO_CLIENTE)
+        if not is_client:
+            return True
+        #Veo si esta en un viaje
+        trips = MODEL_MANAGER.trips_by_client(user_id)
+        if trips is None:
+            return True
+        for trip in trips:
+            start = trip.get('start_stamp')
+            finish = trip.get('end_stamp')
+            if start and not finish:
+                trip_id = trip.get('id')
+                MODEL_MANAGER.add_location_to_trip(location, trip_id)
+        return True
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
 

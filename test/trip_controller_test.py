@@ -2140,8 +2140,8 @@ class TestTripController(unittest.TestCase):
 
     #Post ultima ubicacion de un usuario
 
-    def test_ultima_ubicacion_valida(self):
-        """Probar que un cliente puede enviar una ubicacion valida para guardarla"""
+    def test_ultima_ubicacion_valida_chofer(self):
+        """Probar que un chofer puede enviar una ubicacion valida para guardarla"""
         data = {
             "user_id": "llevame-oscar",
             "lat": "-34.627277",
@@ -2150,8 +2150,120 @@ class TestTripController(unittest.TestCase):
         }
          #Mockeamos la llamada
         self.mockeamos_login_correcto()
-        ModelManager.get_info_usuario = MagicMock(return_value={})
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "type": "driver"
+        })
         ModelManager.add_last_known_position = MagicMock(return_value=True)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_cliente_sin_viajes(self):
+        """Probar que un cliente puede enviar una ubicacion valida para guardarla aun cuando 
+           no comenzo un viaje"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "type": "passenger"
+        })
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        ModelManager.trips_by_client = MagicMock(return_value=None)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_cliente_con_viajes_finalizados(self):
+        """Probar que un cliente puede enviar una ubicacion valida y tiene
+           viajes finalizados"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "type": "passenger"
+        })
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        trips = [
+            {
+                'id': '1',
+                'start_stamp': 'comenzo...',
+                'end_stamp': 'finalizo...'
+            },
+            {
+                'id': '2',
+                'start_stamp': 'comenzo...',
+                'end_stamp': 'finalizo...'
+            }
+        ]
+        ModelManager.trips_by_client = MagicMock(return_value=trips)
+        ModelManager.add_location_to_trip = MagicMock(return_value=False)
+        response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
+                                      content_type='application/json', follow_redirects=True)
+        #Adentro del loads hay que pegar el json que devuelve la url
+        assert_res = json.loads("""{
+            "code": 0,
+            "message": "Se actualizo la ubicacion del usuario llevame-oscar."
+        }""")
+        print(response.data)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_ultima_ubicacion_valida_cliente_con_viaje_sin_finalizar(self):
+        """Probar que un cliente puede enviar una ubicacion valida y tiene
+           viajes sin finalizar"""
+        data = {
+            "user_id": "llevame-oscar",
+            "lat": "-34.627277",
+            "long": "-58.681433",
+            "accuracy": "1"
+        }
+         #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "type": "passenger"
+        })
+        ModelManager.add_last_known_position = MagicMock(return_value=True)
+        trips = [
+            {
+                'id': '1',
+                'start_stamp': 'comenzo...',
+                'end_stamp': 'finalizo...'
+            },
+            {
+                'id': '2',
+                'start_stamp': 'comenzo...'
+            }
+        ]
+        ModelManager.trips_by_client = MagicMock(return_value=trips)
+        ModelManager.add_location_to_trip = MagicMock(return_value=True)
+        ModelManager.add_location_to_trip = MagicMock(return_value=False)
         response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
                                       content_type='application/json', follow_redirects=True)
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -2189,7 +2301,7 @@ class TestTripController(unittest.TestCase):
         self.assertEqual(assert_res, cmp_response)
         self.assertEqual(response.status_code, 400)
 
-    def test_ultima_ubicacion_valida_buscar_usuario(self):
+    def test_ultima_ubicacion_valida_buscar_usuario_sin_viajes(self):
         """Probar que un cliente puede enviar una ubicacion valida para guardarla y como
            el usuario no se encuentra en la base de datos se tuvo que buscar en shared server"""
         data = {
@@ -2246,6 +2358,7 @@ class TestTripController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.trips_by_client = MagicMock(return_value=None)
         response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
                                       content_type='application/json', follow_redirects=True)
         #Adentro del loads hay que pegar el json que devuelve la url
@@ -2351,7 +2464,7 @@ class TestTripController(unittest.TestCase):
         response_mock.set_code(401)
         SharedServer.get_client = MagicMock(return_value=response_mock)
         response = self.app.post('/api/v1/lastlocation', data=json.dumps(data),
-                                      content_type='application/json', follow_redirects=True)
+                                 content_type='application/json', follow_redirects=True)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
             "code": -10,
