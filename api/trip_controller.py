@@ -294,7 +294,7 @@ class TripController:
                                ', vuelva a intentarlo mas tarde.')
             response.status_code = STATUS_ERROR_MONGO
             return response
-    
+
     def start_trip(self, client_id, trip_id):
         """ Este metodo indica que se comenzo un viaje
             @param client_id identificador del cliente
@@ -396,24 +396,23 @@ class TripController:
                 response = _get_response_trip_other_user(trip_id, client_id)
                 return response
         if response_mongo:
-            trip = self._complete_trip(info_trip)
+            trip = self._complete_trip(trip_id)
             if trip is None:
+                print('el viaje se completo incorrectamente, salio None')
                 response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
                                    ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
                 response.status_code = STATUS_ERROR_MONGO
                 return response
+            #Le devuelvo al cliente lo que me dijo el shared server
             response_shared = SHARED_SERVER.post_trip(trip)
+            json_data = json.loads(response_shared.text)
             if response_shared.status_code == 201:
+                #Elimino el viaje de la base de datos y devuelvo la info del viaje
                 MODEL_MANAGER.delete_trip(trip_id)
-                response = jsonify(code=CODE_OK, message='El viaje ' + str(trip_id) +
-                                   ' ha finalizado.')
-                response.status_code = 201
-                return response
-            else:
-                response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
-                                   ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
-                response.status_code = STATUS_ERROR_MONGO
-                return response
+                json_data = json_data.get('trip')
+            response = jsonify(json_data)
+            response.status_code = response_shared.status_code
+            return response
         else:
             response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
                                ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
@@ -480,10 +479,9 @@ class TripController:
             return _get_response_not_paymethod()
 
         trip_id = MODEL_MANAGER.add_trip(json_data)
-        print('El trip_id me dio ' + str(trip_id))
         if trip_id is not None:
             response = jsonify(code=CODE_OK, message='Se creo el viaje '+ str(trip_id)
-                               +' correctamente')
+                               +' correctamente', tripId = str(trip_id))
             response.status_code = 201
             return response
         else:
@@ -795,9 +793,9 @@ class TripController:
                 MODEL_MANAGER.add_location_to_trip(location, trip_id)
         return True
 
-    def  _complete_trip(self, info_trip):
+    def  _complete_trip(self, trip_id):
         #HAY QUE ACTUALIZAR LOS HORARIOS DE SALIDA Y LLEGADA EN EL JSON DEL TRIP
-        print (info_trip)
+        info_trip = MODEL_MANAGER.get_trip(trip_id)
         start_time = info_trip.get('start_stamp')
         if start_time is not None:
             start_time = datetime.datetime.strptime(start_time, FORMAT_DATATIME)
@@ -810,7 +808,6 @@ class TripController:
         end_wait_time = info_trip.get('end_wait_stamp')
         if end_wait_time is not None:
             end_wait_time = datetime.datetime.strptime(end_wait_time, FORMAT_DATATIME)
-        #EL totalTime DEBE SER: HORALLEGADA-HORASALIDA
         if end_time is None or start_time is None:
             return None
         total_time = end_time - start_time
@@ -838,7 +835,7 @@ class TripController:
                     distance = distance + self._get_distance(last_location, location)
                 last_location = location
         end_location = last_location
-        
+
         #Armo el Json del viaje
 
         #Actualizamos la salida
@@ -850,7 +847,7 @@ class TripController:
                 new_address.location = start_location
                 new_start = {}
                 new_start.address = new_address
-                new_start.timestamp = trip.get('start').get('timestamp')
+                new_start.timestamp = str(trip.get('start').get('timestamp'))
                 trip.start = new_start
             #Actualizamos la llegada
             end = trip.get('end').get('address').get('location')
@@ -860,21 +857,29 @@ class TripController:
                 new_address.location = end_location
                 new_end = {}
                 new_end.address = new_address
-                new_end.timestamp = trip.get('end').get('timestamp')
+                new_end.timestamp = str(trip.get('end').get('timestamp'))
                 trip.end = new_end
         #Le agregamos los otros campos calculado
         if total_time is not None:
-            trip['totalTime'] = total_time
+            trip['totalTime'] = total_time.total_seconds()
+        else:
+            trip['totalTime'] = 0
         if wait_time is not None:
-            trip['waitTime'] = wait_time
+            trip['waitTime'] = wait_time.total_seconds()
+        else:
+            trip['waitTime'] = 0
         if travel_time is not None:
-            trip['travelTime'] = travel_time
+            trip['travelTime'] = travel_time.total_seconds()
+        else:
+            trip['travelTime'] = 0
         if distance is not None:
             trip['distance'] = distance
+        else:
+            trip['distance'] = 0
+        #El shared server necesita el trip y el paymethod
         new_trip = {}
         new_trip['trip'] = trip
         new_trip['paymethod'] = info_trip.get('paymethod')
-        #HAY QUE ENVIARLE SOLO EL TRIP Y EL paymethod
         return new_trip
 
     def _get_distance(self, last_location, location):

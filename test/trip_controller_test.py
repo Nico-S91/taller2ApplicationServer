@@ -1972,17 +1972,19 @@ class TestTripController(unittest.TestCase):
         ModelManager.delete_trip = MagicMock(return_value=True)
         response_mock = ResponseMock()
         response_shared = json.dumps({
-            'code': 0,
-            'message': 'Se guardo correctamente el viaje.'
+            'trip': {
+                'id': 1,
+                'info': '......'
+            }
         })
         response_mock.set_response(response_shared)
         response_mock.set_code(201)
-        SharedServer.post_trip =  MagicMock(return_value=response_mock)
+        SharedServer.post_trip = MagicMock(return_value=response_mock)
         response = self.app.put('/api/v1/client/23/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": 0,
-            "message": "El viaje 12 ha finalizado."
+            "id": 1,
+            "info": "......"
         }""")
         self.assertEqual(response.status_code, 201)
         cmp_response = json.loads(response.data.decode('utf-8'))
@@ -2179,11 +2181,21 @@ class TestTripController(unittest.TestCase):
         ModelManager.finish_trip = MagicMock(return_value=True)
         response_info_user = None
         ModelManager.get_info_usuario = MagicMock(return_value=response_info_user)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'trip': {
+                'id': 1,
+                'info': '......'
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(201)
+        SharedServer.post_trip = MagicMock(return_value=response_mock)
         response = self.app.put('/api/v1/client/23/trips/12/finish', data=payload, headers=headers)
         #Adentro del loads hay que pegar el json que devuelve la url
         assert_res = json.loads("""{
-            "code": 0,
-            "message": "El viaje 12 ha finalizado."
+            "id": 1,
+            "info": "......"
         }""")
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
