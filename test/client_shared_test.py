@@ -1884,6 +1884,7 @@ class TestClientController(unittest.TestCase):
         self.assertEqual(assert_res, cmp_response)
 
     #Test de choferes cercanos
+
     def test_obtener_informacion_choferes_cercanos(self):
         """Prueba obtener los choferes cercanos cuando existe un usuario cerca"""
         #Mockeamos la llamada
@@ -1941,6 +1942,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.user_is_available = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""
@@ -2010,6 +2012,7 @@ class TestClientController(unittest.TestCase):
         ]
         ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
         ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.user_is_available = MagicMock(return_value=True)
         #Mock del response los get de clientes de SharedServer
         response_mock = ResponseMock()
         response_shared = json.dumps({
@@ -2109,6 +2112,7 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         #Mock de la respuesta de la base de datos al pedir los choferes
+        ModelManager.user_is_available = MagicMock(return_value=True)
         list_locations = [
             {
                 "client_id": "1",
@@ -2262,11 +2266,88 @@ class TestClientController(unittest.TestCase):
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
 
+    def test_obtener_informacion_choferes_cercanos_no_disponibles(self):
+        """Prueba obtener los choferes cercanos cuando existe dos usuario cerca y otro usuario lejos
+           pero ninguno esta disponible"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock de la respuesta de la base de datos al pedir los choferes
+        ModelManager.user_is_available = MagicMock(return_value=False)
+        list_locations = [
+            {
+                "client_id": "1",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            },
+            {
+                "client_id": "2",
+                "lat": "-34.619996",
+                "long": "-58.686680"
+            },
+            {
+                "client_id": "3",
+                "lat": "-44.619996",
+                "long": "-48.686680"
+            }
+        ]
+        ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'chofer',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        #Hacemos la llamada normal
+        response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
+        assert_res = json.loads("""[ ]""")
+        self.assertEqual(response.status_code, 200)
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+
     def test_obtener_informacion_choferes_cercanos_pero_no_hay_choferes_cercanos(self):
         """Prueba obtener los choferes cercanos cuando existe usuarios lejos"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         #Mock de la respuesta de la base de datos al pedir los choferes
+        ModelManager.user_is_available = MagicMock(return_value=True)
         list_locations = [
             {
                 "client_id": "1",
@@ -2383,6 +2464,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(200)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.user_is_available = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""
@@ -2413,6 +2495,7 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(404)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.user_is_available = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""[]""")
@@ -2442,9 +2525,448 @@ class TestClientController(unittest.TestCase):
         response_mock.set_response(response_shared)
         response_mock.set_code(401)
         SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.user_is_available = MagicMock(return_value=True)
         #Hacemos la llamada normal
         response = self.app.get('/api/v1/closestdrivers/latitude/-34.619996/length/-58.686680/radio/1')
         assert_res = json.loads("""[]""")
         self.assertEqual(response.status_code, 200)
         cmp_response = json.loads(response.data.decode('utf-8'))
         self.assertEqual(assert_res, cmp_response)
+
+    # Put disponibilidad del chofer
+
+    def test_disponible_chofer(self):
+        """Prueba poner disponible a un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "client_type": "driver"
+        })
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/available', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 0, 
+            "message": "El chofer 23 ya se encuentra disponible."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_disponible_chofer_sin_info(self):
+        """Prueba poner disponible a un chofer que no se encuentra en la base de datos"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'driver',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/available', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 0, 
+            "message": "El chofer 23 ya se encuentra disponible."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_disponible_chofer_no_chofer(self):
+        """Prueba poner disponible a un chofer que no es un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "client_type": "passenger"
+        })
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/available', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": -11, 
+            "message": "El usuario 23 no es un chofer."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_disponible_chofer_sin_info_no_chofer(self):
+        """Prueba poner disponible a un chofer que no se encuentra en la base de datos y
+           al buscarlo nos damos cuenta que no es un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/available', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": -11, 
+            "message": "El usuario 23 no es un chofer."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_disponible_chofer_no_existe(self):
+        """Prueba poner disponible a un chofer que no se encuentra en la base de datos y
+           al buscarlo nos damos cuenta que no es un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock del response los get de clientes de SharedServer
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/available', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": -10, 
+            "message": "El usuario 23 no existe."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)
+
+    # Put no disponible chofer
+
+    def test_no_disponible_chofer(self):
+        """Prueba poner disponible a un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "client_type": "driver"
+        })
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/unavailable', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 0, 
+            "message": "El chofer 23 ya no se encuentra disponible."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_no_disponible_chofer_sin_info(self):
+        """Prueba poner disponible a un chofer que no se encuentra en la base de datos"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'driver',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/unavailable', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": 0, 
+            "message": "El chofer 23 ya no se encuentra disponible."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 201)
+
+    def test_no_disponible_chofer_no_chofer(self):
+        """Prueba poner disponible a un chofer que no es un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        ModelManager.get_info_usuario = MagicMock(return_value={
+            "client_type": "passenger"
+        })
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/unavailable', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": -11, 
+            "message": "El usuario 23 no es un chofer."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_no_disponible_chofer_sin_info_no_chofer(self):
+        """Prueba poner disponible a un chofer que no se encuentra en la base de datos y
+           al buscarlo nos damos cuenta que no es un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock del response los get de clientes de SharedServer
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'metadata': {
+                'version': 'string'
+            },
+            'user': {
+                'id': '23',
+                '_ref': 'string',
+                'applicationOwner': 'string',
+                'type': 'passenger',
+                'cars': [
+                    {
+                        'id': 'string',
+                        '_ref': 'string',
+                        'owner': 'string',
+                        'properties': [
+                            {
+                                'name': 'string',
+                                'value': 'string'
+                            }
+                        ]
+                    }
+                ],
+                'username': 'Khaleesi',
+                'name': 'Daenerys',
+                'surname': 'Targaryen',
+                'country': 'Valyria',
+                'email': 'madre_dragones@got.com',
+                'birthdate': '01/01/1990',
+                'images': [
+                    'string'
+                ],
+                'balance': [
+                    {
+                        'currency': 'string',
+                        'value': 0
+                    }
+                ]
+            }
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(200)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/unavailable', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": -11, 
+            "message": "El usuario 23 no es un chofer."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 400)
+
+    def test_no_disponible_chofer_no_existe(self):
+        """Prueba poner disponible a un chofer que no se encuentra en la base de datos y
+           al buscarlo nos damos cuenta que no es un chofer"""
+        #Mockeamos la llamada
+        self.mockeamos_login_correcto()
+        #Mock del response los get de clientes de SharedServer
+        ModelManager.add_usuario = MagicMock(return_value=True)
+        response_mock = ResponseMock()
+        response_shared = json.dumps({
+            'code': 2,
+            'message': 'No existe el usuario'
+        })
+        response_mock.set_response(response_shared)
+        response_mock.set_code(404)
+        SharedServer.get_client = MagicMock(return_value=response_mock)
+        ModelManager.get_info_usuario = MagicMock(return_value=None)
+        ModelManager.change_available_driver = MagicMock(return_value=True)
+        #Hacemos la llamada normal
+        payload = "{\r\n  \"username\": \"Khaleesi\",\r\n  \"password\": \"Dragones3\",\r\n  \"fb\": {\r\n    \"userId\": \"MadreDragones\",\r\n    \"authToken\": \"fb_auth_token\"\r\n  },\r\n  \"firstName\": \"Daenerys\",\r\n  \"lastName\": \"Targaryen\",\r\n  \"country\": \"Valyria\",\r\n  \"email\": \"madre_dragones@got.com\",\r\n  \"birthdate\": \"01/01/1990\",\r\n  \"images\": [\r\n    \"https://typeset-beta.imgix.net/rehost%2F2016%2F9%2F13%2F7c8791ae-a840-4637-9d89-256db36e8174.jpg\"\r\n  ]\r\n}"
+        headers = {
+            'content-type': "application/json",
+            'cache-control': "no-cache",
+            'postman-token': "1795714f-644d-3186-bb79-f6bb4ba39f00"
+        }
+        response = self.app.put('/api/v1/driver/23/unavailable', data=payload, headers=headers)
+        assert_res = json.loads("""{
+            "code": -10, 
+            "message": "El usuario 23 no existe."
+        }""")
+        cmp_response = json.loads(response.data.decode('utf-8'))
+        self.assertEqual(assert_res, cmp_response)
+        self.assertEqual(response.status_code, 404)
