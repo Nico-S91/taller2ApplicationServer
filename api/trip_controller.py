@@ -1,6 +1,8 @@
 """ @package api.trip_controller
 """
 import json
+import math
+import datetime
 from flask import jsonify
 from service.shared_server import SharedServer
 from service.shared_server import TIPO_CLIENTE
@@ -9,6 +11,8 @@ from api.model_manager import ModelManager
 
 SHARED_SERVER = SharedServer()
 MODEL_MANAGER = ModelManager()
+
+KM_FACTOR = 97.89059117
 
 CODE_OK = 0
 CODE_ERROR = -1
@@ -27,8 +31,11 @@ CODE_ERROR_TRIP_WITHOUT_DRIVER = -24
 CODE_ERROR_TRIP_WITHOUT_PASSENGER = -25
 CODE_ERROR_TRIP_ROUTE_INVALID = -26
 CODE_ERROR_TRIP_INVALID = -27
+CODE_ERROR_TRIP_PAYMETHOD = -28
 
 STATUS_ERROR_MONGO = 400
+
+FORMAT_DATATIME = "%Y-%m-%d %H:%M:%S.%f"
 
 def _get_response_not_passenger(client_id):
     """ Devuelve el response que indica que el usuario no es un pasajero"""
@@ -118,6 +125,13 @@ def _get_response_trip_invalid():
     """ Devuelve el response que indica que la informacion del viaje no es valido"""
     response = jsonify(code=CODE_ERROR_TRIP_INVALID, message='La informacion del viaje ' +
                        ' es invalida.')
+    response.status_code = 400
+    return response
+
+def _get_response_not_paymethod():
+    """ Devuelve el response que indica que falta la informacion del medio de pago del viaje"""
+    response = jsonify(code=CODE_ERROR_TRIP_PAYMETHOD, message='La informacion del viaje ' +
+                       ' no tiene el metodo de pago.')
     response.status_code = 400
     return response
 
@@ -280,7 +294,7 @@ class TripController:
                                ', vuelva a intentarlo mas tarde.')
             response.status_code = STATUS_ERROR_MONGO
             return response
-    
+
     def start_trip(self, client_id, trip_id):
         """ Este metodo indica que se comenzo un viaje
             @param client_id identificador del cliente
@@ -382,24 +396,23 @@ class TripController:
                 response = _get_response_trip_other_user(trip_id, client_id)
                 return response
         if response_mongo:
-            #Se pudo finalizar el viaje asi que enviamos la informacion a SharedServer
-            #HAY QUE ACTUALIZAR LOS HORARIOS DE SALIDA Y LLEGADA EN EL JSON DEL TRIP
-            #EL totalTime DEBE SER: HORALLEGADA-HORASALIDA
-            #travelTime ES: totalTime - waitTime
-            #distance ES LA SUMA DE LAS DISTANCIAS DE CADA TRAYECTITO
-            #HAY QUE ENVIARLE SOLO EL TRIP Y EL paymethod
-            response_shared = SHARED_SERVER.post_trip(info_trip)
-            if response_shared.status_code == 201:
-                MODEL_MANAGER.delete_trip(trip_id)
-                response = jsonify(code=CODE_OK, message='El viaje ' + str(trip_id) +
-                                   ' ha finalizado.')
-                response.status_code = 201
-                return response
-            else:
+            trip = self._complete_trip(trip_id)
+            if trip is None:
+                print('el viaje se completo incorrectamente, salio None')
                 response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
                                    ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
                 response.status_code = STATUS_ERROR_MONGO
                 return response
+            #Le devuelvo al cliente lo que me dijo el shared server
+            response_shared = SHARED_SERVER.post_trip(trip)
+            json_data = json.loads(response_shared.text)
+            if response_shared.status_code == 201:
+                #Elimino el viaje de la base de datos y devuelvo la info del viaje
+                MODEL_MANAGER.delete_trip(trip_id)
+                json_data = json_data.get('trip')
+            response = jsonify(json_data)
+            response.status_code = response_shared.status_code
+            return response
         else:
             response = jsonify(code=CODE_ERROR, message='El viaje ' + str(trip_id) +
                                ' no se pudo finalizar, vuelva a intentarlo mas tarde.')
@@ -444,11 +457,13 @@ class TripController:
         trip_info = json_data["trip"]
         driver_id = trip_info["driver"]
         passenger_id = trip_info["passenger"]
+        paymethod = json_data["paymethod"]
 
         check_driver = self._validate_user_with_type(driver_id, "driver")
         check_passenger = self._validate_user_with_type(passenger_id, "passenger")
-        check_valid_trip = self._validate_trip_data(json_data['trip'])
+        check_valid_trip = self._validate_trip_data(trip_info)
         check_valid_accepted_route = self._validate_accepted_route(json_data['accepted_route'])
+        check_valid_paymethod = self._validate_paymethod(paymethod)
 
         #USAR LAS RESPUESTAS DE ARRIBA
         if not check_driver:
@@ -460,12 +475,13 @@ class TripController:
             #EL VIAJE NO ES VALIDO
         if not check_valid_accepted_route:
             return _get_response_trip_route_invalid()
+        if not check_valid_paymethod:
+            return _get_response_not_paymethod()
 
         trip_id = MODEL_MANAGER.add_trip(json_data)
-        print('El trip_id me dio ' + str(trip_id))
         if trip_id is not None:
             response = jsonify(code=CODE_OK, message='Se creo el viaje '+ str(trip_id)
-                               +' correctamente')
+                               +' correctamente', tripId = str(trip_id))
             response.status_code = 201
             return response
         else:
@@ -581,9 +597,8 @@ class TripController:
             return response_error
         #Guardo la ultima posicion
         operation_result = MODEL_MANAGER.add_last_known_position(user_id, lat, lon, accuracy)
-        #HAY QUE VER SI EL USUARIO ESTA EN UN VIAJE
-        #SI ESTA EN UN VIAJE HAY QUE GUARDAR LA LOCALIZACION EN EL VIAJE EN ROUTE
         if operation_result:
+            self._add_location_route_trips(user_id, data)
             response = jsonify(code=CODE_OK, message='Se actualizo la ubicacion' +
                                ' del usuario ' + str(user_id) + '.')
             response.status_code = 201
@@ -724,6 +739,20 @@ class TripController:
         """
         return route != None
 
+    def _validate_paymethod(self, paymethod):
+        """ Este metodo valida el medio de pago del cliente
+            @param paymethod es el medio de pago del viaje
+        """
+        if paymethod is None:
+            return False
+        if paymethod.get('paymethod') is None:
+            return False
+        if paymethod.get('parameters') is None:
+            return False
+        if paymethod.get('parameters') == {}:
+            return False
+        return True
+
     def _validate_type_user(self, user_id, type_user):
         check_user = self._validate_user_with_type(user_id, type_user)
         if not check_user:
@@ -747,6 +776,118 @@ class TripController:
             else:
                 return _get_response_not_exist_user(user_id)
         return None
+
+    def _add_location_route_trips(self, user_id, location):
+        is_client = self._validate_type_user(user_id, TIPO_CLIENTE)
+        if not is_client:
+            return True
+        #Veo si esta en un viaje
+        trips = MODEL_MANAGER.trips_by_client(user_id)
+        if trips is None:
+            return True
+        for trip in trips:
+            start = trip.get('start_stamp')
+            finish = trip.get('end_stamp')
+            if start and not finish:
+                trip_id = trip.get('id')
+                MODEL_MANAGER.add_location_to_trip(location, trip_id)
+        return True
+
+    def  _complete_trip(self, trip_id):
+        #HAY QUE ACTUALIZAR LOS HORARIOS DE SALIDA Y LLEGADA EN EL JSON DEL TRIP
+        info_trip = MODEL_MANAGER.get_trip(trip_id)
+        start_time = info_trip.get('start_stamp')
+        if start_time is not None:
+            start_time = datetime.datetime.strptime(start_time, FORMAT_DATATIME)
+        end_time = info_trip.get('end_stamp')
+        if end_time is not None:
+            end_time = datetime.datetime.strptime(end_time, FORMAT_DATATIME)
+        start_wait_time = info_trip.get('start_wait_stamp')
+        if start_wait_time is not None:
+            start_wait_time = datetime.datetime.strptime(start_wait_time, FORMAT_DATATIME)
+        end_wait_time = info_trip.get('end_wait_stamp')
+        if end_wait_time is not None:
+            end_wait_time = datetime.datetime.strptime(end_wait_time, FORMAT_DATATIME)
+        if end_time is None or start_time is None:
+            return None
+        total_time = end_time - start_time
+        wait_time = None
+        if start_wait_time is not None and end_wait_time is not None:
+            wait_time = end_wait_time - start_wait_time
+        travel_time = None
+        if wait_time is not None:
+            travel_time = total_time - wait_time
+        #distance ES LA SUMA DE LAS DISTANCIAS DE CADA TRAYECTITO
+        trip = info_trip.get('trip')
+        if trip is None:
+            return None
+        route = trip.get('route')
+        start_location = None
+        end_location = None
+        if route is not None:
+            last_location = None
+            distance = 0
+            for location in route:
+                location = location.get('location')
+                if last_location is None:
+                    start_location = location
+                else:
+                    distance = distance + self._get_distance(last_location, location)
+                last_location = location
+        end_location = last_location
+
+        #Armo el Json del viaje
+
+        #Actualizamos la salida
+        if start_location is not None and end_location is not None:
+            start = trip.get('start').get('address').get('location')
+            if not (start.get('lat') == start_location.get('lat') and
+                    start.get('lat') == start_location.get('lat')):
+                new_address = {}
+                new_address.location = start_location
+                new_start = {}
+                new_start.address = new_address
+                new_start.timestamp = str(trip.get('start').get('timestamp'))
+                trip.start = new_start
+            #Actualizamos la llegada
+            end = trip.get('end').get('address').get('location')
+            if not (end.get('lat') == end_location.get('lat') and
+                    end.get('lat') == end_location.get('lat')):
+                new_address = {}
+                new_address.location = end_location
+                new_end = {}
+                new_end.address = new_address
+                new_end.timestamp = str(trip.get('end').get('timestamp'))
+                trip.end = new_end
+        #Le agregamos los otros campos calculado
+        if total_time is not None:
+            trip['totalTime'] = total_time.total_seconds()
+        else:
+            trip['totalTime'] = 0
+        if wait_time is not None:
+            trip['waitTime'] = wait_time.total_seconds()
+        else:
+            trip['waitTime'] = 0
+        if travel_time is not None:
+            trip['travelTime'] = travel_time.total_seconds()
+        else:
+            trip['travelTime'] = 0
+        if distance is not None:
+            trip['distance'] = distance
+        else:
+            trip['distance'] = 0
+        #El shared server necesita el trip y el paymethod
+        new_trip = {}
+        new_trip['trip'] = trip
+        new_trip['paymethod'] = info_trip.get('paymethod')
+        return new_trip
+
+    def _get_distance(self, last_location, location):
+        #Calculo la distancia en Km entre las ubicaciones
+        dif_lat = location.get('lat') - last_location.get('lat')
+        dif_lon = location.get('lon') - last_location.get('lon')
+        dif = math.sqrt(dif_lat * dif_lat + dif_lon * dif_lon)
+        return math.sqrt(dif) * KM_FACTOR
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
 

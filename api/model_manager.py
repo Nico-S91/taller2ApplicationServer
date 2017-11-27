@@ -189,13 +189,18 @@ class ModelManager:
             return result
 
         viaje = viajes.find_one({'_id': ObjectId(trip_id)})
+        lat = location.get('lat')
+        lon = location.get('long')
+
+        if lat is None or lon is None:
+            return result
 
         if viaje is not None:
             locations = viaje.get('route')
             new_location = {
                 "location": {
-                    "lat": location.get('lat'),
-                    "long": location.get('long')
+                    "lat": lat,
+                    "long": lon
                 },
                 "timestamp": datetime.now().date()
             }
