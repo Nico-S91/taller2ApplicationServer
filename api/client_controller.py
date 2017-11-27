@@ -2,9 +2,14 @@
 """
 import json
 from service.shared_server import SharedServer
+from service.shared_server import TIPO_CHOFER
 from api.trip_controller import TripController
 from api.model_manager import ModelManager
 from flask import jsonify
+from api.trip_controller import _get_response_not_exist_user
+from api.trip_controller import _get_response_not_driver
+from api.trip_controller import CODE_ERROR
+from api.trip_controller import CODE_OK
 
 SHARED_SERVER = SharedServer()
 TRIP_CONTROLLER = TripController()
@@ -93,6 +98,44 @@ class ClientController:
         response.status_code = response_shared_server.status_code
         return response
 
+    def put_client_available(self, client_id, available):
+        """ Este metodo modifica la disponibilidad de un cliente
+            @param client_id identificador del cliente
+            @param available es un boolean que indica si esta o no disponible"""
+        #Primero debo ver que exista el cliente, en la base nuestra
+        info_client = MODEL_MANAGER.get_info_usuario(client_id)
+        type_client = None
+        if info_client is None:
+            #Buscamos en el shared server
+            response_shared_server = SHARED_SERVER.get_client(client_id)
+            json_data = json.loads(response_shared_server.text)
+            if response_shared_server.status_code == 200:
+                client = json_data[JSON_CLIENT]
+                self._save_ref(client_id, client.get(CAMPO_COLISIONES))
+                self._add_user_mongo(client_id, client)
+                type_client = client.get('type')
+            else:
+                return _get_response_not_exist_user(client_id)
+        else:
+            type_client = info_client.get('client_type')
+
+        if type_client is None or type_client != TIPO_CHOFER:
+            return _get_response_not_driver(client_id)
+        result = MODEL_MANAGER.change_available_driver(client_id, available)
+        if result:
+            if available:
+                message = 'El chofer ' + str(client_id) + ' ya se encuentra disponible.'
+            else:
+                message = 'El chofer ' + str(client_id) + ' ya no se encuentra disponible.'
+            response = jsonify(code=CODE_OK, message=message)
+            response.status_code = 201
+            return response
+        else:
+            response = jsonify(code=CODE_OK, message='No se pudo modificar la disponibilidad' +
+                               ' del chofer ' + str(client_id) + ', vuelva a intentarlo mas tarde.')
+            response.status_code = 400
+            return response
+
     def delete_client(self, client_id):
         """ Este metodo permite eliminar un cliente
             @param client_id identificador del cliente"""
@@ -120,16 +163,20 @@ class ClientController:
         locations = TRIP_CONTROLLER.get_closest_clients(type_client, lat, lon, ratio)
         clients = []
         if locations == []:
+            print('Esta vacio')
             return jsonify(clients)
         for location in locations:
             id_client = location.get('user_id')
-            response_client = self.get_client(id_client)
-            if response_client.status_code == 200:
-                json_data = {
-                    'info' : json.loads(response_client.data),
-                    'location' : location
-                }
-                clients.append(json_data)
+            #Veo si el cliente esta disponible
+            is_available = MODEL_MANAGER.user_is_available(id_client)
+            if is_available is not None and is_available:
+                response_client = self.get_client(id_client)
+                if response_client.status_code == 200:
+                    json_data = {
+                        'info' : json.loads(response_client.data),
+                        'location' : location
+                    }
+                    clients.append(json_data)
         return jsonify(clients)
 
     # Metodos para manipular la informacion de los autos

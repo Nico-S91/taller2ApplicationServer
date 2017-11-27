@@ -72,9 +72,9 @@ def _get_response_not_exist_trip(trip_id):
     response.status_code = 404
     return response
 
-def _get_response_not_exist_user(trip_id):
+def _get_response_not_exist_user(user_id):
     """ Devuelve el response que indica que el usuario no existe"""
-    response = jsonify(code=CODE_ERROR_NOT_EXIST_USER, message='El usuario ' + str(trip_id) +
+    response = jsonify(code=CODE_ERROR_NOT_EXIST_USER, message='El usuario ' + str(user_id) +
                        ' no existe.')
     response.status_code = 404
     return response

@@ -185,6 +185,28 @@ def put_info_driver(driver_id):
     response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
     return response
 
+@application.route('/api/v1/driver/<string:driver_id>/available', methods=['PUT'])
+def put_available_drive(driver_id):
+    """El chofer se pone como disponible
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/available')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = CLIENT_CONTROLLER.put_client_available(driver_id, True)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/unavailable', methods=['PUT'])
+def put_unavailable_drive(driver_id):
+    """El chofer se pone como disponible
+    @param driver_id es el identificador del chofer"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/unavailable')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = CLIENT_CONTROLLER.put_client_available(driver_id, False)
+    return response
+
 #Endpoints de clientes
 
 @application.route('/api/v1/client/<string:client_id>', methods=['GET'])
