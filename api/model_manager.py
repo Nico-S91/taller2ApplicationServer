@@ -102,6 +102,22 @@ class ModelManager:
                 result.append(usuario)
             return result
 
+    def change_available_driver(self, user_id, available):
+        """ Este metodo modifica la disponibilidad del usuario
+            @param user_id id del usuario
+            @param available es un boolean que indica si esta o no disponible
+        """
+        usuarios = self.db_manager.get_table('usuarios')
+        if usuarios is None:
+            return None
+
+        user_data = usuarios.find_one({'user_id': user_id})
+
+        return usuarios.update_one({'_id': user_data.get('_id')},
+                                   {'$set': {'available': available}},
+                                   upsert=False).acknowledged
+
+
     def user_is_available(self, user_id):
         """ Este metodo devuelve verdadero si el usuario esta disponible o falso sino
             @param user_id id del usuario
