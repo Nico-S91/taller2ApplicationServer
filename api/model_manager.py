@@ -484,7 +484,7 @@ class ModelManager:
         else:
             result = []
             for trip in viajes_sin_terminar:
-                if viajes.get('start_stamp') is not None:
+                if trip.get('start_stamp') is not None:
                     result.append(trip)
             return result
 
