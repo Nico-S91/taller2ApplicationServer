@@ -175,7 +175,7 @@ class ClientController:
                     response_client = self.get_client(id_client)
                     if response_client.status_code == 200:
                         json_data = {
-                            'info' : json.loads(response_client.data),
+                            'info' : json.loads(response_client.data.decode("utf-8")),
                             'location' : location
                         }
                         clients.append(json_data)
