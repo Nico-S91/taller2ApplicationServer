@@ -466,6 +466,28 @@ class ModelManager:
                 result.append(trip)
             return result
 
+    def get_started_and_unfinished_trips_with_driver_id(self, driver_id):
+        """ Este metodo devuelve todos los viajes con el id del driver pedido 
+            que comenzaron pero aun no finalizaron
+            @param driver_id el id de driver
+        """
+
+        viajes = self.db_manager.get_table('viajes')
+        if viajes is None:
+            return []
+
+        viajes_sin_terminar = viajes.find({'driver_id':{"$exists": True},
+                                           'end_stamp': None}, {"_id": 0})
+
+        if viajes_sin_terminar is None:
+            return []
+        else:
+            result = []
+            for trip in viajes_sin_terminar:
+                if trip.get('start_stamp') is not None:
+                    result.append(trip)
+            return result
+
     def get_unfinished_trips(self):
         """ Este metodo devuelve los viajes en mongo sin stamp de end"""
 

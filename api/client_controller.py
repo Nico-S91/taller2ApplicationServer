@@ -170,13 +170,15 @@ class ClientController:
             #Veo si el cliente esta disponible
             is_available = MODEL_MANAGER.user_is_available(id_client)
             if is_available is not None and is_available:
-                response_client = self.get_client(id_client)
-                if response_client.status_code == 200:
-                    json_data = {
-                        'info' : json.loads(response_client.data),
-                        'location' : location
-                    }
-                    clients.append(json_data)
+                trips = MODEL_MANAGER.get_started_and_unfinished_trips_with_driver_id(id_client)
+                if trips is None or trips == []:
+                    response_client = self.get_client(id_client)
+                    if response_client.status_code == 200:
+                        json_data = {
+                            'info' : json.loads(response_client.data),
+                            'location' : location
+                        }
+                        clients.append(json_data)
         return jsonify(clients)
 
     # Metodos para manipular la informacion de los autos

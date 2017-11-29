@@ -1890,6 +1890,7 @@ class TestClientController(unittest.TestCase):
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
         #Mock de la respuesta de la base de datos al pedir los choferes
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         list_locations = [
             {
                 "client_id": "1",
@@ -1997,6 +1998,7 @@ class TestClientController(unittest.TestCase):
         """Prueba obtener los choferes cercanos cuando existe un usuario cerca y otro usuario lejos"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         list_locations = [
             {
@@ -2111,6 +2113,7 @@ class TestClientController(unittest.TestCase):
         """Prueba obtener los choferes cercanos cuando existe dos usuario cerca y otro usuario lejos"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         ModelManager.user_is_available = MagicMock(return_value=True)
         list_locations = [
@@ -2271,6 +2274,7 @@ class TestClientController(unittest.TestCase):
            pero ninguno esta disponible"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         ModelManager.user_is_available = MagicMock(return_value=False)
         list_locations = [
@@ -2346,6 +2350,7 @@ class TestClientController(unittest.TestCase):
         """Prueba obtener los choferes cercanos cuando existe usuarios lejos"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         ModelManager.user_is_available = MagicMock(return_value=True)
         list_locations = [
@@ -2417,6 +2422,7 @@ class TestClientController(unittest.TestCase):
         """Prueba obtener los choferes cercanos cuando existe usuarios lejos"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         list_locations = []
         ModelManager.get_locations_by_type = MagicMock(return_value=list_locations)
@@ -2477,6 +2483,7 @@ class TestClientController(unittest.TestCase):
         """Prueba obtener los choferes cercanos cuando existe un usuario cerca"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         list_locations = [
             {
@@ -2507,6 +2514,7 @@ class TestClientController(unittest.TestCase):
         """Prueba obtener los choferes cercanos cuando existe un usuario cerca"""
         #Mockeamos la llamada
         self.mockeamos_login_correcto()
+        ModelManager.get_started_and_unfinished_trips_with_driver_id = MagicMock(return_value=[])
         #Mock de la respuesta de la base de datos al pedir los choferes
         list_locations = [
             {
