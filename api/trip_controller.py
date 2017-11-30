@@ -37,57 +37,66 @@ STATUS_ERROR_MONGO = 400
 
 FORMAT_DATATIME = "%Y-%m-%d %H:%M:%S.%f"
 
-def _get_response_not_passenger(client_id):
-    """ Devuelve el response que indica que el usuario no es un pasajero"""
-    response = jsonify(code=CODE_ERROR_NOT_PASSENGER, message='El usuario ' + str(client_id) +
+def _get_response_not_passenger(user_id):
+    """ Devuelve el response que indica que el usuario no es un pasajero
+        @param user_id es el identificador del usuario"""
+    response = jsonify(code=CODE_ERROR_NOT_PASSENGER, message='El usuario ' + str(user_id) +
                        ' no es un pasajero.')
     response.status_code = 400
     return response
 
-def _get_response_not_driver(driver_id):
-    """ Devuelve el response que indica que el usuario no es un chofer"""
-    response = jsonify(code=CODE_ERROR_NOT_DRIVER, message='El usuario ' + str(driver_id) +
+def _get_response_not_driver(user_id):
+    """ Devuelve el response que indica que el usuario no es un chofer
+        @param user_id es el identificador del usuario"""
+    response = jsonify(code=CODE_ERROR_NOT_DRIVER, message='El usuario ' + str(user_id) +
                        ' no es un chofer.')
     response.status_code = 400
     return response
 
 def _get_response_trip_not_accepted(driver_id):
-    """ Devuelve el response que indica que el viaje no fue aceptado por el chofer"""
+    """ Devuelve el response que indica que el viaje no fue aceptado por el chofer
+        @param driver_id es el identificador del chofer"""
     response = jsonify(code=CODE_ERROR_TRIP_NOT_ACCEPTED, message='El viaje ' + str(driver_id) +
                        ' no fue aceptado por el chofer.')
     response.status_code = 400
     return response
 
 def _get_response_trip_other_user(trip_id, user_id):
-    """ Devuelve el response que indica que el viaje no le pertence al usuario"""
+    """ Devuelve el response que indica que el viaje no le pertence al usuario
+        @param trip_id es el identificador del viaje
+        @param user_id es el identificador del usuario"""
     response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' + str(trip_id) +
                        ' no le pertenece al usuario ' + str(user_id) + '.')
     response.status_code = 400
     return response
 
 def _get_response_not_exist_trip(trip_id):
-    """ Devuelve el response que indica que el viaje no existe"""
+    """ Devuelve el response que indica que el viaje no existe
+        @param trip_id es el identificador del viaje"""
     response = jsonify(code=CODE_ERROR_NOT_EXIST_TRIP, message='El viaje ' + str(trip_id) +
                        ' no existe.')
     response.status_code = 404
     return response
 
 def _get_response_not_exist_user(user_id):
-    """ Devuelve el response que indica que el usuario no existe"""
+    """ Devuelve el response que indica que el usuario no existe
+        @param user_id es el identificador del usuario"""
     response = jsonify(code=CODE_ERROR_NOT_EXIST_USER, message='El usuario ' + str(user_id) +
                        ' no existe.')
     response.status_code = 404
     return response
 
 def _get_response_trip_not_start(trip_id):
-    """ Devuelve el response que indica que el viaje no fue comenzado"""
+    """ Devuelve el response que indica que el viaje no fue comenzado
+        @param trip_id es el identificador del viaje"""
     response = jsonify(code=-8, message='El viaje ' + str(trip_id) +
                        ' no fue comenzado.')
     response.status_code = 400
     return response
 
 def _get_response_trip_unauthorized(trip_id):
-    """ Devuelve el response que indica que el viaje no pertenece al usuario"""
+    """ Devuelve el response que indica que el viaje no pertenece al usuario
+        @param trip_id es el identificador del viaje"""
     response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' + str(trip_id) +
                        ' no pertenece al usuario.')
     response.status_code = 401
@@ -108,7 +117,9 @@ def _get_response_trip_without_passenger():
     return response
 
 def _get_response_trip_not_belong(trip_id, driver_id):
-    """ Devuelve el response que indica que el viaje nole pertenece al chofer"""
+    """ Devuelve el response que indica que el viaje no le pertenece al chofer
+        @param trip_id es el identificador del viaje
+        @param driver_id es el identificador del chofer"""
     response = jsonify(code=CODE_ERROR_TRIP_OTHER_USER, message='El viaje ' +
                        trip_id + ' no le pertenece al chofer ' + driver_id + '.')
     response.status_code = 400
@@ -349,7 +360,7 @@ class TripController:
             return response
 
     def finish_trip(self, client_id, trip_id):
-        """ Este metodo indica que se comenzo un viaje
+        """ Este metodo indica que se finalizo un viaje
             @param client_id identificador del cliente
             @param trip_id identificador del viaje"""
         is_client = True
@@ -420,9 +431,8 @@ class TripController:
             return response
 
     def post_new_estimate(self, data):
-        """ Este metodo permite devuelve la estimacion de un viaje
-            @param car_json informacion del auto
-            @param driver_id identificador del cliente"""
+        """ Este metodo devuelve la estimacion de un viaje
+            @param data informacion del viaje que se quiere estimar"""
         response_shared_server = SHARED_SERVER.post_trip_estimate(data)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 201:
@@ -432,8 +442,8 @@ class TripController:
         return response
 
     def get_available_trips(self, user_id):
-        """ Este metodo valida el id del usuario, y si es un driver valido, devuelve los
-            viajes disponibles al driver, junto con los ya aceptados por este
+        """ Este metodo devuelve los viajes disponibles que el chofer puede aceptar
+            @param user_id identificador del usuario
         """
         check_valid_driver = self._validate_user_with_type(user_id, "driver")
 
@@ -444,9 +454,20 @@ class TripController:
             #el driver existe, devuelvo los trips SIN idDriver y los que tienen el mismo idDriver
             trips_sin_driver = MODEL_MANAGER.get_trip_without_drivers()
             trips_con_este_driver = MODEL_MANAGER.get_trips_with_driver_id(user_id)
+            trips_con_este_driver = self._filter_uninitiated_trips(trips_con_este_driver)
             trips_merge = trips_sin_driver + trips_con_este_driver
+            trips = []
+            for trip in trips_merge:
+                client_id = trip.get('passenger_id')
+                if client_id is not None:
+                    response_shared_server = SHARED_SERVER.get_client(client_id)
+                    json_data = json.loads(response_shared_server.text)
+                    if response_shared_server.status_code == 200:
+                        client = json_data['user']
+                        trip['passenger'] = client
+                        trips.append(trip)
             response = {
-                "trips": trips_merge
+                "trips": trips
             }
             return jsonify(response)
 
@@ -472,7 +493,7 @@ class TripController:
             return _get_response_trip_without_passenger()
         if not check_valid_trip:
             return _get_response_trip_invalid()
-            #EL VIAJE NO ES VALIDO
+        #EL VIAJE NO ES VALIDO
         if not check_valid_accepted_route:
             return _get_response_trip_route_invalid()
         if not check_valid_paymethod:
@@ -481,7 +502,7 @@ class TripController:
         trip_id = MODEL_MANAGER.add_trip(json_data)
         if trip_id is not None:
             response = jsonify(code=CODE_OK, message='Se creo el viaje '+ str(trip_id)
-                               +' correctamente', tripId = str(trip_id))
+                               +' correctamente', tripId=str(trip_id))
             response.status_code = 201
             return response
         else:
@@ -563,8 +584,8 @@ class TripController:
             return response
 
     def get_last_location(self, user_id):
-        """ Devuelve response de ultima ubicacion
-            @param user_id un id de usuario
+        """ Devuelve la informacion de la ultima ubicacion del usuario
+            @param user_id identificador del usuario
         """
         # VERIFICAR QUE EXISTA EL USUARIO SI NO ESTA LA POSICION
         response_model = MODEL_MANAGER.get_last_known_position(user_id)
@@ -583,9 +604,8 @@ class TripController:
         return response
 
     def post_new_last_location(self, data):
-        """ guarda la nueva ultima ubicacion de un usuario
-            si no habia una anterior, la crea, sino la modifica
-            @param data el json de request para dar de alta la ubicacion
+        """ Este metodo guarda la ultima ubicacion de un usuario
+            @param data informacion de la ubicacion
         """
         user_id = data.get('user_id')
         lat = data.get('lat')
@@ -609,7 +629,8 @@ class TripController:
         return response
 
     def get_closest_clients(self, type_client, lat, lon, radio):
-        """ Este metodo devuelve las ubicaciones de los clientes que se encontraron en el radio de busqueda
+        """ Este metodo devuelve las ubicaciones de los clientes que se encontraron
+            en el radio de busqueda
             @param type_user es el tipo de usuario del viaje
             @param lat es la latitud de la ubicacion
             @param lon es la longitud de la ubicacion
@@ -635,8 +656,9 @@ class TripController:
         return locations
 
     def get_trips_by_client(self, client_id):
-        """ Este metodo devuelve los viajes asociados con un cliente
-            @param client_id el id del pasajero
+        """ Este metodo devuelve los viajes asociados con un cliente que aun
+            no finalizaron
+            @param client_id identificador del pasajero
         """
         trips = MODEL_MANAGER.trips_by_client(client_id)
         response = {
@@ -646,7 +668,7 @@ class TripController:
 
     def get_trips_by_driver(self, driver_id):
         """ Este metodo devuelve los viajes asociados con un driver
-            @param driver_id el id del chofer
+            @param driver_id identificador del chofer
         """
         trips = MODEL_MANAGER.get_trips_with_driver_id(driver_id)
         response = {
@@ -754,6 +776,10 @@ class TripController:
         return True
 
     def _validate_type_user(self, user_id, type_user):
+        """ Este metodo valida el tipo del cliente del usuario
+            @param user_id identificador del usuario
+            @param type_user tipo del usuario
+        """
         check_user = self._validate_user_with_type(user_id, type_user)
         if not check_user:
             if type_user == TIPO_CHOFER:
@@ -763,6 +789,10 @@ class TripController:
         return None
 
     def _validate_user(self, user_id):
+        """ Este metodo valida que el usuario exista, en caso contrario devuelve un
+            response con el mensaje de error
+            @param user_id identificador del usuario
+        """
         model_manager_response = MODEL_MANAGER.get_info_usuario(user_id)
         if model_manager_response is None:
             #si no esta en mongo, hay que buscar en la base de martin
@@ -778,6 +808,10 @@ class TripController:
         return None
 
     def _add_location_route_trips(self, user_id, location):
+        """ Este metodo agrega una ubicacion a la ruta del viaje del pasajero
+            @param user_id identificador del usuario
+            @param location informacion de la ubicacion
+        """
         is_client = self._validate_type_user(user_id, TIPO_CLIENTE)
         if not is_client:
             return True
@@ -794,6 +828,9 @@ class TripController:
         return True
 
     def  _complete_trip(self, trip_id):
+        """ Este metodo completa la informacion de un viaje que necesita el SharedServer
+            @param trip_id identificador del viaje
+        """
         #HAY QUE ACTUALIZAR LOS HORARIOS DE SALIDA Y LLEGADA EN EL JSON DEL TRIP
         info_trip = MODEL_MANAGER.get_trip(trip_id)
         start_time = info_trip.get('start_stamp')
@@ -883,11 +920,26 @@ class TripController:
         return new_trip
 
     def _get_distance(self, last_location, location):
+        """ Este metodo calcula la distancia entre dos ubicaciones
+            @param last_location informacion de una ubicacion
+            @param location informacion de otra ubicacion
+        """
         #Calculo la distancia en Km entre las ubicaciones
         dif_lat = location.get('lat') - last_location.get('lat')
         dif_lon = location.get('lon') - last_location.get('lon')
         dif = math.sqrt(dif_lat * dif_lat + dif_lon * dif_lon)
         return math.sqrt(dif) * KM_FACTOR
+
+    def _filter_uninitiated_trips(self, total_trips):
+        """ Este metodo devuelve un listado de los viajes que aun no fueron aceptados
+            @param total_trips todos los viajes de un chofer
+        """
+        trips = []
+        for trip in total_trips:
+            is_accepted = trip.get('is_accepted')
+            if is_accepted is None or not is_accepted:
+                trips.append(trip)
+        return trips
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
 

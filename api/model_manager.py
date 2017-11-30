@@ -1,10 +1,8 @@
 """ @package model_manager
 """
 from datetime import datetime
-from flask import jsonify
 import model.db_manager
 from bson.objectid import ObjectId
-import json
 import bson
 
 class ModelManager:
@@ -16,8 +14,8 @@ class ModelManager:
         self.db_manager = model.db_manager
 
     def get_info_usuario(self, user_id):
-        """Este metodo obtiene la informacion de un usuario en base de datos de Mongo
-            @param user_id id del usuario
+        """Este metodo obtiene la informacion de un usuario
+            @param user_id identificador del usuario
         """
         usuarios = self.db_manager.get_table('usuarios')
         if usuarios is None:
@@ -35,8 +33,8 @@ class ModelManager:
             return response
 
     def add_usuario(self, user_id, user_type, username, available):
-        """Este metodo agrega un usuario a la coleccion de usuarios en Mongo
-            @param user_id el id del nuevo usuario
+        """Este metodo agrega un usuario a la coleccion de usuarios
+            @param user_id el identificador del nuevo usuario
             @param user_type el tipo de usuario (chofer o pasajero)
             @param username su nickname
             @param available si el usuario esta disponible
@@ -60,7 +58,7 @@ class ModelManager:
 
     def update_usuario(self, user_id, user_type, username, available):
         """ Este metodo actualiza a un usuario con la informacion ingresada
-            @param user_id el id del usuario
+            @param user_id el identificador del usuario
             @param user_type el tipo de usuario
             @param username nombre de usuario
             @param available si el usuario esta disponible
@@ -77,8 +75,8 @@ class ModelManager:
                                    upsert=False).acknowledged
 
     def delete_usuario(self, user_id):
-        """ Este metodo elimina un usuario de la coleccion de usuarios en Mongo
-            @param user_id un id de usuario
+        """ Este metodo elimina un usuario de la coleccion de usuarios
+            @param user_id un identificador de usuario
         """
         usuarios = self.db_manager.get_table('usuarios')
         if usuarios is None:
@@ -104,7 +102,7 @@ class ModelManager:
 
     def change_available_driver(self, user_id, available):
         """ Este metodo modifica la disponibilidad del usuario
-            @param user_id id del usuario
+            @param user_id identificador del usuario
             @param available es un boolean que indica si esta o no disponible
         """
         usuarios = self.db_manager.get_table('usuarios')
@@ -119,8 +117,9 @@ class ModelManager:
 
 
     def user_is_available(self, user_id):
-        """ Este metodo devuelve verdadero si el usuario esta disponible o falso sino
-            @param user_id id del usuario
+        """ Este metodo devuelve verdadero si el usuario esta disponible o
+            falso en caso contrario
+            @param user_id identificador del usuario
         """
         usuarios = self.db_manager.get_table('usuarios')
         if usuarios is None:
@@ -134,7 +133,6 @@ class ModelManager:
         """Este metodo guarda la informacion de un nuevo viaje publicado
             @param info_viaje un dictionary con la info del viaje
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return None
@@ -165,7 +163,7 @@ class ModelManager:
 
     def get_locations_by_type(self, client_type):
         """ Este metodo devuelve un array de ubicaciones de todos los clientes
-            con el tipo dado con su id y el par <latitud, longitud>
+            con el tipo dado con su identificador y el par <latitud, longitud>
             @param client_type el tipo de cliente
         """
         result = []
@@ -197,7 +195,7 @@ class ModelManager:
     def add_location_to_trip(self, location, trip_id):
         """ Este metodo agrega una ubicacion a un viaje
             @param location una ubicacion
-            @param trip_id el id del viaje
+            @param trip_id el identificador del viaje
         """
         result = False
         viajes = self.db_manager.get_table('viajes')
@@ -227,8 +225,8 @@ class ModelManager:
         return result
 
     def get_trip(self, trip_id):
-        """ Este metodo obtiene el viaje dado su id
-            @param trip_id el id del viaje
+        """ Este metodo obtiene el viaje dado su identificador
+            @param trip_id el identificador del viaje
         """
         if not bson.objectid.ObjectId.is_valid(trip_id):
             return None
@@ -256,9 +254,8 @@ class ModelManager:
 
     def delete_trip(self, trip_id):
         """ Este metodo elimina un viaje
-            @param trip_id el id del viaje
+            @param trip_id el identificador del viaje
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return True
@@ -267,9 +264,8 @@ class ModelManager:
 
     def start_trip(self, trip_id):
         """ Este metodo inicia el timestamp del atributo start de un viaje
-            @param trip_id el id del viaje
+            @param trip_id el identificador del viaje
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return False
@@ -280,10 +276,10 @@ class ModelManager:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'start_stamp': datetime.now()}}, upsert=False).acknowledged
 
         return False
-    
+
     def end_trip(self, trip_id):
         """ Este metodo termina, y marca con un timestamp del atributo end de un viaje
-            @param trip_id el id del viaje
+            @param trip_id el identificador del viaje
         """
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
@@ -296,28 +292,9 @@ class ModelManager:
 
         return False
 
-    # def put_trip_new_driver(self, trip_id, driver_id):
-    #     """ Este metodo modifica el chofer de un viaje
-    #         @param trip_id es el identificador del viaje
-    #         @param driver_id es el identificador del chofer
-    #     """
-    #     viajes = self.db_manager.get_table('viajes')
-    #     if viajes is None:
-    #         return False
-
-    #     viaje = viajes.find_one({'_id': ObjectId(trip_id)})
-
-    #     if viaje is not None:
-    #         trip = viaje.get('trip')
-    #         trip.driver_id = driver_id
-    #         return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver_id':driver_id, 'trip':trip}}, upsert=False).acknowledged
-
-    #     return False
-
     def add_last_known_position(self, user_id, latitud, longitud, accuracy):
-        """ Este metodo graba en la base de datos 'UltimasPosiciones'
-            la ultima posicion registrada del usuario.
-            @param user_id el id del usuario
+        """ Este metodo graba en la coleccion ubicaciones la ultima posicion registrada del usuario
+            @param user_id el identificador del usuario
             @param latitud latitud en mapa
             @param longitud longitud en mapa
             @param accuracy el radio de precision
@@ -356,9 +333,8 @@ class ModelManager:
     def get_last_known_position(self, client_id):
         """Este metodo obtiene la ultima posicion conocida por
             el app server de un usuario
-            @param client_id el id del cliente
+            @param client_id el identificador del cliente
         """
-
         #obtengo la coleccion
         ubicaciones = self.db_manager.get_table('ubicaciones')
         if ubicaciones is None:
@@ -378,12 +354,11 @@ class ModelManager:
 
         return response
 
-    def add_driver_to_trip(self, trip_id,  driver_id):
+    def add_driver_to_trip(self, trip_id, driver_id):
         """ Este metodo agrega el chofer asignado a un viaje.
-            @param trip_id el id del viaje
-            @param driver_id el id del chofer asignado
+            @param trip_id el identificador del viaje
+            @param driver_id el identificador del chofer asignado
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return False
@@ -396,12 +371,11 @@ class ModelManager:
             return viajes.update_one({'_id': viaje.get('_id')}, {'$set': {'driver_id':driver_id, 'trip':trip}}, upsert=False).acknowledged
         else:
             return False
-    
+
     def accept_trip(self, trip_id):
         """ Este metodo tilda al viaje como aceptado
-            @param trip_id el id del viaje
+            @param trip_id el identificador del viaje
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return False
@@ -415,7 +389,7 @@ class ModelManager:
 
     def refuse_trip(self, trip_id):
         """ Este metodo tilda al viaje como rechazado
-            @param trip_id el id del viaje
+            @param trip_id el identificador del viaje
         """
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
@@ -432,7 +406,6 @@ class ModelManager:
 
     def get_trip_without_drivers(self):
         """Este metodo devuelve los viajes que no tienen idDriver asignado"""
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return []
@@ -448,10 +421,9 @@ class ModelManager:
             return result
 
     def get_trips_with_driver_id(self, driver_id):
-        """ Este metodo devuelve todos los viajes con el id del driver pedido
-            @param driver_id el id de driver
+        """ Este metodo devuelve todos los viajes con el identificador del driver pedido
+            @param driver_id el identificador de driver
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return []
@@ -467,11 +439,9 @@ class ModelManager:
             return result
 
     def get_started_and_unfinished_trips_with_driver_id(self, driver_id):
-        """ Este metodo devuelve todos los viajes con el id del driver pedido 
-            que comenzaron pero aun no finalizaron
-            @param driver_id el id de driver
+        """ Este metodo devuelve todos los viajes que comenzaron pero aun no finalizaron
+            @param driver_id el identificador de driver
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return []
@@ -484,13 +454,13 @@ class ModelManager:
         else:
             result = []
             for trip in viajes_sin_terminar:
-                if trip.get('start_stamp') is not None:
-                    result.append(trip)
+                if trip.get('driver_id') == driver_id:
+                    if trip.get('start_stamp') is not None:
+                        result.append(trip)
             return result
 
     def get_unfinished_trips(self):
         """ Este metodo devuelve los viajes en mongo sin stamp de end"""
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return []
@@ -506,10 +476,9 @@ class ModelManager:
             return result
 
     def trips_by_client(self, client_id):
-        """ Este metodo devuelve los viajes asociados con el id de un cliente
-            @param client_id el id del cliente
+        """ Este metodo devuelve los viajes asociados con el identificador de un cliente
+            @param client_id el identificador del cliente
         """
-
         viajes = self.db_manager.get_table('viajes')
         if viajes is None:
             return []

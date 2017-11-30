@@ -77,8 +77,8 @@ def is_logged():
 
 @application.route('/login/facebookAuthToken/<string:facebook_auth_token>', methods=['GET', 'POST'])
 def login_facebook(facebook_auth_token):
-    """Logueamos al usuario
-    @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
+    """Logueo del usuario a partir del token de facebook
+        @param facebookAuthToken es el token de facebook que tenemos guardado en el sistema"""
     if request.method == 'POST':
         application.logger.info('[POST] /login/facebookAuthToken/' + str(facebook_auth_token))
         if not facebook_auth_token:
@@ -91,13 +91,15 @@ def login_facebook(facebook_auth_token):
         </form>
     '''
 
-@application.route('/login/username/<string:username>/password/<string:password>', methods=['GET', 'POST'])
+@application.route('/login/username/<string:username>/password/<string:password>',
+                   methods=['GET', 'POST'])
 def login(username, password):
-    """Logueamos al usuario
-    @param username es el nombre del usuario que guardo en el sistema
-    @param password es la contrasenia del usuario"""
+    """Logueo del cliente a partir de la informacion del username y la password
+        @param username es el nombre del usuario que guardo en el sistema
+        @param password es la contrasenia del usuario"""
     if request.method == 'POST':
-        application.logger.info('[POST] /login/username/' + str(username) + '/password/' + str(password))
+        application.logger.info('[POST] /login/username/' + str(username) +
+                                '/password/' + str(password))
         if not (username and password):
             return make_response(jsonify({'respuesta': 'Credenciales invalidas'}), 401)
         return LOGIN_SERVICE.login(username, password, session)
@@ -110,7 +112,7 @@ def login(username, password):
 
 @application.route('/logout', methods=['POST', 'GET'])
 def logout():
-    """Deslogueamos al usuario"""
+    """Deslogueo del usuario"""
     application.logger.info('[POST] /logout')
     LOGIN_SERVICE.logout(session)
     response = jsonify(mensaje='Se deslogueo correctamente')
@@ -129,7 +131,7 @@ def response_invalid_login():
 @application.route('/api/v1/driver/<string:driver_id>', methods=['GET'])
 def get_info_driver(driver_id):
     """Devuelve la informacion de un chofer
-    @param driver_id es el identificador del chofer"""
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id))
     #Veo si esta logueado
     if not is_logged():
@@ -147,7 +149,63 @@ def get_info_drivers():
     response = CLIENT_CONTROLLER.get_clients(TIPO_CHOFER)
     return response
 
-@application.route('/api/v1/closestdrivers/latitude/<string:lat>/length/<string:lon>/radio/<string:radio>', methods=['GET'])
+@application.route('/api/v1/driver', methods=['POST'])
+def post_info_driver():
+    """Crea un nuevo chofer"""
+    application.logger.info('[POST] /api/v1/driver')
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>', methods=['PUT'])
+def put_info_driver(driver_id):
+    """Modifica un chofer
+        @param driver_id es el identificador del driver"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    if not request.json:
+        abort(400)
+    response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>', methods=['DELETE'])
+def delete_info_driver(driver_id):
+    """Elimina un chofer
+        @param driver_id es el identificador del chofer"""
+    application.logger.info('[DELETE] /api/v1/driver/' + str(driver_id))
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = CLIENT_CONTROLLER.delete_client(driver_id)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/available', methods=['PUT'])
+def put_available_driver(driver_id):
+    """El chofer se pone como disponible
+        @param driver_id es el identificador del chofer"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/available')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = CLIENT_CONTROLLER.put_client_available(driver_id, True)
+    return response
+
+@application.route('/api/v1/driver/<string:driver_id>/unavailable', methods=['PUT'])
+def put_unavailable_driver(driver_id):
+    """El chofer se pone como no disponible
+        @param driver_id es el identificador del chofer"""
+    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/unavailable')
+    #Veo si esta logueado
+    if not is_logged():
+        return response_invalid_login()
+    response = CLIENT_CONTROLLER.put_client_available(driver_id, False)
+    return response
+
+@application.route('/api/v1/closestdrivers/latitude/<string:lat>/length/<string:lon>/radio/<string:radio>',
+                   methods=['GET'])
 def get_info_closest_drivers(lat, lon, radio):
     """Devuelve la informacion de todos los choferes cercanos
         @param lat es la latitud del lugar donde se busca a los choferes
@@ -163,56 +221,12 @@ def get_info_closest_drivers(lat, lon, radio):
     response = CLIENT_CONTROLLER.get_closest_clients(TIPO_CHOFER, _lat, _lon, _radio)
     return response
 
-@application.route('/api/v1/driver', methods=['POST'])
-def post_info_driver():
-    """Crea un nuevo chofer"""
-    application.logger.info('[POST] /api/v1/driver')
-    if not request.json:
-        abort(400)
-    response = CLIENT_CONTROLLER.post_new_client(request.json, TIPO_CHOFER)
-    return response
-
-@application.route('/api/v1/driver/<string:driver_id>', methods=['PUT'])
-def put_info_driver(driver_id):
-    """Modifica un chofer
-    @param driver_id es el identificador del driver"""
-    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id))
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    if not request.json:
-        abort(400)
-    response = CLIENT_CONTROLLER.put_new_client(request.json, TIPO_CHOFER, driver_id)
-    return response
-
-@application.route('/api/v1/driver/<string:driver_id>/available', methods=['PUT'])
-def put_available_drive(driver_id):
-    """El chofer se pone como disponible
-    @param driver_id es el identificador del chofer"""
-    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/available')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    response = CLIENT_CONTROLLER.put_client_available(driver_id, True)
-    return response
-
-@application.route('/api/v1/driver/<string:driver_id>/unavailable', methods=['PUT'])
-def put_unavailable_drive(driver_id):
-    """El chofer se pone como disponible
-    @param driver_id es el identificador del chofer"""
-    application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/unavailable')
-    #Veo si esta logueado
-    if not is_logged():
-        return response_invalid_login()
-    response = CLIENT_CONTROLLER.put_client_available(driver_id, False)
-    return response
-
 #Endpoints de clientes
 
 @application.route('/api/v1/client/<string:client_id>', methods=['GET'])
 def get_info_client(client_id):
     """Devuelve la informacion de un cliente
-    @param client_id es el identificador del cliente"""
+        @param client_id es el identificador del cliente"""
     application.logger.info('[GET] /api/v1/client/' + str(client_id))
     #Veo si esta logueado
     if not is_logged():
@@ -242,7 +256,7 @@ def post_info_client():
 @application.route('/api/v1/client/<string:client_id>', methods=['PUT'])
 def put_info_client(client_id):
     """Modificar un cliente
-    @param client_id es el identificador del cliente"""
+        @param client_id es el identificador del cliente"""
     application.logger.info('[PUT] /api/v1/client/' + str(client_id))
     #Veo si esta logueado
     if not is_logged():
@@ -254,8 +268,8 @@ def put_info_client(client_id):
 
 @application.route('/api/v1/client/<string:client_id>', methods=['DELETE'])
 def delete_info_client(client_id):
-    """Devuelve la informacion de un cliente
-    @param client_id es el identificador del cliente"""
+    """Elimina un cliente
+        @param client_id es el identificador del cliente"""
     application.logger.info('[DELETE] /api/v1/client/' + str(client_id))
     #Veo si esta logueado
     if not is_logged():
@@ -265,9 +279,12 @@ def delete_info_client(client_id):
 
 # Endpoints de autos
 
-@application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>',methods=['GET'])
+@application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>',
+                   methods=['GET'])
 def get_info_car(driver_id, car_id):
-    """Devuelve la informacion del auto de un conductor"""
+    """Devuelve la informacion del auto de un conductor
+        @param driver_id es el identificador del chofer
+        @param car_id es el identificador del auto de un chofer"""
     application.logger.info('[GET] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
     #Veo si esta logueado
     if not is_logged():
@@ -277,7 +294,8 @@ def get_info_car(driver_id, car_id):
 
 @application.route('/api/v1/driver/<string:driver_id>/cars', methods=['GET'])
 def get_all_cars(driver_id):
-    """Devuelve la informacion de todos los autos asociados a un conductor"""
+    """Devuelve la informacion de todos los autos asociados a un conductor
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id))
     #login check
     if not is_logged():
@@ -288,8 +306,7 @@ def get_all_cars(driver_id):
 @application.route('/api/v1/driver/<string:driver_id>/cars', methods=['POST'])
 def post_info_car(driver_id):
     """Crea un nuevo auto para un chofer
-    @param car_id es el identificador del auto de un chofer
-    @param driver_id es el identificador del chofer"""
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[POST] /api/v1/driver/'+str(driver_id)+'/cars')
     #Veo si esta logueado
     if not is_logged():
@@ -302,8 +319,8 @@ def post_info_car(driver_id):
 @application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>', methods=['PUT'])
 def put_info_car(driver_id, car_id):
     """Modificar el auto de un chofer
-    @param car_id es el identificador del auto de un chofer
-    @param driver_id es el identificador del chofer"""
+        @param driver_id es el identificador del chofer
+        @param car_id es el identificador del auto de un chofer"""
     application.logger.info('[PUT] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
     #Veo si esta logueado
     if not is_logged():
@@ -316,8 +333,8 @@ def put_info_car(driver_id, car_id):
 @application.route('/api/v1/driver/<string:driver_id>/cars/<int:car_id>', methods=['DELETE'])
 def delete_info_car(driver_id, car_id):
     """Elimina el auto de un chofer
-    @param car_id es el identificador del auto de un chofer
-    @param driver_id es el identificador del chofer"""
+        @param driver_id es el identificador del chofer
+        @param car_id es el identificador del auto de un chofer"""
     application.logger.info('[DELETE] /api/v1/driver/'+str(driver_id)+'/cars/' + str(car_id))
     #Veo si esta logueado
     if not is_logged():
@@ -339,7 +356,8 @@ def get_paymentmethods():
 
 @application.route('/api/v1/driver/<string:driver_id>/transactions', methods=['GET'])
 def get_transactions_driver(driver_id):
-    """Devuelve los metodos de pago que acepta el sistema"""
+    """Devuelve las transacciones de un chofer
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/transactions')
     #Veo si esta logueado
     if not is_logged():
@@ -349,7 +367,8 @@ def get_transactions_driver(driver_id):
 
 @application.route('/api/v1/client/<string:client_id>/transactions', methods=['GET'])
 def get_transactions_client(client_id):
-    """Devuelve los metodos de pago que acepta el sistema"""
+    """Devuelve las transacciones de un cliente
+        @param driver_id es el identificador del cliente"""
     application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/transactions')
     #Veo si esta logueado
     if not is_logged():
@@ -360,7 +379,7 @@ def get_transactions_client(client_id):
 @application.route('/api/v1/driver/<string:driver_id>/transactions', methods=['POST'])
 def post_info_transaction_driver(driver_id):
     """Guarda la informacion de la transaccion del chofer
-    @param driver_id es el identificador del chofer"""
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[POST] /api/v1/driver/'+str(driver_id)+'/transactions')
     #Veo si esta logueado
     if not is_logged():
@@ -373,7 +392,7 @@ def post_info_transaction_driver(driver_id):
 @application.route('/api/v1/client/<string:client_id>/transactions', methods=['POST'])
 def post_info_transaction_client(client_id):
     """Guarda la informacion de la transaccion del cliente
-    @param client_id es el identificador del cliente"""
+        @param client_id es el identificador del cliente"""
     application.logger.info('[POST] /api/v1/client/'+str(client_id)+'/transactions')
     #Veo si esta logueado
     if not is_logged():
@@ -387,9 +406,9 @@ def post_info_transaction_client(client_id):
 
 @application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>', methods=['GET'])
 def get_trip_driver(driver_id, trip_id):
-    """Obtiene la informacion del viaje de un chofer
-    @param driver_id es el identificador del chofer
-    @param trip_id es el identificador del viaje"""
+    """ Devuelve la informacion del viaje de un chofer
+        @param driver_id es el identificador del chofer
+        @param trip_id es el identificador del viaje"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/trips/' + str(trip_id))
     #Veo si esta logueado
     if not is_logged():
@@ -399,9 +418,9 @@ def get_trip_driver(driver_id, trip_id):
 
 @application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>', methods=['GET'])
 def get_trip_client(client_id, trip_id):
-    """Obtiene la informacion del viaje de un cliente
-    @param client_id es el identificador del cliente
-    @param trip_id es el identificador del viaje"""
+    """Devuelve la informacion del viaje de un cliente
+        @param client_id es el identificador del cliente
+        @param trip_id es el identificador del viaje"""
     application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/trips/' + str(trip_id))
     #Veo si esta logueado
     if not is_logged():
@@ -411,9 +430,8 @@ def get_trip_client(client_id, trip_id):
 
 @application.route('/api/v1/driver/<string:driver_id>/trips', methods=['GET'])
 def get_trips_driver(driver_id):
-    """Obtiene la informacion del viaje de un chofer
-    @param driver_id es el identificador del chofer
-    @param trip_id es el identificador del viaje"""
+    """Devuelve la informacion todos los viajes de un chofer
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[GET] /api/v1/driver/' + str(driver_id) + '/trips')
     #Veo si esta logueado
     if not is_logged():
@@ -423,8 +441,8 @@ def get_trips_driver(driver_id):
 
 @application.route('/api/v1/client/<string:client_id>/trips', methods=['GET'])
 def get_trips_client(client_id):
-    """Obtiene la informacion de los viajes de un cliente
-    @param client_id es el identificador del cliente"""
+    """Devuelve la informacion todos los viajes de un cliente
+        @param client_id es el identificador del cliente"""
     application.logger.info('[GET] /api/v1/client/' + str(client_id) + '/trips')
     #Veo si esta logueado
     if not is_logged():
@@ -432,11 +450,12 @@ def get_trips_client(client_id):
     response = TRIP_CONTROLLER.get_trips(client_id)
     return response
 
-@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/accept', methods=['PUT'])
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/accept',
+                   methods=['PUT'])
 def put_trips_driver_accept(driver_id, trip_id):
     """El chofer acepta realizar un viaje
-    @param driver_id es el identificador del chofer
-    @param trip_id es el identificador del viaje"""
+        @param driver_id es el identificador del chofer
+        @param trip_id es el identificador del viaje"""
     application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/'
                             + str(trip_id) + '/accept')
     #Veo si esta logueado
@@ -445,11 +464,12 @@ def put_trips_driver_accept(driver_id, trip_id):
     response = TRIP_CONTROLLER.accept_trip(driver_id, trip_id)
     return response
 
-@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/refuse', methods=['PUT'])
+@application.route('/api/v1/driver/<string:driver_id>/trips/<string:trip_id>/refuse',
+                   methods=['PUT'])
 def put_trips_driver_refuse(driver_id, trip_id):
     """El chofer rechaza realizar un viaje
-    @param driver_id es el identificador del chofer
-    @param trip_id es el identificador del viaje"""
+        @param driver_id es el identificador del chofer
+        @param trip_id es el identificador del viaje"""
     application.logger.info('[PUT] /api/v1/driver/' + str(driver_id) + '/trips/'
                             + str(trip_id) + '/refuse')
     #Veo si esta logueado
@@ -458,11 +478,12 @@ def put_trips_driver_refuse(driver_id, trip_id):
     response = TRIP_CONTROLLER.refuse_trip(driver_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/start', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/start',
+                   methods=['PUT'])
 def put_trips_client_start(client_id, trip_id):
     """El cliente confirma que comenzo el viaje
-    @param client_id es el identificador del cliente
-    @param trip_id es el identificador del viaje"""
+        @param client_id es el identificador del cliente
+        @param trip_id es el identificador del viaje"""
     application.logger.info('[PUT] /api/v1/driver/' + str(client_id) + '/trips/'
                             + str(trip_id) + '/start')
     #Veo si esta logueado
@@ -471,11 +492,12 @@ def put_trips_client_start(client_id, trip_id):
     response = TRIP_CONTROLLER.start_trip(client_id, trip_id)
     return response
 
-@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/finish', methods=['PUT'])
+@application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/finish',
+                   methods=['PUT'])
 def put_trips_client_finish(client_id, trip_id):
     """El cliente confirma que termino el viaje
-    @param client_id es el identificador del cliente
-    @param trip_id es el identificador del viaje"""
+        @param client_id es el identificador del cliente
+        @param trip_id es el identificador del viaje"""
     application.logger.info('[PUT] /api/v1/client/' + str(client_id) + '/trips/'
                             + str(trip_id) + '/finish')
     #Veo si esta logueado
@@ -499,8 +521,9 @@ def post_estimate():
 
 @application.route('/api/v1/client/<string:client_id>/trips', methods=['POST'])
 def post_trip(client_id):
-    """Crea un viaje"""
-    application.logger.info('[POST] /api/v1/trip')
+    """ Crea un viaje
+        @param client_id es el identificador del cliente"""
+    application.logger.info('[POST] /api/v1/client' + str(client_id) +'/trips')
     #check de login
     if not is_logged():
         return response_invalid_login()
@@ -512,7 +535,10 @@ def post_trip(client_id):
 @application.route('/api/v1/client/<string:client_id>/trips/<string:trip_id>/driver/'
                    + '<string:driver_id>', methods=['PUT'])
 def put_trip(client_id, trip_id, driver_id):
-    """Crea un viaje"""
+    """ Se modifica el chofer de un viaje
+        @param client_id es el identificador del cliente
+        @param trip_id es el identificador del viaje
+        @param driver_id es el identificador del chofer"""
     application.logger.info('[PUT] /api/v1/client' + str(client_id) + '/trips/' +
                             str(trip_id) + '/driver/' + str(driver_id))
     #check de login
@@ -521,10 +547,11 @@ def put_trip(client_id, trip_id, driver_id):
     response = TRIP_CONTROLLER.put_trip_new_driver(client_id, trip_id, driver_id)
     return response
 
-@application.route('/api/v1/availabletrips/<string:user_id>', methods=['GET'])
+@application.route('/api/v1/driver/<string:user_id>/availabletrips', methods=['GET'])
 def get_available_trips(user_id):
-    """Obtiene los viajes disponibles dado un id de un driver"""
-    application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
+    """ Devuelve los viajes disponibles que puede aceptar un driver
+        @param driver_id es el identificador del chofer"""
+    application.logger.info('[GET] /api/v1/driver/' + str(user_id) +'/availabletrips')
     #check de login
     if not is_logged():
         return response_invalid_login()
@@ -533,7 +560,8 @@ def get_available_trips(user_id):
 
 @application.route('/api/v1/client/<string:client_id>/newtrips', methods=['GET'])
 def get_new_trips_by_client(client_id):
-    """Devuelve los viajes pedidos un cliente"""
+    """ Devuelve los viajes de un cliente que aun no finalizaron
+        @param client_id es el identificador del cliente"""
     #check de login
     if not is_logged():
         return response_invalid_login()
@@ -542,7 +570,8 @@ def get_new_trips_by_client(client_id):
 
 @application.route('/api/v1/driver/<string:driver_id>/newtrips', methods=['GET'])
 def get_new_trips_by_driver(driver_id):
-    """Devuelve los viajes pedidos de un driver"""
+    """ Devuelve los viajes de un chofer que aun no finalizaron
+        @param driver_id es el identificador del chofer"""
     #check de login
     if not is_logged():
         return response_invalid_login()
@@ -570,19 +599,21 @@ def get_directions():
     return response
 
 #Endpoints test de mongo!
-@application.route('/api/v1/lastlocation/<string:client_id>', methods=['GET'])
-def get_last_location(client_id):
-    """Devuelve la ultima ubicacion conocida de un usuario
+@application.route('/api/v1/lastlocation/<string:user_id>', methods=['GET'])
+def get_last_location(user_id):
+    """ Devuelve la ultima ubicacion conocida de un usuario
+        @param user_id es el identificador del usuario
     """
-    application.logger.info('[GET] /api/v1/lastlocation')
+    application.logger.info('[GET] /api/v1/lastlocation/' + str(user_id))
     if not is_logged():
         return response_invalid_login()
-    response = TRIP_CONTROLLER.get_last_location(client_id)
+    response = TRIP_CONTROLLER.get_last_location(user_id)
     return response
 
 @application.route('/api/v1/lastlocation', methods=['POST'])
 def add_last_location():
     """ Agrega la ultima ubicacion asociada a un usuario
+        @param user_id es el identificador del usuario
     """
     application.logger.info('[POST] /api/v1/lastlocation')
     if not is_logged():

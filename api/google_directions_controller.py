@@ -1,7 +1,7 @@
 """ @package google_directions_controller
 """
-import requests
 import json
+import requests
 from flask import jsonify
 
 GOOGLE_API_KEY = "AIzaSyC0Ro5dttq9RUlR78Lta4_exF8fIK1qgxM"
