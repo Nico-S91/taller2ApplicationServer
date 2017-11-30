@@ -434,6 +434,7 @@ class TripController:
     def get_available_trips(self, user_id):
         """ Este metodo valida el id del usuario, y si es un driver valido, devuelve los
             viajes disponibles al driver, junto con los ya aceptados por este
+            @param user_id identificador del usuario
         """
         check_valid_driver = self._validate_user_with_type(user_id, "driver")
 
@@ -444,9 +445,20 @@ class TripController:
             #el driver existe, devuelvo los trips SIN idDriver y los que tienen el mismo idDriver
             trips_sin_driver = MODEL_MANAGER.get_trip_without_drivers()
             trips_con_este_driver = MODEL_MANAGER.get_trips_with_driver_id(user_id)
+            trips_con_este_driver = self._filter_uninitiated_trips(trips_con_este_driver)
             trips_merge = trips_sin_driver + trips_con_este_driver
+            trips = []
+            for trip in trips_merge:
+                client_id = trip.get('passenger_id')
+                if client_id is not None:
+                    response_shared_server = SHARED_SERVER.get_client(client_id)
+                    json_data = json.loads(response_shared_server.text)
+                    if response_shared_server.status_code == 200:
+                        client = json_data['user']
+                        trip['passenger'] = client
+                        trips.append(trip)
             response = {
-                "trips": trips_merge
+                "trips": trips
             }
             return jsonify(response)
 
@@ -888,6 +900,14 @@ class TripController:
         dif_lon = location.get('lon') - last_location.get('lon')
         dif = math.sqrt(dif_lat * dif_lat + dif_lon * dif_lon)
         return math.sqrt(dif) * KM_FACTOR
+
+    def _filter_uninitiated_trips(self, trips_con_este_driver):
+        trips = []
+        for trip in trips_con_este_driver:
+            is_accepted = trip.get('is_accepted')
+            if is_accepted is None or not is_accepted:
+                trips.append(trip)
+        return trips
 
     #Metodos que quedaron obsoletos pero sirven para hacer pruebas
 

@@ -521,10 +521,10 @@ def put_trip(client_id, trip_id, driver_id):
     response = TRIP_CONTROLLER.put_trip_new_driver(client_id, trip_id, driver_id)
     return response
 
-@application.route('/api/v1/availabletrips/<string:user_id>', methods=['GET'])
+@application.route('/api/v1/driver/<string:user_id>/availabletrips', methods=['GET'])
 def get_available_trips(user_id):
     """Obtiene los viajes disponibles dado un id de un driver"""
-    application.logger.info('[GET] /api/v1/availabletrips with user_id: ' + str(user_id))
+    application.logger.info('[GET] /api/v1/driver/' + str(user_id) +'/availabletrips')
     #check de login
     if not is_logged():
         return response_invalid_login()
