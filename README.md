@@ -46,3 +46,6 @@ iv. se va a haber creado la carpeta "htmlcov" con el reporte en formato html
 
 ##Nombre de google api Key
 llevame-grupo6: AIzaSyC0Ro5dttq9RUlR78Lta4_exF8fIK1qgxM
+
+##Docker
+correr **docker-compose up** en el directorio del proyecto! (si tira error, probablemente es que la version en linux es '2' y hay un '3'!!)
