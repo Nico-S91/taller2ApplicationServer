@@ -1,6 +1,7 @@
 """ @package service.shared_server
 """
 import json
+import os
 import requests
 from model import client_shared
 from flask import jsonify
@@ -8,11 +9,13 @@ from flask import jsonify
 TIPO_CLIENTE = "passenger"
 TIPO_CHOFER = "driver"
 
+SHARED_SERVER_URL = os.getenv('SHARED_SERVER_URL', 'https://stormy-lowlands-30400.herokuapp.com')
+
 class SharedServer:
     """Conexion con el Shared server"""
 
     def __init__(self):
-        self.url_shared_server = 'https://stormy-lowlands-30400.herokuapp.com'
+        self.url_shared_server = SHARED_SERVER_URL
         self.token = self._get_token_initial()
 
     def get_validate_client(self, username, password):
