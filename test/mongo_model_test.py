@@ -1,10 +1,10 @@
 """ @package test.mongo_model_test
 """
-import unittest
-import json
-import main_app
-from flask import jsonify
-from api.model_manager import ModelManager
+# import unittest
+# import json
+# import main_app
+# from flask import jsonify
+# from api.model_manager import ModelManager
 
 # class TestMongoMOdel(unittest.TestCase):
     # """ Esta clase tiene los test de los metodos de manipulacion del modelo en MongoDB
