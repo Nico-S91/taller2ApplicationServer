@@ -1,0 +1,1683 @@
+swagger: '2.0'
+info:
+  description: Endpoints del Application server
+  version: 1.0.0
+  title: Llevame - Application Server API
+host: taller2-application-server.herokuapp.com
+schemes:
+  - http
+basePath: /api/v1
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  AndroidToken:
+    type: apiKey
+    in: query
+    name: token
+tags:
+  - name: login
+    description: |
+      Llamados correspondientes al login
+  - name: app
+    description: |
+      Llamados que puede realizar el cliente de android
+  - name: driver
+    description: |
+      Llamados que pueden realizar los choferes
+  - name: passenger
+    description: |
+      Llamados que pueden realizar los pasajeros
+paths:
+  /login/facebookAuthToken/{fbAuthTOken}:
+    parameters:
+      - description: "token de autenticacion de facebook"
+        in: path
+        name: fbAuthTOken
+        required: true
+        type: string
+    post:
+      tags:
+        - login
+      security:
+        - AndroidToken: []
+      description: "Login contra facebook"
+      responses:
+        201:
+          description: "Login correcto"
+        401:
+          description: "Credenciales Invalidas"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Login de Facebook"
+  /login/username/{username}/password/{password}:
+    parameters:
+      - description: "nombre de usuario"
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: "password del usuario"
+        in: path
+        name: password
+        required: true
+        type: string
+    post:
+      tags:
+        - login
+      security:
+        - AndroidToken: []
+      description: "Login contra la app"
+      responses:
+        201:
+          description: "Login correcto"
+        401:
+          description: "Credenciales Invalidas"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Login por Applicacion"
+  /drivers:
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve toda la información acerca de todos los choferes.
+      responses:
+        200:
+          description: "Todos los choferes indicados"
+          schema:
+            properties:
+              clients:
+                items:
+                  $ref: '#/definitions/ApplicationUser'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Choferes - Listado de choferes"
+    post:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Endpoint para dar de alta un chofer"
+      parameters:
+        - description: "Datos para dar de alta un chofer"
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/ApplicationUserCreate"
+      responses:
+        201:
+          description: "Alta correcta"
+          schema:
+            properties:
+              user:
+                $ref: '#/definitions/ApplicationUser'
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Dar de alta un chofer"
+  /driver/{driverId}:
+    parameters:
+      - description: "Identificador del conductor"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la informacion de un conductor
+      responses:
+        200:
+          description: "Informacion del conductor"
+          schema:
+            properties:
+              businessUser:
+                  $ref: '#/definitions/BusinessUser'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Devolucion de un usuario de APpserver"
+    delete:
+      tags:
+        - app
+      security:
+        - AndroidToken: []
+      description: |
+        Endpoint para dar de baja un conductor
+      responses:
+        204:
+          description: "Baja correcta"
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Eliminar un usuario de negocio"
+    put:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Modificación de los datos de un chofer"
+      parameters:
+        - description: Datos para modificar al chofer
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/ApplicationUserCreate"
+      responses:
+        200:
+          description: "Modificación correcta"
+          schema:
+            properties:
+              metadata:
+                $ref: '#/definitions/EntityMetadata'
+              user:
+                $ref: "#/definitions/ApplicationUser"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        409:
+          description: Conflicto en el update (esta mal el valor de `_ref`)
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Actualización de información de un usuario"
+  /driver/{driverId}/available:
+    parameters:
+      - description: "Identificador del conductor"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Marca a un chofer como disponible"
+      responses:
+        201:
+          description: "Chofer disponible"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Activacion de la disponibilidad de un chofer"
+  /driver/{driverId}/unavailable:
+    parameters:
+      - description: "Identificador del conductor"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Marca a un chofer como no disponible"
+      responses:
+        201:
+          description: "Chofer no disponible"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Inactivacion de la disponibilidad de un chofer"
+  /closestdrivers/latitude/{lat}/length/{lon}/radio/{radio}:
+    parameters:
+      - description: "latitud"
+        in: path
+        name: lat
+        required: true
+        type: string
+      - description: "longitud"
+        in: path
+        name: lon
+        required: true
+        type: string
+      - description: "radio"
+        in: path
+        name: radio
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: "Devuelve toda la información del Auto"
+      responses:
+        200:
+          description: "Información del Auto"
+          schema:
+            properties:
+              drivers:
+                items: 
+                  $ref: "#/definitions/ClosestDrivers"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Devuelve los conductores mas cercanos"
+  /clients:
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve toda la información acerca de todos los pasajeros.
+      responses:
+        200:
+          description: "Todos los pasajeros indicados"
+          schema:
+            properties:
+              clients:
+                items:
+                  $ref: '#/definitions/ApplicationUser'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Pasajeros - Listado de pasajeros"
+  /client:
+    post:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: "Endpoint para dar de alta un pasajero"
+      parameters:
+        - description: "Datos para dar de alta un pasajero"
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/ApplicationUserCreate"
+      responses:
+        201:
+          description: "Alta correcta"
+          schema:
+            properties:
+              user:
+                $ref: '#/definitions/ApplicationUser'
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Dar de alta un pasajero"
+  /client/{clientId}:
+    parameters:
+      - description: "Identificador del pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la informacion de un pasajero
+      responses:
+        200:
+          description: "Informacion del pasajero"
+          schema:
+            properties:
+              businessUser:
+                  $ref: '#/definitions/BusinessUser'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Devolucion de un pasajero de Appserver"
+    delete:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+        Endpoint para dar de baja un pasajero
+      responses:
+        204:
+          description: "Baja correcta"
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Eliminar un usuario de negocio"
+    put:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: "Modificación de los datos de un pasajero"
+      parameters:
+        - description: Datos para modificar al pasajero
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/ApplicationUserCreate"
+      responses:
+        200:
+          description: "Modificación correcta"
+          schema:
+            properties:
+              metadata:
+                $ref: '#/definitions/EntityMetadata'
+              user:
+                $ref: "#/definitions/ApplicationUser"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        409:
+          description: Conflicto en el update (esta mal el valor de `_ref`)
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Actualización de información de un pasajero"
+  /driver/{driverId}/cars/{carId}:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+      - description: "id de un auto"
+        in: path
+        name: carId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Devuelve toda la información del Auto de un chofer"
+      responses:
+        200:
+          description: "Información del Auto"
+          schema:
+            properties:
+              car:
+                $ref: "#/definitions/Car"
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        404:
+          description: "Auto inexistente"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Obtener información de un auto"
+    delete:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Endpoint para dar de baja un auto"
+      responses:
+        204:
+          description: "Baja correcta"
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Eliminar el auto"
+    put:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Modificación de los datos de un auto"
+      parameters:
+        - description: Datos nuevos del auto
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        200:
+          description: "Modificación correcta"
+          schema:
+            properties:
+              car:
+                $ref: "#/definitions/Car"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        409:
+          description: Conflicto en el update (esta mal el valor de `_ref`)
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Actualizar información de un auto"
+  /driver/{driverId}/cars:
+    parameters:
+      - description: "Identificador de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve toda la información acerca los autos del chofer.
+      responses:
+        200:
+          description: Autos del chofer
+          schema:
+            properties:
+              cars:
+                items:
+                  $ref: '#/definitions/Car'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Listado de autos de un chofer
+    post:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: "Endpoint para dar de alta un auto de un chofer"
+      parameters:
+        - description: Los datos del auto
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/Car"
+      responses:
+        201:
+          description: "Alta correcta"
+          schema:
+            properties:
+              car:
+                $ref: '#/definitions/Car'
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Dar de alta un auto de usuario"
+  /paymethods:
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve los metodos de pago que acepta el sistema
+      responses:
+        200:
+          description: "Métodos de pago soportados"
+          schema:
+            properties:
+              paymethods:
+                items:
+                  $ref: '#/definitions/PayMethodDefinition'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "LIstado de metodos de Pago"
+  /driver/{driverId}/transactions:
+    parameters:
+      - description: "Identificador del chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve las transacciones de un chofer
+      responses:
+        200:
+          description: Transacciones del chofer
+          schema:
+            properties:
+              transactions:
+                items:
+                  $ref: '#/definitions/Transaction'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Listado de transacciones de un chofer
+    post:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+        Guarda la informacion de la transaccion del chofer
+      responses:
+        200:
+          description: Transacción realizada correctamente
+          schema:
+            properties:
+              transaction:
+                $ref: '#/definitions/Transaction'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Guardar informacion de la transaccion de un chofer
+  /client/{clientId}/transactions:
+    parameters:
+      - description: "Identificador del pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve las transacciones de un pasajero
+      responses:
+        200:
+          description: Transacciones del pasajero
+          schema:
+            properties:
+              transactions:
+                items:
+                  $ref: '#/definitions/Transaction'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Listado de transacciones de un chofer
+    post:
+      tags:
+        - app
+      security:
+        - AndroidToken: []
+      description: |
+        Guarda la informacion de la transaccion del pasajero
+      responses:
+        200:
+          description: Transacción realizada correctamente
+          schema:
+            properties:
+              transaction:
+                $ref: '#/definitions/Transaction'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Guardar informacion de la transaccion de un pasajero
+  /driver/{driverId}/trips:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la informacion todos los viajes de un chofer
+      responses:
+        200:
+          description: Informacion de los Viajes
+          schema:
+            properties:
+              trips:
+                items:
+                  $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Informacion de los viajes de un chofer
+  /driver/{driverId}/trips/{tripId}:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la informacion del viaje de un chofer
+      responses:
+        200:
+          description: Informacion del Viaje
+          schema:
+            properties:
+              trip:
+                $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Informacion del viaje de un chofer
+  /client/{clientId}/trips:
+    parameters:
+      - description: "id de un pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la informacion todos los viajes de un pasajero
+      responses:
+        200:
+          description: Informacion de los Viajes
+          schema:
+            properties:
+              trips:
+                items:
+                  $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Informacion de los viajes de un pasajero
+    post:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: "Dar de alta un viaje"
+      parameters:
+        - description: Datos del viaje a guardar
+          in: body
+          name: body
+          required: true
+          schema:
+            properties:
+              trip:
+                $ref: '#/definitions/MongoTrip'
+              accepted_reoute:
+                type: object
+              paymethod:
+                $ref: '#/definitions/PayMethod'
+      responses:
+        201:
+          description: "Alta correcta"
+          schema:
+            $ref: "#/definitions/CodeSuccess"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Dar de alta un viaje"
+  /client/{clientId}/trips/{tripId}:
+    parameters:
+      - description: "id de un pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la informacion del viaje de un pasajero
+      responses:
+        200:
+          description: Informacion del Viaje
+          schema:
+            properties:
+              trip:
+                $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Informacion del viaje de un pasajero
+  /driver/{driverId}/trips/{tripId}/accept:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          El chofer acepta realizar un viaje
+      responses:
+        200:
+          description: Viaje Aceptado
+          schema:
+            $ref: '#/definitions/CodeSuccess'
+              
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Aceptacion de un viaje por parte del chofer
+  /driver/{driverId}/trips/{tripId}/refuse:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          El chofer rechaza realizar un viaje
+      responses:
+        200:
+          description: Viaje Rechazado
+          schema:
+            $ref: '#/definitions/CodeSuccess'
+              
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Rechazo de un viaje por parte del chofer
+  /client/{clientId}/trips/{tripId}/start:
+    parameters:
+      - description: "id de un pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          El cliente confirma que comenzo el viaje
+      responses:
+        200:
+          description: Viaje Iniciado
+          schema:
+            $ref: '#/definitions/CodeSuccess'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Inicio  de un Viaje
+  /client/{clientId}/trips/{tripId}/finish:
+    parameters:
+      - description: "id de un pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          El cliente confirma que termino el viaje
+      responses:
+        200:
+          description: Viaje Iniciado
+          schema:
+            $ref: '#/definitions/CodeSuccess'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: Fin  de un Viaje
+  /trips/estimate:
+    post:
+      tags:
+        - app
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve la estimacion de un viaje
+      parameters:
+        - description: "Datos del viaje a estimar"
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/Trip"
+      responses:
+        200:
+          description: "Validación correcta"
+          schema:
+            properties:
+              metadata:
+                $ref: '#/definitions/EntityMetadata'
+              cost:
+                $ref: '#/definitions/Cost'
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        402:
+          description: |
+            El pasajero debe normalizar su situación de pago.
+            No se le debe permitir realizar el pago.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Validar usuario de aplicación"
+  /client/{clientId}/trips/{tripId}driver/{driverId}:
+    parameters:
+      - description: "id de un pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+      - description: "id de un viaje"
+        in: path
+        name: tripId
+        required: true
+        type: string
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    put:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: "Modificacion del chofer de un viaje de un pasajero"
+      responses:
+        200:
+          description: "Modificación exitosa"
+          schema:
+            $ref: "#/definitions/CodeSuccess"
+        400:
+          description: "Incumplimiento de precondiciones (parámetros faltantes)"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "No existe el recurso solicitado"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Actualización de información de un usuario"
+  /driver/{driverId}/availabletrips:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve todos los viajes disponibles
+      responses:
+        200:
+          description: "Todos los Viajes Disponibles"
+          schema:
+            properties:
+              trips:
+                items:
+                  $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Listado de viajes Disponibles"
+  /client/{clientId}/newtrips:
+    parameters:
+      - description: "id de un pasajero"
+        in: path
+        name: clientId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - passenger
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve todos los viajes aun no finalizados de un cliente
+      responses:
+        200:
+          description: "Los Viajes no finalizados"
+          schema:
+            properties:
+              trips:
+                items:
+                  $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "LIstado de viajes no finalizados del cliente"
+  /driver/{driverId}/newtrips:
+    parameters:
+      - description: "id de un chofer"
+        in: path
+        name: driverId
+        required: true
+        type: string
+    get:
+      tags:
+        - app
+        - driver
+      security:
+        - AndroidToken: []
+      description: |
+          Devuelve todos los viajes aun no finalizados de un chofer
+      responses:
+        200:
+          description: "Los Viajes no finalizados"
+          schema:
+            properties:
+              trips:
+                items:
+                  $ref: '#/definitions/Trip'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "LIstado de viajes no finalizados del chofer"
+  /trajectories:
+    post:
+      tags:
+        - app
+      security:
+        - AndroidToken: []
+      description: |
+          devuelve todas las posibles trayectorias desde una locacion a otra.
+      parameters:
+        - description: Los puntos de origen y destino
+          in: body
+          name: body
+          required: true
+          schema:
+            properties:
+              origin_lat:
+                type: number
+              origin_long:
+                type: number
+              destination_lat:
+                type: number
+              destination_long:
+                type: number
+      responses:
+        200:
+          description: "Todos los pasajeros indicados"
+          schema:
+            properties:
+              clients:
+                items:
+                  $ref: '#/definitions/GoogleDirection'
+        401:
+          description: Unauthorized
+          schema:
+              $ref: '#/definitions/Error'
+        500:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      summary: "Pasajeros - Listado de pasajeros"
+
+definitions:
+  Version:
+    type: string
+    description: Versión de la api
+  Id:
+    type: string
+    description: |
+      Se guarda como un string, pero podría ser un número
+      es dependiente de la implementación.
+  Ref:
+    type: string
+    description: |
+      Hash que es utilizado para prevenir colosiones.
+      Cuando se crea un elemento, se debe pasar un valor de undefined (o no debe estar).
+      Al actualizar, el servidor chequeará que este valor sea igual al guardado, de no coincidir,
+      significa que otro actualizó el recurso, por ende, la actualización debe fallar.
+  Cost:
+    properties:
+      currency:
+        type: string
+        description: Moneda de acuerdo a ISO 4217
+      value:
+        type: number
+        description: Valor
+  Timestamp:
+    type: number
+    description: |
+      Tiempo en epoch
+  Transaction:
+    properties:
+      id:
+        $ref: '#/definitions/Id'
+      trip:
+        $ref: '#/definitions/Id'
+      timestamp:
+        $ref: '#/definitions/Timestamp'
+      cost:
+        $ref: '#/definitions/Cost'
+      description:
+        type: string
+      data:
+        type: object
+        description: (opcional) Diccionario para guardar datos relacionados con la transacción
+  Location:
+    description: |
+      Las coordenadas utilizan la especificación de [GeoJSON](https://geojson.org/geojson-spec.html#coordinate-reference-system-objects)
+      donde `lon` es el primer número, mientras `lat` el segundo
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+  Address:
+    properties:
+      street:
+        description: Dirección en texto (opcional)
+        type: string
+      location:
+        $ref: "#/definitions/Location"
+  Step:
+    properties:
+      location:
+        $ref: '#/definitions/Location'
+      timestamp:
+        $ref: '#/definitions/Timestamp'
+  Endpoint:
+    properties:
+      address:
+        $ref: '#/definitions/Address'
+      timestamp:
+        $ref: '#/definitions/Timestamp'
+  
+  MongoTrip:
+    type: object
+    properties:
+      passenger:
+        type: string
+      driver:
+        type: string
+      start:
+        $ref: '#/definitions/Endpoint'
+      end:
+        $ref: '#/definitions/Endpoint'
+      route:
+        items:
+          $ref: '#/definitions/Step'
+  
+  GoogleDirection:
+    type: object
+    properties:
+      geocoded_waypoints:
+        type: object
+      routes:
+        items:
+          type: object
+      status:
+        type: string
+  
+  Trip:
+    type: object
+    properties:
+      id:
+        $ref: '#/definitions/Id'
+      applicationOwner:
+        $ref: '#/definitions/Id'
+      driver:
+        $ref: '#/definitions/Id'
+      passenger:
+        $ref: '#/definitions/Id'
+      start:
+        $ref: "#/definitions/Endpoint"
+      end:
+        $ref: "#/definitions/Endpoint"
+      totalTime:
+        description: |
+          Tiempo de espera (segundos) total del viaje
+        type: number
+      waitTime:
+        description: |
+          Tiempo de espera (segundos) a que llegue el conductor
+        type: number
+      travelTime:
+        description: |
+          Tiempo de espera (segundos) de viaje
+        type: number
+      distance:
+        description: Distancia en metros (si esta disponible)
+        type: number
+      route:
+        items:
+          $ref: '#/definitions/Step'
+      cost:
+        $ref: '#/definitions/Cost'
+  
+  CodeSuccess:
+    properties:
+      code:
+        format: int32
+        type: integer
+      message:
+        type: string
+    type: object
+
+  Error:
+    properties:
+      code:
+        format: int32
+        type: integer
+      message:
+        type: string
+    type: object
+  EntityMetadata:
+    properties:
+      version:
+        $ref: '#/definitions/Version'
+
+  CarProperties:
+    properties:
+      name:
+        description: Nombre del atributo o propiedad del auto
+        type: string
+      value:
+        description: Valor del mismo
+        type: string
+  Car:
+    properties:
+      id:
+        $ref: '#/definitions/Id'
+      _ref:
+        $ref: '#/definitions/Ref'
+      owner:
+        $ref: '#/definitions/Id'
+      properties:
+        items:
+          $ref: '#/definitions/CarProperties'
+  ApplicationUser:
+    properties:
+      id:
+        $ref: '#/definitions/Id'
+      _ref:
+        $ref: '#/definitions/Ref'
+      applicationOwner:
+        $ref: '#/definitions/Id'
+      type:
+        $ref: '#/definitions/ApplicationUserType'
+      cars:
+        items:
+          $ref: '#/definitions/Car'
+      username:
+        description: Nombre del usuario en la aplicación
+        type: string
+      name:
+        description: Nombre del usuario
+        type: string
+      surname:
+        description: Apellido del usuario
+        type: string
+      country:
+        description: Pais  del usuario
+        type: string
+      email:
+        description: Email  del usuario
+        type: string
+      birthdate:
+        description: Fecha de cumpleaños del usuario
+        type: string
+      images:
+        description: "Imagenes relacionadas al usuario"
+        items:
+          type: string
+      balance:
+        description: |
+          Saldo en todas las monedas del usuario.
+          Es un array, por que se encontrará una entidad `Cost` por cada tipo de moneda que haya usado.
+        items:
+          $ref: '#/definitions/Cost'
+  ApplicationUserType:
+    description: |
+      Especifica si es pasajero `passenger` o chofer `driver`
+    type: string
+  ApplicationUserCreate:
+    type: object
+    properties:
+      _ref:
+        $ref: '#/definitions/Ref'
+      type:
+        $ref: '#/definitions/ApplicationUserType'
+      username:
+        description: Nombre del usuario en la aplicación
+        type: string
+      password:
+        description: Contraseña del usuario en la aplicación
+        type: string
+        format: password
+      fb:
+        type: object
+        description: Información de facebook (opcional)
+        properties:
+          userId:
+            type: string
+            description: Id de usuario de facebook
+          authToken:
+            type: string
+            description: Token de autenticación de facebook
+      firstName:
+        description: Nombre del usuario
+        type: string
+      lastName:
+        description: Apellido del usuario
+        type: string
+      country:
+        description: Pais  del usuario
+        type: string
+      email:
+        description: Email  del usuario
+        type: string
+      birthdate:
+        description: Fecha de cumpleaños  del usuario
+        type: string
+      images:
+        description: "Imagenes relacionadas al usuario"
+        items:
+          type: string
+        type: array
+  BusinessUser:
+    description: Usuario de negocio
+    properties:
+      _ref:
+        $ref: '#/definitions/Ref'
+      applicationOwner:
+        type: string
+      balance:
+        type: array
+        items:
+          $ref: '#/definitions/Balance'
+      birthdate: 
+        type: string
+      cars:
+        type: array
+        items:
+          $ref: '#/definitions/Car'
+      country: 
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      images:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+      type:
+        type: string
+      username:
+        type: string
+          
+  ClosestDrivers:
+    description: chofer cercano
+    properties:
+      info:
+        type: object
+        $ref: '#/definitions/ClosestDriverInfo'
+  
+  ClosestDriverInfo:
+    description: Info de Usuario de negocio
+    properties:
+      _ref:
+        $ref: '#/definitions/Ref'
+      applicationOwner: 
+        type: string
+      balance:
+        type: array
+        items:
+          $ref: '#/definitions/Balance'
+      birthdate:
+        type: string
+      cars:
+        type: array
+        items:
+          $ref: '#/definitions/Car'
+      country: 
+        type: string
+      email: 
+        type: string
+      id:
+        type: string
+      images:
+        type: array
+        items:
+          type: string
+      name:
+        type: string
+      surname:
+        type: string
+      type:
+        type: string
+      username:
+        type: string
+      location:
+        type: object
+        $ref: '#/definitions/LocationDriver'
+  
+  LocationDriver:
+    properties:
+      accuracy:
+        type: number
+      lat:
+        type: number
+      long:
+        type: number
+      user_id:
+        type: number
+  
+  Balance:
+    properties:
+      currency:
+        type: string
+      value:
+        type: string
+
+  PayMethodName:
+    type: string
+    description: Nombre / Identificador del método de pago
+  PayMethodDefinition:
+    properties:
+      name:
+        $ref: '#/definitions/PayMethodName'
+      parameters:
+        type: object
+        description: |
+          Diccionario cuyas claves son los nombres de los parametros y los valores el tipo de dato del parámetro.
+  PayMethod:
+    properties:
+      paymethod:
+        $ref: '#/definitions/PayMethodName'
+      parameters:
+        type: object
+        description: |
+          Diccionario cuyas claves son los nombres de los parametros y los valores el valor correspondiente a ese parámetro
