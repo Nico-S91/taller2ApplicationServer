@@ -30,6 +30,7 @@ class SharedServer:
 
     def put_client(self, client_id, client):
         """ Modifica la informacion de un cliente/chofer
+            @param client_id identificador del cliente
             @param client es la informacion modificada del cliente/chofer existente
         """
         return self._put_shared_server('/api/v1/users/'+str(client_id), client)
@@ -42,7 +43,7 @@ class SharedServer:
 
     def get_client(self, client_id):
         """ Devuelve la informacion del cliente buscado
-            @param client_id es el id del cliente buscado
+            @param client_id identificador del cliente
         """
         return self._get_shared_server('/api/v1/users/'+str(client_id))
 
@@ -53,7 +54,7 @@ class SharedServer:
 
     def delete_client(self, client_id):
         """ Elimina un cliente/chofer
-            @param client_id es el id del cliente/chofer que se desea eliminar
+            @param client_id identificador del cliente
         """
         return self._delete_shared_server('/api/v1/users/'+str(client_id))
 
@@ -61,35 +62,35 @@ class SharedServer:
 
     def get_car(self, id_car, owner):
         """ Devuelve la informacion del auto de un cliente
-            @param id_car es el id del auto del cliente
-            @param owner es el id del cliente buscado
+            @param id_car identificador del auto del cliente
+            @param owner identificador del cliente
         """
         return self._get_shared_server('/api/v1/users/'+str(owner)+'/cars/'+str(id_car))
 
     def get_cars(self, owner):
         """ Devuelve la informacion de los autos de un cliente
-            @param owner es el id del cliente buscado
+            @param owner identificador del cliente
         """
         return self._get_shared_server('/api/v1/users/'+str(owner)+'/cars')
 
     def post_car(self, car, driver_id):
         """ Crea un nuevo auto para el chofer
             @param car son las propiedades del auto del chofer
-            @param driver_id es el identificador del chofer
+            @param driver_id identificador del chofer
         """
         return self._post_shared_server('/api/v1/users/' + str(driver_id) + '/cars', car)
 
     def put_car(self, car, car_id, driver_id):
         """ Modifica el auto de un chofer
             @param car son las propiedades del auto del chofer
-            @param car_id es el identificador del auto
-            @param driver_id es el identificador del chofer
+            @param car_id identificador del auto
+            @param driver_id identificador del chofer
         """
         return self._put_shared_server('/api/v1/users/' + str(driver_id) + '/cars/'
                                        + str(car_id), car)
 
     def delete_car(self, driver_id, car_id):
-        """ Este metodo permite eliminar un auto de un chofer
+        """ Elimina un auto de un chofer
             @param car_id identificadore del auto
             @param driver_id identificador del conductor"""
         return self._delete_shared_server('/api/v1/users/' + str(driver_id) + '/cars/'
@@ -124,13 +125,13 @@ class SharedServer:
         return self._get_shared_server('/api/v1/trips/' + str(trip_id))
 
     def get_trips(self, client_id):
-        """ Este metodo devuelve la informacion de un viaje
+        """ Este metodo devuelve la informacion de todos los viaje de un cliente
             @param client_id identificadore del cliente"""
         return self._get_shared_server('/api/v1/users/' + str(client_id) + '/trips')
 
     def post_trip_estimate(self, data):
         """ Calcula la estimacion de un viaje
-            @param estimate informacion necesaria para estimar un viaje
+            @param estimate informacion de un viaje
         """
         return self._post_shared_server('/api/v1/trips/estimate', data)
 

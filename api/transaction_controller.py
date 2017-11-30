@@ -24,7 +24,8 @@ class TransactionController:
         return response
 
     def get_transactions(self, id_user):
-        """Este metodo devuelve la informacion de todas las transacciones de un usuario"""
+        """Este metodo devuelve la informacion de todas las transacciones de un usuario
+            @param id_user identificador del usuario"""
         response_shared_server = SHARED_SERVER.get_transactions(id_user)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:

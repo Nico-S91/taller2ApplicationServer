@@ -29,7 +29,7 @@ class ClientController:
 
     def get_client(self, client_id):
         """ Este metodo devuelve la informacion del cliente buscado
-            @param client_id es el id del cliente que se esta buscando la informacion"""
+            @param client_id identificado del cliente"""
         response_shared_server = SHARED_SERVER.get_client(client_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
@@ -43,8 +43,8 @@ class ClientController:
         return response
 
     def get_clients(self, type_client):
-        """ Este metodo devuelve la informacion de todos los cliente
-            @param client_id es el id del cliente que se esta buscando la informacion"""
+        """ Este metodo devuelve la informacion de todos los cliente de un tipo
+            @param type_client tipo de cliente buscado"""
         response_shared_server = SHARED_SERVER.get_clients()
         #Hay que filtrar los usuarios por tipos
         json_data = json.loads(response_shared_server.text)
@@ -80,7 +80,8 @@ class ClientController:
     def put_new_client(self, client_json, type_client, client_id):
         """ Este metodo permite modificar un cliente
             @param client informacion del cliente
-            @param type_client tipo de cliente"""
+            @param type_client tipo de cliente
+            @param client_id identificado del cliente"""
         # Le agregamos el tipo al cliente
         client_json['type'] = type_client
         client_json[CAMPO_COLISIONES] = self._get_ref_client(client_id)
@@ -183,15 +184,15 @@ class ClientController:
 
     # Metodos para manipular la informacion de los autos
 
-    def get_car(self, car_id, client_id):
+    def get_car(self, car_id, driver_id):
         """ Este metodo devuelve la informacion del auto de un cliente
-            @param car_id es el id del auto del cliente
-            @param client_id es el id del cliente que se esta buscando la informacion"""
-        response_shared_server = SHARED_SERVER.get_car(car_id, client_id)
+            @param car_id identificado del auto del cliente
+            @param driver_id identificado del chofer"""
+        response_shared_server = SHARED_SERVER.get_car(car_id, driver_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
             car = json_data[JSON_CAR]
-            self._save_car_ref(client_id, car_id, car.get(CAMPO_COLISIONES))
+            self._save_car_ref(driver_id, car_id, car.get(CAMPO_COLISIONES))
             response = jsonify(car)
         else:
             response = jsonify(json_data)
@@ -200,7 +201,7 @@ class ClientController:
 
     def get_cars(self, driver_id):
         """ Este metodo devuelve la informacion de los autos de un cliente
-            @param driver_id el id del cliente del que se busca la info de los autos"""
+            @param driver_id identificado del chofer"""
         response_shared_server = SHARED_SERVER.get_cars(driver_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
@@ -214,7 +215,7 @@ class ClientController:
     def post_new_car(self, car_json, driver_id):
         """ Este metodo permite crear un auto
             @param car_json informacion del auto
-            @param driver_id identificador del cliente"""
+            @param driver_id identificador del chofer"""
         response_shared_server = SHARED_SERVER.post_car(car_json, driver_id)
         json_data = json.loads(response_shared_server.text)
         if response_shared_server.status_code == 200:
@@ -227,10 +228,10 @@ class ClientController:
         return response
 
     def put_new_car(self, car_json, car_id, driver_id):
-        """ Este metodo permite modificar un cliente
+        """ Este metodo permite modificar un auto
             @param car_json informacion del auto
             @param car_id identificadore del auto
-            @param driver_id identificador del conductor"""
+            @param driver_id identificador del chofer"""
         #Le agregamos el campo de las colisiones para que todo funciones
         car_json[CAMPO_COLISIONES] = self._get_ref_car(driver_id, car_id)
 
@@ -248,7 +249,7 @@ class ClientController:
     def delete_car(self, driver_id, car_id):
         """ Este metodo permite eliminar un auto de un chofer
             @param car_id identificadore del auto
-            @param driver_id identificador del conductor"""
+            @param driver_id identificador del chofer"""
         response_shared_server = SHARED_SERVER.delete_car(driver_id, car_id)
         json_data = ''
         if response_shared_server.text:
@@ -315,16 +316,16 @@ class ClientController:
             return ''
 
     def _save_car_ref(self, driver_id, car_id, ref):
-        """ Este metodo guarda el ref para manejar las colisiones con el sharedServer
-            @param driver_id identificador del cliente
+        """ Este metodo guarda el ref del auto para manejar las colisiones con el sharedServer
+            @param driver_id identificador del chofer
             @param car_id identificador del auto
             @param ref es el dato que necesita el sharedServer para identificar colisiones"""
         key = self._key_car(driver_id, car_id)
         self.car_refs[key] = ref
 
     def _delete_car_ref(self, driver_id, car_id):
-        """ Este metodo elimina el ref
-           @param driver_id identificador del cliente
+        """ Este metodo elimina el ref del auto
+           @param driver_id identificador del chofer
             @param car_id identificador del auto"""
         key = self._key_car(driver_id, car_id)
         if self.car_refs.get(key):
@@ -332,8 +333,8 @@ class ClientController:
 
     def _filter_user(self, users, type_client):
         """ Este metodo filtra los usuarios segun su tipo
-            @param type_client tipo de clientes que se espera obtener
-            @param users es la informacion de todos los usuarios"""
+            @param users es la informacion de todos los usuarios
+            @param type_client tipo de clientes que se espera obtener"""
         clients = []
         for user in users:
             if user.get('type') == type_client:
@@ -348,7 +349,7 @@ class ClientController:
             MODEL_MANAGER.add_usuario(user_id, user.get('type'), user.get('username'), True)
 
     def _update_client_mongo(self, user_id, user):
-        """ Este metodo modifica la informacion de un usuario en nuestra base de datosS
+        """ Este metodo modifica la informacion de un usuario en nuestra base de datos
             @param user_id es el identificador del usuario
             @param user es la informacion del usuario"""
         if MODEL_MANAGER.get_info_usuario(user_id) is None:
